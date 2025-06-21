@@ -9,10 +9,10 @@
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
-            #{item.namespaceId}, #{item.groupName},#{item.groupId}, #{item.sceneName}, #{item.sceneId},
+             #{item.namespaceId}, #{item.groupName},#{item.groupId}, #{item.sceneName}, #{item.sceneId},
              #{item.idempotentId}, #{item.bizNo}, #{item.executorName}, #{item.argsStr}, #{item.extAttrs},
-             #{item.nextTriggerAt}, #{item.taskType}, #{item.retryStatus}, #{item.createDt}, #{item.bucketIndex},
-             #{item.parentId}, #{item.deleted}, #{item.serializerName}
+             #{item.serializerName}, #{item.nextTriggerAt}, #{item.taskType}, #{item.retryStatus}, #{item.createDt},
+             #{item.bucketIndex},  #{item.parentId}, #{item.deleted}
             )
         </foreach>
     </insert>

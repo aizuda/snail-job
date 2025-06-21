@@ -4,7 +4,7 @@
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="false">
         INSERT INTO sj_retry_dead_letter (namespace_id, group_name, group_id, scene_name, scene_id, idempotent_id, biz_no,
-                                          executor_name, args_str, ext_attrs, create_dt)
+                                          executor_name, args_str, ext_attrs, create_dt, serializer_name)
         <foreach collection="list" item="item" separator="UNION ALL">
             SELECT
                 #{item.namespaceId,jdbcType=VARCHAR},
@@ -17,7 +17,8 @@
                 #{item.executorName,jdbcType=VARCHAR},
                 #{item.argsStr,jdbcType=VARCHAR},
                 #{item.extAttrs,jdbcType=VARCHAR},
-                #{item.createDt,jdbcType=TIMESTAMP}
+                #{item.createDt,jdbcType=TIMESTAMP},
+                #{item.serializerName,jdbcType=VARCHAR}
             FROM DUAL
         </foreach>
     </insert>

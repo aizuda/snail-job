@@ -43,11 +43,14 @@ public class SnailJobServerCommonAutoConfiguration {
     @Bean
     public Schedule refreshNodeSchedule(ClientRegister clientRegister, ServerNodeMapper serverNodeMapper,
                                         InstanceManager instanceManager) {
-        return clientRegister.newRefreshNodeSchedule(serverNodeMapper, instanceManager);
+        ClientRegister.RefreshNodeSchedule refreshNodeSchedule =
+                clientRegister.newRefreshNodeSchedule(serverNodeMapper, instanceManager);
+        clientRegister.setRefreshNodeSchedule(refreshNodeSchedule);
+        return refreshNodeSchedule;
     }
 
     @Bean(ClientRegister.BEAN_NAME)
-    public Register clientRegister() {
+    public ClientRegister clientRegister() {
         return new ClientRegister();
     }
 

@@ -17,10 +17,9 @@ import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.common.schedule.AbstractSchedule;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.ServerNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.InitializingBean;
+import lombok.Setter;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -46,6 +45,8 @@ public class ClientRegister extends AbstractRegister {
     public static final String BEAN_NAME = "clientRegister";
     public static final int DELAY_TIME = 30;
     protected static final LinkedBlockingDeque<ServerNode> QUEUE = new LinkedBlockingDeque<>(1000);
+    @Setter
+    private RefreshNodeSchedule refreshNodeSchedule;
 
     @Override
     public boolean supports(int type) {
@@ -81,6 +82,7 @@ public class ClientRegister extends AbstractRegister {
 
     @Override
     public void start() {
+        refreshNodeSchedule.startScheduler();
     }
 
     @Override
@@ -120,7 +122,7 @@ public class ClientRegister extends AbstractRegister {
     }
 
     @RequiredArgsConstructor
-    public class RefreshNodeSchedule extends AbstractSchedule implements InitializingBean {
+    public class RefreshNodeSchedule extends AbstractSchedule {
         private ThreadPoolExecutor refreshNodePool;
         private final ServerNodeMapper serverNodeMapper;
         private final InstanceManager instanceManager;
@@ -230,9 +232,5 @@ public class ClientRegister extends AbstractRegister {
             taskScheduler.scheduleWithFixedDelay(this::execute, Instant.now(), Duration.parse("PT5S"));
         }
 
-        @Override
-        public void afterPropertiesSet() throws Exception {
-            startScheduler();
-        }
     }
 }
