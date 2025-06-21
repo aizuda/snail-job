@@ -101,6 +101,14 @@
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-common-log</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.fury</groupId>
+            <artifactId>fury-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.luben</groupId>
+            <artifactId>zstd-jni</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

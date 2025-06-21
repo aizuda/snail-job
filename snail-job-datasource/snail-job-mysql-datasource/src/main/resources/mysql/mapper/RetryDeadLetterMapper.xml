@@ -4,7 +4,7 @@
 
     <insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO sj_retry_dead_letter (namespace_id, group_name, group_id, scene_name, scene_id, idempotent_id, biz_no,
-                                          executor_name, args_str, ext_attrs, create_dt)
+                                          executor_name, args_str, serializer_name, ext_attrs, create_dt)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
@@ -17,6 +17,7 @@
                 #{item.bizNo,jdbcType=VARCHAR},
                 #{item.executorName,jdbcType=VARCHAR},
                 #{item.argsStr,jdbcType=VARCHAR},
+                #{item.serializerName,jdbcType=VARCHAR},
                 #{item.extAttrs,jdbcType=VARCHAR},
                 #{item.createDt,jdbcType=TIMESTAMP}
             )

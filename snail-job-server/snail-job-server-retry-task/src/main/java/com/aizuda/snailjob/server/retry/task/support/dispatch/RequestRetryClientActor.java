@@ -1,6 +1,9 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
-import com.aizuda.snailjob.server.common.dto.*;
+import com.aizuda.snailjob.server.common.dto.InstanceKey;
+import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
+import com.aizuda.snailjob.server.common.dto.RegisterNodeInfo;
+import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.common.rpc.client.grpc.GrpcClientInvokeHandlerV2;
 import  org.apache.pekko.actor.AbstractActor;
@@ -135,10 +138,10 @@ public class RequestRetryClientActor extends AbstractActor {
         public <V> void onRetry(final Attempt<V> attempt) {
             // 负载节点
             if (attempt.hasException()) {
-                JobLogMetaDTO jobLogMetaDTO = RetryTaskConverter.INSTANCE.toJobLogDTO(executorDTO);
-                jobLogMetaDTO.setTimestamp(DateUtils.toNowMilli());
+                RetryLogMetaDTO retryTaskLogDTO = RetryTaskLogConverter.INSTANCE.toRetryLogMetaDTO(executorDTO);
+                retryTaskLogDTO.setTimestamp(DateUtils.toNowMilli());
                 SnailJobLog.REMOTE.error("Task scheduling failed attempt retry. Task instance ID:[{}] retryCount:[{}]. <|>{}<|>",
-                        executorDTO.getRetryTaskId(), attempt.getAttemptNumber(), jobLogMetaDTO, attempt.getExceptionCause());
+                        executorDTO.getRetryTaskId(), attempt.getAttemptNumber(), retryTaskLogDTO, attempt.getExceptionCause());
                 return;
             }
 

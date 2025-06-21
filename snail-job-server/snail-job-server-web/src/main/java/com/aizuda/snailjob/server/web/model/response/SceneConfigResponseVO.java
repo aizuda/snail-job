@@ -71,4 +71,9 @@ public class SceneConfigResponseVO {
     private String ownerName;
 
     private Long ownerId;
+
+    /**
+     * 标签
+     */
+    private String labels;
 }

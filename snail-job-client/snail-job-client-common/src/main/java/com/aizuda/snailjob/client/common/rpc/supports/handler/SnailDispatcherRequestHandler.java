@@ -126,7 +126,7 @@ public class SnailDispatcherRequestHandler {
         SnailJobGrpcRequest snailJobRequest = request.getSnailJobRequest();
         EndPointInfo endPointInfo = null;
         Result resultObj = null;
-        Exception e = null;
+        Throwable e = null;
         try {
             Metadata metadata = snailJobRequest.getMetadata();
             Map<String, String> headersMap = metadata.getHeadersMap();
@@ -167,7 +167,7 @@ public class SnailDispatcherRequestHandler {
             for (final HandlerInterceptor handlerInterceptor : handlerInterceptors) {
                 handlerInterceptor.postHandle(httpRequest, httpResponse, endPointInfo);
             }
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             SnailJobLog.LOCAL.error("http request error. [{}]", snailJobRequest, ex);
             snailJobRpcResult.setMessage(ex.getMessage()).setStatus(StatusEnum.NO.getStatus());
             e = ex;

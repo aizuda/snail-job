@@ -5,7 +5,9 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.client.model.RetryArgsDeserializeDTO;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
@@ -21,6 +23,7 @@ import com.aizuda.snailjob.server.web.model.request.RetryDeadLetterQueryVO;
 import com.aizuda.snailjob.server.web.model.response.RetryDeadLetterResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryDeadLetterService;
 import com.aizuda.snailjob.server.web.service.convert.RetryDeadLetterResponseVOConverter;
+import com.aizuda.snailjob.server.web.service.handler.RetryArgsDeserializeHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
@@ -48,6 +51,7 @@ import java.util.Set;
 public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     private final AccessTemplate accessTemplate;
     private final SystemProperties systemProperties;
+    private final RetryArgsDeserializeHandler retryArgsDeserializeHandler;
 
     @Override
     public PageResult<List<RetryDeadLetterResponseVO>> getRetryDeadLetterPage(RetryDeadLetterQueryVO queryVO) {
@@ -75,7 +79,20 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
     public RetryDeadLetterResponseVO getRetryDeadLetterById(String groupName, Long id) {
         TaskAccess<RetryDeadLetter> retryDeadLetterAccess = accessTemplate.getRetryDeadLetterAccess();
         RetryDeadLetter retryDeadLetter = retryDeadLetterAccess.one(new LambdaQueryWrapper<RetryDeadLetter>().eq(RetryDeadLetter::getId, id));
-        return RetryDeadLetterResponseVOConverter.INSTANCE.convert(retryDeadLetter);
+        if (retryDeadLetter == null) {
+            return null;
+        }
+
+        RetryDeadLetterResponseVO responseVO = RetryDeadLetterResponseVOConverter.INSTANCE.convert(retryDeadLetter);
+        RetryArgsDeserializeDTO retryArgsDeserializeDTO = new RetryArgsDeserializeDTO();
+        retryArgsDeserializeDTO.setArgsStr(responseVO.getArgsStr());
+        retryArgsDeserializeDTO.setExecutorName(responseVO.getExecutorName());
+        retryArgsDeserializeDTO.setScene(responseVO.getSceneName());
+        retryArgsDeserializeDTO.setGroup(responseVO.getGroupName());
+        retryArgsDeserializeDTO.setSerializerName(responseVO.getSerializerName());
+        responseVO.setArgsStr(retryArgsDeserializeHandler.deserialize(retryArgsDeserializeDTO));
+
+        return responseVO;
     }
 
     @Override

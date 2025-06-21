@@ -15,7 +15,7 @@ public interface HandlerInterceptor {
 
     void postHandle(HttpRequest httpRequest, HttpResponse httpResponse, EndPointInfo handler);
 
-    void afterCompletion(HttpRequest httpRequest, HttpResponse httpResponse, EndPointInfo handler, Exception ex);
+    void afterCompletion(HttpRequest httpRequest, HttpResponse httpResponse, EndPointInfo handler, Throwable ex);
 
     int order();
 }

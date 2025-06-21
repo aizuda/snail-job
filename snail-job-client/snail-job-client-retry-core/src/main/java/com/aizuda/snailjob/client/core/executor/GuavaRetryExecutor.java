@@ -66,7 +66,8 @@ public class GuavaRetryExecutor extends AbstractRetryExecutor<WaitStrategy, Stop
                 SnailJobLog.LOCAL.debug("Business system retry exception:", e.getLastFailedAttempt().getExceptionCause());
             } else {
                 SnailJobLog.LOCAL.debug("Business system retry exception:", e.getLastFailedAttempt().getResult());
-                retryError.accept(new RetryIfResultException("Business system retry exception. {}", e.getLastFailedAttempt().getResult()));
+                // 这里必须设置一个异常，本地重试才能上报
+                retryError.accept(new RetryIfResultException("Business system retry exception. result: {}", e.getLastFailedAttempt().getResult()));
             }
 
         }

@@ -33,6 +33,8 @@ public class RetryDeadLetter extends CreateDt {
 
     private String executorName;
 
+    private String serializerName;
+
     private String argsStr;
 
     private String extAttrs;

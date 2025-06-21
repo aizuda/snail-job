@@ -44,6 +44,8 @@ public class RetryPartitionTask extends PartitionTask {
 
     private String executorName;
 
+    private String serializerName;
+
     private Integer retryStatus;
 
     private Long parentId;

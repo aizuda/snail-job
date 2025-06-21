@@ -8,6 +8,7 @@ import com.aizuda.snailjob.client.core.event.SimpleSnailRetryListener;
 import com.aizuda.snailjob.client.core.event.SnailJobListener;
 import com.aizuda.snailjob.client.core.expression.ExpressionInvocationHandler;
 import com.aizuda.snailjob.client.core.intercepter.ThreadLockRetrySiteSnapshotContext;
+import com.aizuda.snailjob.client.core.serializer.FurySerializer;
 import com.aizuda.snailjob.client.core.serializer.JacksonSerializer;
 import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.common.core.expression.ExpressionFactory;
@@ -33,10 +34,10 @@ public class SnailRetrySpiLoader {
      * 加载参数序列化SPI类
      * 若配置多个则只加载第一个
      *
-     * @return {@link JacksonSerializer} 默认序列化类为JacksonSerializer
+     * @return {@link JacksonSerializer} 默认序列化类为FurySerializer
      */
     public static RetryArgSerializer loadRetryArgSerializer() {
-        return Optional.ofNullable(ServiceLoaderUtil.loadFirst(RetryArgSerializer.class)).orElse(new JacksonSerializer());
+        return Optional.ofNullable(ServiceLoaderUtil.loadFirst(RetryArgSerializer.class)).orElse(new FurySerializer());
     }
 
     /**
@@ -49,7 +50,7 @@ public class SnailRetrySpiLoader {
                 .stream()
                 .filter(retryArgSerializer -> retryArgSerializer.name().equals(name))
                 .findAny()
-                .orElse(new JacksonSerializer());
+                .orElse(new FurySerializer());
     }
 
     /**

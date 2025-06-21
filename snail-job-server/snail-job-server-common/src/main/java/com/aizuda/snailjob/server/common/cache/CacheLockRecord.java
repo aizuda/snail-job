@@ -21,7 +21,14 @@ import java.time.Duration;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CacheLockRecord implements Lifecycle {
-    private static Cache<String, String> CACHE;
+    private static final Cache<String, String> CACHE;
+    static {
+        CACHE = CacheBuilder.newBuilder()
+                // 设置并发级别为cpu核心数
+                .concurrencyLevel(Runtime.getRuntime().availableProcessors())
+                .expireAfterWrite(Duration.ofHours(1))
+                .build();
+    }
 
     public static void addLockRecord(String lockName) {
         CACHE.put(lockName, lockName);
@@ -47,11 +54,6 @@ public class CacheLockRecord implements Lifecycle {
     @Override
     public void start() {
         SnailJobLog.LOCAL.info("CacheLockRecord start");
-        CACHE = CacheBuilder.newBuilder()
-                // 设置并发级别为cpu核心数
-                .concurrencyLevel(Runtime.getRuntime().availableProcessors())
-                .expireAfterWrite(Duration.ofHours(1))
-                .build();
     }
 
     @Override

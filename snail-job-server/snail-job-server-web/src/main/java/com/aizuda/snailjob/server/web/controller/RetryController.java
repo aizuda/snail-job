@@ -56,12 +56,6 @@ public class RetryController {
         return new Result<>(retryService.idempotentIdGenerate(generateRetryIdempotentIdVO));
     }
 
-    @LoginRequired
-    @PostMapping("/deserialize")
-    public Result<Object> deserialize(@RequestBody @Validated RetryArgsDeserializeVO retryArgsDeserializeVO) {
-        return new Result<>(retryService.deserialize(retryArgsDeserializeVO));
-    }
-
 
     @LoginRequired
     @PutMapping("/batch")

@@ -80,8 +80,4 @@ public interface RetryService {
      */
     boolean manualTriggerRetryTask(ManualTriggerTaskRequestVO requestVO);
 
-    /**
-     * 反序列化重试任务参数
-     */
-    Object deserialize(RetryArgsDeserializeVO retryArgsDeserializeVO);
 }

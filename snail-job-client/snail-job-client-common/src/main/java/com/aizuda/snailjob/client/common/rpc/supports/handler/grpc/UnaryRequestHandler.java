@@ -55,11 +55,11 @@ public class UnaryRequestHandler implements ServerCalls.UnaryMethod<SnailJobGrpc
             SnailJobRpcResult snailJobRpcResult = null;
             try {
                 snailJobRpcResult = dispatcher.dispatch(grpcRequest);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 snailJobRpcResult = new SnailJobRpcResult(StatusEnum.NO.getStatus(), e.getMessage(), null, 0);
             } finally {
                 GrpcResult grpcResult = GrpcResult.newBuilder()
-                    .setStatus(snailJobRpcResult.getStatus())
+                    .setStatus(Optional.ofNullable(snailJobRpcResult.getStatus()).orElse(StatusEnum.NO.getStatus()))
                     .setMessage(Optional.ofNullable(snailJobRpcResult.getMessage()).orElse(StrUtil.EMPTY))
                     .setData(JsonUtil.toJsonString(snailJobRpcResult.getData()))
                     .build();

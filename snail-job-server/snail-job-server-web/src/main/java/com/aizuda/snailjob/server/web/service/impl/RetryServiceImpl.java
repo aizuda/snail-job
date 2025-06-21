@@ -4,6 +4,7 @@ import com.aizuda.snailjob.client.model.RetryArgsDeserializeDTO;
 import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
 import com.aizuda.snailjob.server.common.dto.InstanceSelectCondition;
 import com.aizuda.snailjob.server.common.handler.InstanceManager;
+import com.aizuda.snailjob.server.web.service.handler.RetryArgsDeserializeHandler;
 import org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
@@ -86,6 +87,8 @@ public class RetryServiceImpl implements RetryService {
     private TransactionTemplate transactionTemplate;
     @Autowired
     private InstanceManager instanceManager;
+    @Autowired
+    private RetryArgsDeserializeHandler retryArgsDeserializeHandler;
 
     @Override
     public PageResult<List<RetryResponseVO>> getRetryPage(RetryQueryVO queryVO) {
@@ -135,7 +138,15 @@ public class RetryServiceImpl implements RetryService {
     public RetryResponseVO getRetryById(String groupName, Long id) {
         TaskAccess<Retry> retryTaskAccess = accessTemplate.getRetryAccess();
         Retry retry = retryTaskAccess.one(new LambdaQueryWrapper<Retry>().eq(Retry::getId, id));
-        return RetryTaskResponseVOConverter.INSTANCE.convert(retry);
+        RetryResponseVO retryResponseVO = RetryTaskResponseVOConverter.INSTANCE.convert(retry);
+        RetryArgsDeserializeDTO retryArgsDeserializeDTO = new RetryArgsDeserializeDTO();
+        retryArgsDeserializeDTO.setArgsStr(retryResponseVO.getArgsStr());
+        retryArgsDeserializeDTO.setExecutorName(retryResponseVO.getExecutorName());
+        retryArgsDeserializeDTO.setScene(retryResponseVO.getSceneName());
+        retryArgsDeserializeDTO.setGroup(retryResponseVO.getGroupName());
+        retryArgsDeserializeDTO.setSerializerName(retryResponseVO.getSerializerName());
+        retryResponseVO.setArgsStr(retryArgsDeserializeHandler.deserialize(retryArgsDeserializeDTO));
+        return retryResponseVO;
     }
 
     @Override
@@ -413,52 +424,4 @@ public class RetryServiceImpl implements RetryService {
         return true;
     }
 
-    @Override
-    public Object deserialize(RetryArgsDeserializeVO retryArgsDeserializeVO) {
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-
-        RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess()
-                .getSceneConfigByGroupNameAndSceneName(retryArgsDeserializeVO.getGroupName(),
-                        retryArgsDeserializeVO.getSceneName(), namespaceId);
-
-        Assert.notNull(retrySceneConfig,
-                () -> new SnailJobServerException("Failed to deserialize argsStr: RetrySceneConfig nodes exist"));
-
-        InstanceSelectCondition condition = InstanceSelectCondition
-                .builder()
-                .allocKey(retrySceneConfig.getSceneName())
-                .groupName(retrySceneConfig.getGroupName())
-                .namespaceId(retrySceneConfig.getNamespaceId())
-                .routeKey(retrySceneConfig.getRouteKey())
-                .targetLabels(retrySceneConfig.getLabels())
-                .build();
-        InstanceLiveInfo instance = instanceManager.getALiveInstanceByRouteKey(condition);
-        Assert.notNull(instance,
-                () -> new SnailJobServerException("Failed to deserialize argsStr: No active client nodes exist"));
-
-        // 委托客户端反序列化重试参数
-        RetryArgsDeserializeDTO retryArgsDeserializeDTO = new RetryArgsDeserializeDTO();
-        retryArgsDeserializeDTO.setGroup(retryArgsDeserializeVO.getGroupName());
-        retryArgsDeserializeDTO.setScene(retryArgsDeserializeVO.getSceneName());
-        retryArgsDeserializeDTO.setArgsStr(retryArgsDeserializeVO.getArgsStr());
-        retryArgsDeserializeDTO.setExecutorName(retryArgsDeserializeVO.getExecutorName());
-        retryArgsDeserializeDTO.setSerializerName(retryArgsDeserializeVO.getSerializerName());
-
-        RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
-                .nodeInfo(instance)
-                .retryTimes(3)
-                .failover(false)
-                .failRetry(true)
-                .retryInterval(1)
-                .client(RetryRpcClient.class)
-                .build();
-
-        Result result = rpcClient.deserialize(retryArgsDeserializeDTO);
-
-        Assert.notNull(result, () -> new SnailJobServerException("idempotentId generation failed"));
-        Assert.isTrue(1 == result.getStatus(),
-                () -> new SnailJobServerException("deserialize failed: Ensure that the parameters and executor name are correct"));
-
-        return result.getData();
-    }
 }
