@@ -303,10 +303,12 @@ class PostgreSQLConvertor(Convertor):
     def gen_create(self, ddl: Dict) -> str:
         """生成 create"""
 
-        def _generate_column(col):
+        def _generate_column(col: str, table_name: str) -> str:
             name = col["name"].lower()
             if name == "id":
                 return "id bigserial PRIMARY KEY"
+            if table_name == "sj_distributed_lock" and name == "name":
+                return "name varchar(64) NOT NULL PRIMARY KEY"
 
             type = col["type"].lower()
             full_type = self.translate_type(type, col["size"])
@@ -315,7 +317,9 @@ class PostgreSQLConvertor(Convertor):
             return f"{name} {full_type} {nullable} {default}"
 
         table_name = ddl["table_name"].lower()
-        columns = [f"{_generate_column(col).strip()}" for col in ddl["columns"]]
+        columns = [
+            f"{_generate_column(col, table_name).strip()}" for col in ddl["columns"]
+        ]
         filed_def_list = ",\n  ".join(columns)
         script = f"""-- {table_name}
 CREATE TABLE {table_name} (
@@ -404,13 +408,15 @@ class OracleConvertor(Convertor):
                 f"number({','.join(str(s) for s in size)})" if len(size) else "number"
             )
 
-    def gen_create(self, ddl) -> str:
+    def gen_create(self, ddl: Dict) -> str:
         """生成 CREATE 语句"""
 
-        def generate_column(col):
+        def generate_column(col: str, table_name: str) -> str:
             name = col["name"].lower()
             if name == "id":
                 return "id number GENERATED ALWAYS AS IDENTITY"
+            if table_name == "sj_distributed_lock" and name == "name":
+                return "name varchar2(64) NOT NULL"
 
             type = col["type"].lower()
             full_type = self.translate_type(type, col["size"])
@@ -424,7 +430,9 @@ class OracleConvertor(Convertor):
             return f"{field_name} {full_type} {default} {nullable}"
 
         table_name = ddl["table_name"].lower()
-        columns = [f"{generate_column(col).strip()}" for col in ddl["columns"]]
+        columns = [
+            f"{generate_column(col, table_name).strip()}" for col in ddl["columns"]
+        ]
         field_def_list = ",\n    ".join(columns)
         script = f"""-- {table_name}
 CREATE TABLE {table_name} (
@@ -458,7 +466,10 @@ CREATE TABLE {table_name} (
 
     def gen_pk(self, table_name: str) -> str:
         """生成主键定义"""
-        return f"ALTER TABLE {table_name} ADD CONSTRAINT pk_{table_name} PRIMARY KEY (id);\n"
+        key = "id"
+        if table_name == "sj_distributed_lock":
+            key = "name"
+        return f"ALTER TABLE {table_name} ADD CONSTRAINT pk_{table_name} PRIMARY KEY ({key});\n"
 
     def gen_uk(self, table_ddl: Dict) -> str:
         script = ""
@@ -468,9 +479,6 @@ CREATE TABLE {table_name} (
             script += f"CREATE UNIQUE INDEX {uk_name} ON {table_name} ({', '.join(uk_columns)});\n"
 
         return script
-
-    def gen_index(self, ddl: Dict) -> str:
-        return "\n".join(f"{script};" for script in self.index(ddl))
 
     def gen_insert(self, table_name: str) -> str:
         """拷贝 INSERT 语句"""
@@ -532,10 +540,12 @@ class SQLServerConvertor(Convertor):
     def gen_create(self, ddl: Dict) -> str:
         """生成 create"""
 
-        def _generate_column(col):
+        def _generate_column(col: str, table_name: str) -> str:
             name = col["name"].lower()
             if name == "id":
                 return "id bigint NOT NULL PRIMARY KEY IDENTITY"
+            if table_name == "sj_distributed_lock" and name == "name":
+                return "name nvarchar(64) NOT NULL PRIMARY KEY"
 
             type = col["type"].lower()
             full_type = self.translate_type(type, col["size"])
@@ -545,14 +555,17 @@ class SQLServerConvertor(Convertor):
             return f"{name} {full_type} {nullable} {default}"
 
         table_name = ddl["table_name"].lower()
-        columns = [f"{_generate_column(col).strip()}" for col in ddl["columns"]]
+        columns = [
+            f"{_generate_column(col, table_name).strip()}" for col in ddl["columns"]
+        ]
         filed_def_list = ",\n    ".join(columns)
+        # fmt: off
         script = (f"-- {table_name}\n"
                   f"CREATE TABLE {table_name} (\n"
                   f"    {filed_def_list}\n"
                   f")\n"
                   f"GO")
-
+        # fmt: on
         return script
 
     def gen_comment(self, table_ddl: Dict) -> str:
@@ -664,10 +677,12 @@ class DM8Convertor(Convertor):
     def gen_create(self, ddl) -> str:
         """生成 CREATE 语句"""
 
-        def generate_column(col):
+        def generate_column(col: str, table_name: str):
             name = col["name"].lower()
             if name == "id":
                 return "id bigint NOT NULL PRIMARY KEY IDENTITY"
+            if table_name == "sj_distributed_lock" and name == "name":
+                return "name varchar(64) NOT NULL PRIMARY KEY"
 
             type = col["type"].lower()
             full_type = self.translate_type(type, col["size"])
@@ -681,7 +696,9 @@ class DM8Convertor(Convertor):
             return f"{field_name} {full_type} {default} {nullable}"
 
         table_name = ddl["table_name"].lower()
-        columns = [f"{generate_column(col).strip()}" for col in ddl["columns"]]
+        columns = [
+            f"{generate_column(col, table_name).strip()}" for col in ddl["columns"]
+        ]
         field_def_list = ",\n    ".join(columns)
         script = f"""-- {table_name}
 CREATE TABLE {table_name} (
@@ -726,9 +743,6 @@ CREATE TABLE {table_name} (
 
         return script
 
-    def gen_index(self, ddl: Dict) -> str:
-        return "\n".join(f"{script};" for script in self.index(ddl))
-
     def gen_insert(self, table_name: str) -> str:
         """拷贝 INSERT 语句"""
         inserts = []
@@ -758,10 +772,12 @@ class KingbaseConvertor(PostgreSQLConvertor):
     def gen_create(self, ddl: Dict) -> str:
         """生成 create"""
 
-        def _generate_column(col):
+        def _generate_column(col: str, table_name: str) -> str:
             name = col["name"].lower()
             if name == "id":
                 return "id bigserial PRIMARY KEY"
+            if table_name == "sj_distributed_lock" and name == "name":
+                return "name varchar(64) NOT NULL PRIMARY KEY"
 
             type = col["type"].lower()
             full_type = self.translate_type(type, col["size"])
@@ -772,7 +788,9 @@ class KingbaseConvertor(PostgreSQLConvertor):
             return f"{name} {full_type} {nullable} {default}"
 
         table_name = ddl["table_name"].lower()
-        columns = [f"{_generate_column(col).strip()}" for col in ddl["columns"]]
+        columns = [
+            f"{_generate_column(col, table_name).strip()}" for col in ddl["columns"]
+        ]
         filed_def_list = ",\n  ".join(columns)
         script = f"""-- {table_name}
 CREATE TABLE {table_name} (
@@ -802,9 +820,9 @@ def main():
         convertor = OracleConvertor(sql_file)
     elif args.type == "sqlserver":
         convertor = SQLServerConvertor(sql_file)
-    elif args.type ==  "dm8":
+    elif args.type == "dm8":
         convertor = DM8Convertor(sql_file)
-    elif args.type ==  "kingbase":
+    elif args.type == "kingbase":
         convertor = KingbaseConvertor(sql_file)
     else:
         raise NotImplementedError(f"Database type not supported: {args.type}")
