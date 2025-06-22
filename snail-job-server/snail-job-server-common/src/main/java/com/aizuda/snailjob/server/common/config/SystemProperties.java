@@ -42,24 +42,10 @@ public class SystemProperties {
     private int jobPullPageSize = 1000;
 
     /**
-     * netty 端口
-     * see: serverPort
-     */
-    @Deprecated
-    private Integer nettyPort;
-
-    /**
      * 服务端端口
      */
     private int serverPort = 17888;
 
-    /**
-     * 获取服务端端口
-     */
-    public int getServerPort() {
-        // since: 1.3.0-beta1 兼容nettyPort
-        return Objects.isNull(nettyPort) ? serverPort : nettyPort;
-    }
 
     /**
      * 服务端地址
