@@ -22,7 +22,7 @@ public class GroupConfigAccess extends AbstractConfigAccess<GroupConfig> {
     public boolean supports(String operationType) {
         DbTypeEnum dbType = getDbType();
         return OperationTypeEnum.GROUP.name().equals(operationType)
-                && ALLOW_DB.contains(dbType.getDb());
+                && dbType.isAllowDb();
     }
 
     @Override

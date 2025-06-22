@@ -22,7 +22,7 @@ public class NotifyConfigAccess extends AbstractConfigAccess<NotifyConfig> {
     public boolean supports(String operationType) {
         DbTypeEnum dbType = getDbType();
         return OperationTypeEnum.NOTIFY.name().equals(operationType)
-                && ALLOW_DB.contains(dbType.getDb());
+                && dbType.isAllowDb();
     }
 
     @Override

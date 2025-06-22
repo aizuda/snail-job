@@ -29,7 +29,7 @@ public class RetryAccess extends AbstractTaskAccess<Retry> {
     public boolean supports(String operationType) {
         DbTypeEnum dbType = getDbType();
         return OperationTypeEnum.RETRY.name().equals(operationType)
-                && ALLOW_DB.contains(dbType.getDb());
+                && dbType.isAllowDb();
     }
 
     @Override

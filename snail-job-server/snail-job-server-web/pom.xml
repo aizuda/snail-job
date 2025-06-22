@@ -93,6 +93,10 @@
         </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-gauss-datasource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
             <artifactId>snail-job-server-retry-task</artifactId>
         </dependency>
         <dependency>

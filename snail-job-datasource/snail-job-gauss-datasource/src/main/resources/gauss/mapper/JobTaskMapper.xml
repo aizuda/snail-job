@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper">
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO sj_job_task (namespace_id, group_name, job_id, task_batch_id, parent_id, task_status,
+                                 retry_count, mr_stage, leaf, task_name, client_info, wf_context, args_str,
+                                 result_message, args_type, ext_attrs, create_dt, update_dt)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.namespaceId},
+                #{item.groupName},
+                #{item.jobId},
+                #{item.taskBatchId},
+                #{item.parentId},
+                #{item.taskStatus},
+                #{item.retryCount},
+                #{item.mrStage},
+                #{item.leaf},
+                #{item.taskName},
+                #{item.clientInfo},
+                #{item.wfContext},
+                #{item.argsStr},
+                #{item.resultMessage},
+                #{item.argsType},
+                #{item.extAttrs},
+                #{item.createDt},
+                #{item.updateDt}
+            )
+        </foreach>
+    </insert>
+
+</mapper>

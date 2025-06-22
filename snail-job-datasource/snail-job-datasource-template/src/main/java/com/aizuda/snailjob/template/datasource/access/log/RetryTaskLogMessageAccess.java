@@ -35,7 +35,7 @@ public class RetryTaskLogMessageAccess implements RetryLogAccess<RetryTaskLogMes
 
     @Override
     public boolean supports(String operationType) {
-        return DbTypeEnum.all().contains(getDbType()) && OperationTypeEnum.RETRY_LOG.name().equals(operationType);
+        return getDbType().isAllowDb() && OperationTypeEnum.RETRY_LOG.name().equals(operationType);
 
     }
     @Override
