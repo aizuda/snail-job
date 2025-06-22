@@ -378,7 +378,7 @@ COMMENT ON TABLE sj_server_node IS '服务器节点';
 -- sj_distributed_lock
 CREATE TABLE sj_distributed_lock
 (
-    name       varchar(64)  NOT NULL PRdisIMARY KEY,
+    name       varchar(64)  NOT NULL PRIMARY KEY,
     lock_until timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     locked_at  timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     locked_by  varchar(255) NOT NULL,
