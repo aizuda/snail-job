@@ -21,6 +21,10 @@ public class JobArgs {
 
     private Long taskBatchId;
 
+    private Long workflowTaskBatchId;
+
+    private Long workflowNodeId;
+
     private Long jobId;
 
     private Map<String, Object> wfContext;

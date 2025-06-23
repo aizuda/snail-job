@@ -3,6 +3,7 @@ package com.aizuda.snailjob.server.job.task.support.prepare.workflow;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
+import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.util.DateUtils;
@@ -54,6 +55,9 @@ public class RunningWorkflowPrepareHandler extends AbstractWorkflowPrePareHandle
             // 2. 判断DAG是否已经支持超时
             // 计算超时时间，到达超时时间中断任务
             if (delay > DateUtils.toEpochMilli(prepare.getExecutorTimeout())) {
+
+                // 超时停止任务
+                workflowBatchHandler.stop(prepare.getWorkflowTaskBatchId(), JobOperationReasonEnum.TASK_EXECUTION_TIMEOUT.getReason());
 
                 // 超时停止任务
                 String reason = String.format("Task execution timeout. Workflow task batch ID:[%s] Delay:[%s] Executor timeout:[%s]", prepare.getWorkflowTaskBatchId(), delay, DateUtils.toEpochMilli(prepare.getExecutorTimeout()));

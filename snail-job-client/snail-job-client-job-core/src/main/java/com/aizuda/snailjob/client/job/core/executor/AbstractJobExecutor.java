@@ -105,6 +105,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         jobArgs.setJobParams(jobContext.getJobArgsHolder().getJobParams());
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
+        jobArgs.setWorkflowNodeId(jobContext.getWorkflowNodeId());
+        jobArgs.setWorkflowTaskBatchId(jobContext.getWorkflowTaskBatchId());
         return jobArgs;
     }
 
@@ -115,6 +117,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setShardingIndex(jobContext.getShardingIndex());
         jobArgs.setShardingTotal(jobContext.getShardingTotal());
+        jobArgs.setWorkflowNodeId(jobContext.getWorkflowNodeId());
+        jobArgs.setWorkflowTaskBatchId(jobContext.getWorkflowTaskBatchId());
         return jobArgs;
     }
 
@@ -126,6 +130,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskName(jobContext.getTaskName());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
+        jobArgs.setWorkflowNodeId(jobContext.getWorkflowNodeId());
+        jobArgs.setWorkflowTaskBatchId(jobContext.getWorkflowTaskBatchId());
         return jobArgs;
     }
 
@@ -144,6 +150,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
         jobArgs.setWfContext(jobContext.getWfContext());
+        jobArgs.setWorkflowNodeId(jobContext.getWorkflowNodeId());
+        jobArgs.setWorkflowTaskBatchId(jobContext.getWorkflowTaskBatchId());
         return jobArgs;
     }
 
@@ -163,6 +171,8 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
         jobArgs.setExecutorInfo(jobContext.getExecutorInfo());
         jobArgs.setTaskBatchId(jobContext.getTaskBatchId());
         jobArgs.setWfContext(jobContext.getWfContext());
+        jobArgs.setWorkflowNodeId(jobContext.getWorkflowNodeId());
+        jobArgs.setWorkflowTaskBatchId(jobContext.getWorkflowTaskBatchId());
         return jobArgs;
     }
 
