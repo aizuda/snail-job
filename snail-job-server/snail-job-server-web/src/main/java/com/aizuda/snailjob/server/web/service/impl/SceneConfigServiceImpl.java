@@ -118,6 +118,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         RetrySceneConfig retrySceneConfig = SceneConfigConverter.INSTANCE.toRetrySceneConfig(requestVO);
         retrySceneConfig.setCreateDt(LocalDateTime.now());
         retrySceneConfig.setNamespaceId(namespaceId);
+        retrySceneConfig.setOwnerId(Optional.ofNullable(requestVO.getOwnerId()).orElse(0L));
 
         if (Objects.equals(requestVO.getBackOff(), WaitStrategies.WaitStrategyEnum.DELAY_LEVEL.getType())) {
             retrySceneConfig.setTriggerInterval(StrUtil.EMPTY);
@@ -148,6 +149,7 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         retrySceneConfig.setSceneName(null);
         retrySceneConfig.setGroupName(null);
         retrySceneConfig.setNamespaceId(null);
+        retrySceneConfig.setOwnerId(Optional.ofNullable(requestVO.getOwnerId()).orElse(0L));
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
@@ -165,7 +167,6 @@ public class SceneConfigServiceImpl implements SceneConfigService {
         updateWrapper.eq(RetrySceneConfig::getNamespaceId, namespaceId);
         updateWrapper.eq(RetrySceneConfig::getGroupName, requestVO.getGroupName());
         updateWrapper.eq(RetrySceneConfig::getSceneName, requestVO.getSceneName());
-        updateWrapper.set(RetrySceneConfig::getOwnerId, requestVO.getOwnerId());
 
         Assert.isTrue(1 == accessTemplate.getSceneConfigAccess().update(retrySceneConfig, updateWrapper),
                 () -> new SnailJobServerException("failed to update scene. retrySceneConfig:[{}]",

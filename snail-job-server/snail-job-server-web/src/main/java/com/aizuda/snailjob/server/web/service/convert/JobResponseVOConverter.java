@@ -35,9 +35,14 @@ public interface JobResponseVOConverter {
     @Mappings({
             @Mapping(target = "nextTriggerAt", expression = "java(JobResponseVOConverter.toLocalDateTime(job.getNextTriggerAt()))"),
             @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIds(job.getNotifyIds()))"),
-            @Mapping(target = "triggerInterval", expression = "java(JobResponseVOConverter.toTriggerInterval(job))")
+            @Mapping(target = "triggerInterval", expression = "java(JobResponseVOConverter.toTriggerInterval(job))"),
+            @Mapping(target = "ownerId", expression = "java(JobResponseVOConverter.getOwnerId(job))")
     })
     JobResponseVO convert(Job job);
+
+    static Long getOwnerId(Job job) {
+        return Objects.nonNull(job.getOwnerId()) && job.getOwnerId() > 0 ? job.getOwnerId() : null;
+    }
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
         if (Objects.isNull(nextTriggerAt) || nextTriggerAt == 0) {

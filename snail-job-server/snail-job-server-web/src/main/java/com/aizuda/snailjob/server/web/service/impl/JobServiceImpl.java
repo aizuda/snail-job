@@ -110,7 +110,7 @@ public class JobServiceImpl implements JobService {
 
         for (JobResponseVO jobResponseVO : jobResponseList) {
             // 兼容Oracle OwnerId Null查询异常：java.sql.SQLException: 无效的列类型: 1111
-            if (Objects.nonNull(jobResponseVO.getOwnerId())) {
+            if (Objects.nonNull(jobResponseVO.getOwnerId()) && jobResponseVO.getOwnerId() > 0) {
                 SystemUser systemUser = systemUserMapper.selectById(jobResponseVO.getOwnerId());
                 jobResponseVO.setOwnerName(systemUser.getUsername());
             }
@@ -160,6 +160,7 @@ public class JobServiceImpl implements JobService {
                 % systemProperties.getBucketTotal());
         job.setNextTriggerAt(calculateNextTriggerAt(job, DateUtils.toNowMilli()));
         job.setNamespaceId(UserSessionUtils.currentUserSession().getNamespaceId());
+        job.setOwnerId(Optional.ofNullable(jobRequestVO.getOwnerId()).orElse(0L));
         job.setId(null);
         return 1 == jobMapper.insert(job);
     }
@@ -205,10 +206,10 @@ public class JobServiceImpl implements JobService {
 
         // 禁止更新组
         updateJob.setGroupName(null);
+        updateJob.setOwnerId(Optional.ofNullable(jobRequestVO.getOwnerId()).orElse(0L));
 
         LambdaUpdateWrapper<Job> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Job::getId, jobRequestVO.getId());
-        updateWrapper.set(Job::getOwnerId, jobRequestVO.getOwnerId());
         return 1 == jobMapper.update(updateJob, updateWrapper);
     }
 

@@ -145,6 +145,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         // 保存图信息
         workflow.setVersion(null);
+        workflow.setOwnerId(Optional.ofNullable(workflowRequestVO.getOwnerId()).orElse(0L));
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         Assert.isTrue(1 == workflowMapper.updateById(workflow), () -> new SnailJobServerException("Failed to save workflow graph"));
         return true;
@@ -196,7 +197,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         List<WorkflowResponseVO> workflowResponseVOList = WorkflowConverter.INSTANCE.convertListToWorkflowList(page.getRecords());
         for (WorkflowResponseVO responseVO : workflowResponseVOList) {
-            if (Objects.nonNull(responseVO.getOwnerId())) {
+            if (Objects.nonNull(responseVO.getOwnerId()) && responseVO.getOwnerId() > 0) {
                 SystemUser systemUser = systemUserMapper.selectById(responseVO.getOwnerId());
                 responseVO.setOwnerName(systemUser.getUsername());
             }
@@ -240,11 +241,11 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         // 不允许更新组
         workflow.setGroupName(null);
+        workflow.setOwnerId(Optional.ofNullable(workflowRequestVO.getOwnerId()).orElse(0L));
 
         LambdaUpdateWrapper<Workflow> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Workflow::getId, workflow.getId());
         updateWrapper.eq(Workflow::getVersion, version);
-        updateWrapper.set(Workflow::getOwnerId, workflowRequestVO.getOwnerId());
 
         Assert.isTrue(workflowMapper.update(workflow, updateWrapper) > 0,
                 () -> new SnailJobServerException("Update failed"));
