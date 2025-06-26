@@ -84,6 +84,7 @@ public class OpenApiGetWorkflowBatchDetailRequestHandler extends PostHttpRequest
 
         WorkflowDetailResponseVO responseVO = WorkflowConverter.INSTANCE.convert(workflow);
         responseVO.setWorkflowBatchStatus(workflowTaskBatch.getTaskBatchStatus());
+        responseVO.setWfContext(workflowTaskBatch.getWfContext());
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
                 .eq(WorkflowNode::getDeleted, StatusEnum.NO.getStatus())
                 .eq(WorkflowNode::getWorkflowId, workflow.getId()));
