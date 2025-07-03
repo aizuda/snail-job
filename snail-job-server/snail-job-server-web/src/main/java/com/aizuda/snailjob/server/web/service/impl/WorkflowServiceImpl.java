@@ -140,7 +140,7 @@ public class WorkflowServiceImpl implements WorkflowService {
                 new LinkedBlockingDeque<>(),
                 workflowRequestVO.getGroupName(),
                 workflow.getId(), nodeConfig, graph,
-                workflow.getVersion());
+                workflow.getVersion(), workflow.getNamespaceId());
         log.info("Graph construction complete. graph:[{}]", graph);
 
         // 保存图信息
@@ -225,7 +225,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         int version = workflow.getVersion();
         // 递归构建图
         workflowHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT), new LinkedBlockingDeque<>(),
-                workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph, version + 1);
+                workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph, version + 1, workflow.getNamespaceId());
 
         log.info("Graph construction complete. graph:[{}]", graph);
 

@@ -121,16 +121,17 @@ public class WorkflowHandler {
     /**
      * 根据给定的父节点ID、队列、工作流组名、工作流ID、节点配置、图构建图
      *
-     * @param parentIds  父节点ID列表
-     * @param deque      队列
-     * @param groupName  工作流组名
-     * @param workflowId 工作流ID
-     * @param nodeConfig 节点配置
-     * @param graph      图
-     * @param version    版本号
+     * @param parentIds   父节点ID列表
+     * @param deque       队列
+     * @param groupName   工作流组名
+     * @param workflowId  工作流ID
+     * @param nodeConfig  节点配置
+     * @param graph       图
+     * @param version     版本号
+     * @param namespaceId
      */
     public void buildGraph(List<Long> parentIds, LinkedBlockingDeque<Long> deque, String groupName, Long workflowId,
-                           WorkflowRequestVO.NodeConfig nodeConfig, MutableGraph<Long> graph, Integer version) {
+                           WorkflowRequestVO.NodeConfig nodeConfig, MutableGraph<Long> graph, Integer version, String namespaceId) {
 
         if (Objects.isNull(nodeConfig)) {
             return;
@@ -153,6 +154,7 @@ public class WorkflowHandler {
                 workflowNode.setGroupName(groupName);
                 workflowNode.setNodeType(nodeConfig.getNodeType());
                 workflowNode.setVersion(version);
+                workflowNode.setNamespaceId(namespaceId);
                 if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
                     workflowNode.setJobId(SystemConstants.DECISION_JOB_ID);
                     DecisionConfig decision = nodeInfo.getDecision();
@@ -192,7 +194,7 @@ public class WorkflowHandler {
                 if (Objects.nonNull(childNode) && CollUtil.isNotEmpty(childNode.getConditionNodes())) {
                     buildGraph(Lists.newArrayList(workflowNode.getId()),
                             Objects.isNull(tempDeque) ? deque : tempDeque,
-                            groupName, workflowId, childNode, graph, version);
+                            groupName, workflowId, childNode, graph, version, namespaceId);
                 } else {
                     if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
                         throw new SnailJobServerException("Decision nodes or successor nodes of decision nodes cannot be leaf nodes");
@@ -219,7 +221,7 @@ public class WorkflowHandler {
                 tempDeque.drainTo(list);
             }
 
-            buildGraph(list, deque, groupName, workflowId, childNode, graph, version);
+            buildGraph(list, deque, groupName, workflowId, childNode, graph, version, namespaceId);
         }
     }
 
