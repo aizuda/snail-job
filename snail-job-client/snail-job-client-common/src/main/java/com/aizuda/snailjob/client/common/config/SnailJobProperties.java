@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.client.common.config;
 
+import com.aizuda.snailjob.client.common.rpc.client.openapi.SnailHttpClientConfig;
 import com.aizuda.snailjob.common.core.alarm.email.SnailJobMailProperties;
 import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import lombok.AllArgsConstructor;
@@ -92,6 +93,11 @@ public class SnailJobProperties {
      */
     @NestedConfigurationProperty
     private SnailJobMailProperties mail = new SnailJobMailProperties();
+
+    /**
+     * http客户端配置(openapi使用)
+     */
+    public SnailHttpClientConfig httpConfig = new SnailHttpClientConfig();
 
     /**
      * 客户端脚本存储位置

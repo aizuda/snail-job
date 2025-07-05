@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
  * @since 1.0.0
  */
 @Slf4j
+@Deprecated
 public class NettyHttpClientHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
     private final NettyHttpConnectClient nettyHttpConnectClient;

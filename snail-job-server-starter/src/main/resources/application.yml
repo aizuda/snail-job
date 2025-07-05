@@ -14,7 +14,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/snail_job?useSSL=false&characterEncoding=utf8&useUnicode=true
     username: root
-    password: 123456
+    password: root
     ## postgres
     #    driver-class-name: org.postgresql.Driver
     #    url: jdbc:postgresql://localhost:5432/snail_job?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true

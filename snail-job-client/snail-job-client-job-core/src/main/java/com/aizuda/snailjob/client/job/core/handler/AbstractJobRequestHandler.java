@@ -14,5 +14,7 @@ public abstract class AbstractJobRequestHandler<R> extends AbstractRequestHandle
     protected JobOpenApiClient client = RequestBuilder.<JobOpenApiClient, SnailJobRpcResult>newBuilder()
             .client(JobOpenApiClient.class)
             .async(false)
+            // 走openapi模式
+            .openapi(true)
             .build();
 }

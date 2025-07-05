@@ -31,6 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @since 1.3.0
  */
 @Slf4j
+@Deprecated
 public class NettyChannel {
     private NettyChannel() {
     }

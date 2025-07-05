@@ -2,6 +2,7 @@ package com.aizuda.snailjob.client.common.rpc.client;
 
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.common.rpc.client.grpc.GrpcClientInvokeHandler;
+import com.aizuda.snailjob.client.common.rpc.client.openapi.HttpClientInvokeHandler;
 import com.aizuda.snailjob.common.core.model.Result;
 
 import java.lang.reflect.InvocationHandler;
@@ -28,6 +29,8 @@ public class RequestBuilder<T, R extends Result<Object>> {
     private long timeout = 60 * 1000;
 
     private TimeUnit unit = TimeUnit.MILLISECONDS;
+
+    private boolean openapi = false;
 
     public static <T, R extends Result<Object>> RequestBuilder<T, R> newBuilder() {
         return new RequestBuilder<>();
@@ -58,6 +61,11 @@ public class RequestBuilder<T, R extends Result<Object>> {
         return this;
     }
 
+    public RequestBuilder<T, R> openapi(boolean isOpenapi) {
+        this.openapi = isOpenapi;
+        return this;
+    }
+
     public T build() {
         if (Objects.isNull(clintInterface)) {
             throw new SnailJobClientException("clintInterface cannot be null");
@@ -69,10 +77,16 @@ public class RequestBuilder<T, R extends Result<Object>> {
             throw new SnailJobClientException("class not found exception to: [{}]", clintInterface.getName());
         }
 
-        InvocationHandler invocationHandler = new GrpcClientInvokeHandler<>(async, timeout, unit, callback);
+        InvocationHandler invocationHandler;
+        if (openapi) {
+            invocationHandler = new HttpClientInvokeHandler<>();
+        } else {
+            invocationHandler = new GrpcClientInvokeHandler<>(async, timeout, unit, callback);
+        }
 
         return (T) Proxy.newProxyInstance(clintInterface.getClassLoader(),
                 new Class[]{clintInterface}, invocationHandler);
+
     }
 
 }

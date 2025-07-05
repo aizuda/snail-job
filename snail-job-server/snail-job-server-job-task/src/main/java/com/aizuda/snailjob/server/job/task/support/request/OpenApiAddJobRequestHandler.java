@@ -38,6 +38,7 @@ import java.util.Objects;
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiAddJobRequestHandler extends PostHttpRequestHandler {
     private final SystemProperties systemProperties;
     private final JobMapper jobMapper;

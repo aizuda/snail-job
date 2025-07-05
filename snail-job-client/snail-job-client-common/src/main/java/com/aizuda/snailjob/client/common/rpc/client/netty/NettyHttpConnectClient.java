@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 //@Component
 @RequiredArgsConstructor
 @Order(Ordered.HIGHEST_PRECEDENCE)
+@Deprecated
 public class NettyHttpConnectClient implements Lifecycle {
     private final SnailJobProperties snailJobProperties;
     private static final NioEventLoopGroup nioEventLoopGroup = new NioEventLoopGroup();
