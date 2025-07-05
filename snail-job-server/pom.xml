@@ -16,11 +16,8 @@
 
     <modules>
         <module>snail-job-server-common</module>
-        <module>snail-job-server-web</module>
         <module>snail-job-server-retry-task</module>
         <module>snail-job-server-job-task</module>
-        <module>snail-job-server-starter</module>
-        <module>snail-job-server-ui</module>
     </modules>
 
     <dependencyManagement>

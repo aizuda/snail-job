@@ -129,6 +129,21 @@
                 <artifactId>snail-job-kingbase-datasource</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-server-openapi</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-server-service</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-server-web</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <!--      SnailJob client      -->
             <dependency>
@@ -139,6 +154,26 @@
             <dependency>
                 <groupId>com.aizuda</groupId>
                 <artifactId>snail-job-client-job-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-server-job-task</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-server-retry-task</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-server-common</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-server-ui</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -297,6 +332,8 @@
         <module>snail-job-client-starter</module>
         <module>snail-job-datasource</module>
         <module>snail-job-client</module>
+        <module>snail-job-server-interface</module>
+        <module>snail-job-server-starter</module>
     </modules>
     <packaging>pom</packaging>
 
