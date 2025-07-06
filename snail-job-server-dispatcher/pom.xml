@@ -9,10 +9,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>snail-job-server</artifactId>
+    <artifactId>snail-job-server-dispatcher</artifactId>
     <packaging>pom</packaging>
-    <name>snail-job-server</name>
-    <description>snail-job-server</description>
+    <name>snail-job-server-dispatcher</name>
+    <description>snail-job-server-dispatcher</description>
 
     <modules>
         <module>snail-job-server-common</module>

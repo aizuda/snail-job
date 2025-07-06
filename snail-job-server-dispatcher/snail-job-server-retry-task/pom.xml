@@ -5,21 +5,16 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.aizuda</groupId>
-        <artifactId>snail-job-server</artifactId>
+        <artifactId>snail-job-server-dispatcher</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>snail-job-server-job-task</artifactId>
-    <name>snail-job-server-job-task</name>
-    <description>snail-job-server-job-task</description>
+    <artifactId>snail-job-server-retry-task</artifactId>
+    <name>snail-job-server-retry-task</name>
+    <description>snail-job-server-retry-task</description>
     <packaging>jar</packaging>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
     <dependencies>
         <!--    preprocessor    -->
         <dependency>
@@ -46,36 +41,11 @@
             <groupId>com.github.rholder</groupId>
             <artifactId>guava-retrying</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.googlecode.aviator</groupId>
-            <artifactId>aviator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>QLExpress</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-beanutils</groupId>
-                    <artifactId>commons-beanutils</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
-        <!--   SnailJob     -->
+        <!--    SnailJob    -->
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-server-common</artifactId>
-        </dependency>
-        <!-- 上报日志，采用logback打印，排除log4j2 -->
-        <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-common-log</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-log4j2</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>
@@ -83,19 +53,11 @@
         </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-common-client-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.aizuda</groupId>
             <artifactId>snail-job-datasource-template</artifactId>
         </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-server-retry-task</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-server-service</artifactId>
+            <artifactId>snail-job-common-client-api</artifactId>
         </dependency>
     </dependencies>
 
@@ -118,4 +80,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

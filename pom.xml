@@ -328,7 +328,7 @@
 
     <modules>
         <module>snail-job-common</module>
-        <module>snail-job-server</module>
+        <module>snail-job-server-dispatcher</module>
         <module>snail-job-client-starter</module>
         <module>snail-job-datasource</module>
         <module>snail-job-client</module>
