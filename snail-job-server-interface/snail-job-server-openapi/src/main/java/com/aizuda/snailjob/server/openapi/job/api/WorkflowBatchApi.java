@@ -7,6 +7,7 @@ import com.aizuda.snailjob.server.service.service.WorkflowBatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -24,7 +25,7 @@ public class WorkflowBatchApi {
     private final WorkflowBatchService workflowBatchApiService;
 
     @PostMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_WORKFLOW_BATCH_DETAIL_V2)
-    public WorkflowDetailResponseVO getWorkflowBatchById(@PathVariable("id") Long id) {
+    public WorkflowDetailResponseVO getWorkflowBatchById(@RequestParam("id") Long id) {
         return workflowBatchApiService.getWorkflowBatchById(id);
     }
 }

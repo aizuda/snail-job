@@ -93,6 +93,10 @@
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-server-retry-task</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-server-service</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

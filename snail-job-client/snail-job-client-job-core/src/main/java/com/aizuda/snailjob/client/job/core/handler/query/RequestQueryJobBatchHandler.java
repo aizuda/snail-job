@@ -34,7 +34,13 @@ public class RequestQueryJobBatchHandler extends AbstractJobRequestHandler<JobBa
 
     @Override
     protected JobBatchResponseVO doExecute() {
-        Result<Object> result = client.getJobBatchDetail(queryJobBatchId);
+        Result<Object> result;
+        if (isOpenApiV2()) {
+            result = clientV2.getJobBatchDetail(queryJobBatchId);
+        } else {
+            result = client.getJobBatchDetail(queryJobBatchId);
+        }
+
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();

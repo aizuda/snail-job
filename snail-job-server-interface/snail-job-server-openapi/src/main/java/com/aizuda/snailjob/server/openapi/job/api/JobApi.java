@@ -60,7 +60,7 @@ public class JobApi {
     }
 
     @GetMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_JOB_DETAIL_V2)
-    public JobResponseDTO getJobById(@PathVariable("id") Long id) {
+    public JobResponseDTO getJobById(@RequestParam("id") Long id) {
         return jobApiService.getJobById(id);
     }
 

@@ -144,7 +144,7 @@ public interface SystemConstants {
         // ==================================job ========================//
         String OPENAPI_ADD_JOB = "/api/job/add";
         String OPENAPI_UPDATE_JOB = "/api/job/update";
-        String OPENAPI_GET_JOB_DETAIL_V2 = "/api/job/detail/{id}";
+        String OPENAPI_GET_JOB_DETAIL_V2 = "/api/job/detail/id";
         String OPENAPI_TRIGGER_JOB_V2 = "/api/job/trigger";
         String OPENAPI_DELETE_JOB_V2 = "/api/job/delete";
         String OPENAPI_UPDATE_JOB_STATUS_V2 = "/api/job/update/status";
@@ -161,13 +161,13 @@ public interface SystemConstants {
         // ==================================job batch ========================//
         @Deprecated
         String OPENAPI_GET_JOB_BATCH_DETAIL = "/api/job/getJobBatchDetail";
-        String OPENAPI_GET_JOB_BATCH_DETAIL_V2 = "/api/job-batch/detail/{id}";
+        String OPENAPI_GET_JOB_BATCH_DETAIL_V2 = "/api/job-batch/detail/id}";
         // ==================================job batch ========================//
 
         // ==================================workflow batch ========================//
         @Deprecated
         String OPENAPI_GET_WORKFLOW_BATCH_DETAIL = "/api/job/getWorkflowBatchDetail";
-        String OPENAPI_GET_WORKFLOW_BATCH_DETAIL_V2 = "/api/workflow-batch/detail/{id}";
+        String OPENAPI_GET_WORKFLOW_BATCH_DETAIL_V2 = "/api/workflow-batch/detail/id";
         // ==================================workflow batch ========================//
 
         // ==================================workflow ========================//

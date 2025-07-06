@@ -59,6 +59,11 @@ public class SnailJobProperties {
     private Integer port = 17889;
 
     /**
+     * 是否走新的openapi(1.7.0 暂时先关闭,1.8.0会默认打开)
+     */
+    private boolean openapiV2 = false;
+
+    /**
      * rpc类型
      */
     private RpcTypeEnum rpcType = RpcTypeEnum.GRPC;

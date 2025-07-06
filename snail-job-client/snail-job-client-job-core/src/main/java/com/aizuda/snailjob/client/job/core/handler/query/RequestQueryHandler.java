@@ -3,9 +3,11 @@ package com.aizuda.snailjob.client.job.core.handler.query;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
+import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.job.core.dto.JobResponseVO;
 import com.aizuda.snailjob.client.job.core.handler.AbstractJobRequestHandler;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -31,7 +33,13 @@ public class RequestQueryHandler extends AbstractJobRequestHandler<JobResponseVO
 
     @Override
     protected JobResponseVO doExecute() {
-        Result<Object> result = client.getJobDetail(queryJobId);
+        Result<Object> result;
+        if (isOpenApiV2()) {
+             result = clientV2.getJobDetail(queryJobId);
+        } else {
+            result = client.getJobDetail(queryJobId);
+        }
+
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();
