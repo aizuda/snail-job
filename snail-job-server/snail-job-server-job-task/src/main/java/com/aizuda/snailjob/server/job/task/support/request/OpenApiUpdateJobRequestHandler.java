@@ -36,6 +36,7 @@ import java.util.Optional;
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiUpdateJobRequestHandler extends PostHttpRequestHandler {
     private final JobMapper jobMapper;
 

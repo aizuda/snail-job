@@ -37,7 +37,10 @@ public class DateUtils {
         return date.toInstant(zoneOffset).toEpochMilli();
     }
 
-    public static LocalDateTime toLocalDateTime(long milli) {
+    public static LocalDateTime toLocalDateTime(Long milli) {
+        if (milli == null || milli == 0) {
+            return null;
+        }
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(milli), zoneOffset);
     }
 

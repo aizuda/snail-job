@@ -36,6 +36,7 @@ import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiGetJobBatchDetailRequestHandler extends PostHttpRequestHandler {
     private final JobMapper jobMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;

@@ -24,6 +24,8 @@ import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.JobPrepareHandler;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.cache.ResidentTaskCache;
+import com.aizuda.snailjob.server.service.dto.CalculateNextTriggerAtDTO;
+import com.aizuda.snailjob.server.service.kit.JobKit;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
@@ -185,25 +187,34 @@ public class JobServiceImpl implements JobService {
         checkTriggerInterval(jobRequestVO);
 
         // 工作流任务
-        if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
-            updateJob.setNextTriggerAt(0L);
-            // 非常驻任务 > 非常驻任务
-        } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
-                updateJob.getResident(),
-                StatusEnum.NO.getStatus())) {
-            updateJob.setNextTriggerAt(calculateNextTriggerAt(updateJob, DateUtils.toNowMilli()));
-        } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
-                updateJob.getResident(), StatusEnum.NO.getStatus())) {
-            // 常驻任务的触发时间
-            long time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
-                    .orElse(DateUtils.toNowMilli());
-            updateJob.setNextTriggerAt(calculateNextTriggerAt(updateJob, time));
-            // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
-        } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
-                updateJob.getResident(), StatusEnum.YES.getStatus())) {
-            updateJob.setNextTriggerAt(DateUtils.toNowMilli());
-        }
+//        if (Objects.equals(jobRequestVO.getTriggerType(), SystemConstants.WORKFLOW_TRIGGER_TYPE)) {
+//            updateJob.setNextTriggerAt(0L);
+//            // 非常驻任务 > 非常驻任务
+//        } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
+//                updateJob.getResident(),
+//                StatusEnum.NO.getStatus())) {
+//            updateJob.setNextTriggerAt(calculateNextTriggerAt(updateJob, DateUtils.toNowMilli()));
+//        } else if (Objects.equals(job.getResident(), StatusEnum.YES.getStatus()) && Objects.equals(
+//                updateJob.getResident(), StatusEnum.NO.getStatus())) {
+//            // 常驻任务的触发时间
+//            long time = Optional.ofNullable(ResidentTaskCache.get(jobRequestVO.getId()))
+//                    .orElse(DateUtils.toNowMilli());
+//            updateJob.setNextTriggerAt(calculateNextTriggerAt(updateJob, time));
+//            // 老的是不是常驻任务 新的是常驻任务 需要使用当前时间计算下次触发时间
+//        } else if (Objects.equals(job.getResident(), StatusEnum.NO.getStatus()) && Objects.equals(
+//                updateJob.getResident(), StatusEnum.YES.getStatus())) {
+//            updateJob.setNextTriggerAt(DateUtils.toNowMilli());
+//        }
 
+        CalculateNextTriggerAtDTO nextTriggerAtDTO = CalculateNextTriggerAtDTO
+                .builder()
+                .triggerInterval(jobRequestVO.getTriggerInterval())
+                .triggerType(jobRequestVO.getTriggerType())
+                .newResident(updateJob.getResident())
+                .oldResident(job.getResident())
+                .id(job.getId())
+                .build();
+        updateJob.setNextTriggerAt(JobKit.calculateNextTriggerAt(nextTriggerAtDTO));
         // 禁止更新组
         updateJob.setGroupName(null);
         updateJob.setOwnerId(Optional.ofNullable(jobRequestVO.getOwnerId()).orElse(0L));
@@ -235,19 +246,6 @@ public class JobServiceImpl implements JobService {
         return StatusEnum.NO.getStatus();
     }
 
-    private static boolean areAllIntervalsLessThan(List<LocalDateTime> times, Duration maxGap) {
-        if (times.size() < 2) return true;
-
-        for (int i = 1; i < times.size(); i++) {
-            Duration gap = Duration.between(times.get(i - 1), times.get(i));
-            if (gap.compareTo(maxGap) < 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-
     @Override
     public Boolean updateJobStatus(JobStatusUpdateRequestVO jobRequestVO) {
         Assert.notNull(jobRequestVO.getId(), () -> new SnailJobServerException("id cannot be null"));
@@ -256,7 +254,6 @@ public class JobServiceImpl implements JobService {
         job.setJobStatus(jobRequestVO.getJobStatus());
         return 1 == jobMapper.updateById(job);
     }
-
 
     @Override
     public boolean trigger(JobTriggerVO jobTrigger) {

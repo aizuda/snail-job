@@ -34,6 +34,7 @@ import java.util.Set;
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiDeleteWorkflowRequestHandler extends PostHttpRequestHandler {
     private final WorkflowMapper workflowMapper;
     private final JobSummaryMapper jobSummaryMapper;

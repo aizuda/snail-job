@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiTriggerJobRequestHandler extends PostHttpRequestHandler {
     private final JobMapper jobMapper;
     private final AccessTemplate accessTemplate;

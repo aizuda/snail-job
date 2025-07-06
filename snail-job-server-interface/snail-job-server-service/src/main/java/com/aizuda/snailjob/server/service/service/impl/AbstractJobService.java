@@ -1,0 +1,207 @@
+package com.aizuda.snailjob.server.service.service.impl;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.HashUtil;
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.server.common.config.SystemProperties;
+import com.aizuda.snailjob.server.common.dto.JobTriggerDTO;
+import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
+import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
+import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
+import com.aizuda.snailjob.server.job.task.support.prepare.job.TerminalJobPrepareHandler;
+import com.aizuda.snailjob.server.service.convert.JobConverter;
+import com.aizuda.snailjob.server.service.dto.CalculateNextTriggerAtDTO;
+import com.aizuda.snailjob.server.service.dto.JobRequestBaseDTO;
+import com.aizuda.snailjob.server.service.dto.JobResponseDTO;
+import com.aizuda.snailjob.server.service.dto.JobStatusUpdateRequestDTO;
+import com.aizuda.snailjob.server.service.kit.JobKit;
+import com.aizuda.snailjob.server.service.kit.TriggerIntervalKit;
+import com.aizuda.snailjob.server.service.service.JobService;
+import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.Job;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobSummary;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+/**
+ * <p>
+ *
+ * </p>
+ *
+ * @author opensnail
+ * @date 2025-07-05
+ */
+public abstract class AbstractJobService implements JobService {
+    @Autowired
+    protected SystemProperties systemProperties;
+    @Autowired
+    protected JobMapper jobMapper;
+    @Autowired
+    protected JobSummaryMapper jobSummaryMapper;
+    @Autowired
+    protected AccessTemplate accessTemplate;
+    @Autowired
+    protected TerminalJobPrepareHandler terminalJobPrepareHandler;
+
+    @Override
+    public Boolean trigger(JobTriggerDTO jobTrigger) {
+        Job job = jobMapper.selectById(jobTrigger.getJobId());
+        Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
+
+        long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
+                .eq(GroupConfig::getGroupName, job.getGroupName())
+                .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
+                .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
+        );
+
+        Assert.isTrue(count > 0,
+                () -> new SnailJobServerException("Group [{}] is closed, manual execution is not supported.", job.getGroupName()));
+        JobTaskPrepareDTO jobTaskPrepare = JobTaskConverter.INSTANCE.toJobTaskPrepare(job);
+        // 设置now表示立即执行
+        jobTaskPrepare.setNextTriggerAt(DateUtils.toNowMilli());
+        jobTaskPrepare.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_JOB.getType());
+        if (StrUtil.isNotBlank(jobTrigger.getTmpArgsStr())) {
+            jobTaskPrepare.setTmpArgsStr(jobTrigger.getTmpArgsStr());
+        }
+        // 创建批次
+        terminalJobPrepareHandler.handle(jobTaskPrepare);
+        return true;
+    }
+
+
+    /**
+     * 删除任务
+     *
+     * @param ids jobId列表
+     * @return
+     */
+    @Override
+    public boolean deleteJobByIds(Set<Long> ids) {
+        String namespaceId = getNamespaceId();
+
+        List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
+                .select(JobSummary::getId)
+                .in(JobSummary::getBusinessId, ids)
+                .eq(JobSummary::getNamespaceId, namespaceId)
+                .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.JOB.getType())
+        );
+        if (CollUtil.isNotEmpty(jobSummaries)) {
+            jobSummaryMapper.deleteByIds(StreamUtils.toSet(jobSummaries, JobSummary::getId));
+        }
+
+        Assert.isTrue(ids.size() == jobMapper.delete(
+                new LambdaQueryWrapper<Job>()
+                        .eq(Job::getNamespaceId, namespaceId)
+                        .eq(Job::getJobStatus, StatusEnum.NO.getStatus())
+                        .in(Job::getId, ids)
+        ), () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task status is closed"));
+
+        return true;
+    }
+
+    @Override
+    public boolean updateJob(JobRequestBaseDTO jobRequest) {
+        Assert.notNull(jobRequest.getId(), () -> new SnailJobServerException("ID cannot be empty"));
+        Job job = jobMapper.selectById(jobRequest.getId());
+        Assert.notNull(job, () -> new SnailJobServerException("Job is null, update failed"));
+
+        // 前置校验
+        updateJobPreValidator(jobRequest);
+
+        // 判断常驻任务
+        Job updateJob = JobConverter.INSTANCE.convert(jobRequest);
+        updateJob.setResident(JobKit.isResident(jobRequest.getTriggerType(), jobRequest.getTriggerInterval()));
+
+        // check triggerInterval
+        checkTriggerInterval(jobRequest);
+
+        CalculateNextTriggerAtDTO nextTriggerAtDTO = CalculateNextTriggerAtDTO
+                .builder()
+                .triggerInterval(jobRequest.getTriggerInterval())
+                .triggerType(jobRequest.getTriggerType())
+                .newResident(updateJob.getResident())
+                .oldResident(job.getResident())
+                .id(job.getId())
+                .build();
+        updateJob.setNextTriggerAt(JobKit.calculateNextTriggerAt(nextTriggerAtDTO));
+        // 禁止更新组
+        updateJob.setGroupName(null);
+        updateJob.setNamespaceId(null);
+
+        LambdaUpdateWrapper<Job> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Job::getId, jobRequest.getId());
+        updateWrapper.set(Job::getOwnerId, jobRequest.getOwnerId());
+        return 1 == jobMapper.update(updateJob, updateWrapper);
+    }
+
+    @Override
+    public Long addJob(JobRequestBaseDTO request) {
+
+        // 前置校验
+        addJobPreValidator(request);
+
+        // 判断常驻任务
+        Job job = JobConverter.INSTANCE.convert(request);
+        job.setResident(JobKit.isResident(request.getTriggerType(), request.getTriggerInterval()));
+
+        // check triggerInterval
+        checkTriggerInterval(request);
+
+        job.setBucketIndex(HashUtil.bkdrHash(request.getGroupName() + request.getJobName())
+                % systemProperties.getBucketTotal());
+        job.setNextTriggerAt(JobKit.calculateNextTriggerAt(job.getTriggerType(), job.getTriggerInterval(), DateUtils.toNowMilli()));
+        job.setId(null);
+        job.setNamespaceId(getNamespaceId());
+        // 子类填充属性
+        addJobPopulate(job, request);
+        Assert.isTrue(1 == jobMapper.insert(job), () -> new SnailJobServerException("Adding new task failed"));
+        return job.getId();
+    }
+
+    @Override
+    public Boolean updateJobStatus(JobStatusUpdateRequestDTO requestDTO) {
+        Long count = jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, requestDTO.getId()));
+        Assert.isTrue(count == 1, () -> new SnailJobServerException("Update job status failed"));
+        Job job = new Job();
+        job.setId(requestDTO.getId());
+        job.setJobStatus(requestDTO.getJobStatus());
+        return 1 == jobMapper.updateById(job);
+    }
+
+    @Override
+    public JobResponseDTO getJobById(Long id) {
+        Job job = jobMapper.selectById(id);
+        if (Objects.isNull(job)) {
+            return null;
+        }
+
+        return JobConverter.INSTANCE.convert(job);
+
+    }
+
+    protected abstract void updateJobPreValidator(JobRequestBaseDTO jobRequest);
+
+    protected abstract String getNamespaceId();
+
+    protected abstract void addJobPopulate(Job job, JobRequestBaseDTO request);
+
+    protected void checkTriggerInterval(JobRequestBaseDTO jobRequestVO) {
+        TriggerIntervalKit.checkTriggerInterval(jobRequestVO.getTriggerInterval(), jobRequestVO.getTriggerType());
+    }
+
+    protected abstract void addJobPreValidator(JobRequestBaseDTO request);
+}

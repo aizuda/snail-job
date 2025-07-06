@@ -24,6 +24,7 @@ import java.util.Objects;
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiUpdateWorkFlowStatusRequestHandler extends PostHttpRequestHandler {
     private final WorkflowMapper workflowMapper;
 

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiUpdateJobStatusRequestHandler extends PostHttpRequestHandler {
     private final JobMapper jobMapper;
 

@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiGetJobDetailRequestHandler extends PostHttpRequestHandler {
     private final JobMapper jobMapper;
 

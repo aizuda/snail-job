@@ -1,82 +1,75 @@
-package com.aizuda.snailjob.server.job.task.support.request;
+package com.aizuda.snailjob.server.service.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.net.url.UrlQuery;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
-import com.aizuda.snailjob.common.core.model.SnailJobRequest;
-import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.convert.JobBatchResponseVOConverter;
 import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
 import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
 import com.aizuda.snailjob.server.common.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.common.vo.JobBatchResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.job.task.support.cache.MutableGraphCache;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
-import com.aizuda.snailjob.template.datasource.persistence.po.*;
+import com.aizuda.snailjob.server.service.service.WorkflowBatchService;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.Job;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
+import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
+import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
+import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * OPENAPI
- * 获取工作流任务批次详情
- * @since 1.5.0
+ * <p>
+ *
+ * </p>
+ *
+ * @author opensnail
+ * @date 2025-07-06
  */
-@Component
-@RequiredArgsConstructor
-@Deprecated
-public class OpenApiGetWorkflowBatchDetailRequestHandler extends PostHttpRequestHandler {
+public abstract class AbstractWorkflowBatchService implements WorkflowBatchService {
     private static final Integer WORKFLOW_DECISION_FAILED_STATUS = 98;
-    private final WorkflowTaskBatchMapper workflowTaskBatchMapper;
-    private final WorkflowMapper workflowMapper;
-    private final WorkflowNodeMapper workflowNodeMapper;
-    private final JobTaskBatchMapper jobTaskBatchMapper;
-    private final WorkflowHandler workflowHandler;
-    private final JobMapper jobMapper;
+
+    @Autowired
+    protected WorkflowTaskBatchMapper workflowTaskBatchMapper;
+    @Autowired
+    protected WorkflowMapper workflowMapper;
+    @Autowired
+    protected WorkflowNodeMapper workflowNodeMapper;
+    @Autowired
+    protected JobTaskBatchMapper jobTaskBatchMapper;
+    @Autowired
+    protected JobMapper jobMapper;
+    @Autowired
+    protected WorkflowHandler workflowHandler;
 
     @Override
-    public boolean supports(String path) {
-        return HTTP_PATH.OPENAPI_GET_WORKFLOW_BATCH_DETAIL.equals(path);
-    }
-
-    @Override
-    public HttpMethod method() {
-        return HttpMethod.POST;
-    }
-
-    @Override
-    public SnailJobRpcResult doHandler(String content, UrlQuery query, HttpHeaders headers) {
-        SnailJobLog.LOCAL.debug("query workflow batch content:[{}]", content);
-        SnailJobRequest jobRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
-        Object[] args = jobRequest.getArgs();
-        Long workflowBatchId = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), Long.class);
-        Assert.notNull(workflowBatchId, () -> new SnailJobServerException("id cannot be null"));
-
-        WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectOne(
-                new LambdaQueryWrapper<WorkflowTaskBatch>()
-                        .eq(WorkflowTaskBatch::getId, workflowBatchId));
+    public WorkflowDetailResponseVO getWorkflowBatchById(Long workflowBatchId) {
+        WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectById(workflowBatchId);
         if (Objects.isNull(workflowTaskBatch)) {
-            return new SnailJobRpcResult(null, jobRequest.getReqId());
+            return null;
         }
 
         Workflow workflow = workflowMapper.selectById(workflowTaskBatch.getWorkflowId());
@@ -135,7 +128,7 @@ public class OpenApiGetWorkflowBatchDetailRequestHandler extends PostHttpRequest
 
                         if (jobTaskBatchList.stream()
                                 .filter(Objects::nonNull)
-                                .anyMatch(OpenApiGetWorkflowBatchDetailRequestHandler::isNoOperation)) {
+                                .anyMatch(AbstractWorkflowBatchService::isNoOperation)) {
                             // 当前节点下面的所有节点都是无需处理的节点
                             Set<Long> allDescendants = MutableGraphCache.getAllDescendants(graph, nodeInfo.getId());
                             allNoOperationNode.addAll(allDescendants);
@@ -168,10 +161,6 @@ public class OpenApiGetWorkflowBatchDetailRequestHandler extends PostHttpRequest
                 if (Objects.nonNull(jobTask)) {
                     jobBatchResponseVO.setJobId(jobTask.getJobId());
                 }
-                // 只为前端展示提供
-//                nodeInfo.setTaskBatchStatus(NOT_HANDLE_STATUS);
-//                jobBatchResponseVO.setTaskBatchStatus(NOT_HANDLE_STATUS);
-//                jobBatchResponseVO.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason());
                 nodeInfo.setJobBatchList(Lists.newArrayList(jobBatchResponseVO));
             }
         }
@@ -186,12 +175,11 @@ public class OpenApiGetWorkflowBatchDetailRequestHandler extends PostHttpRequest
             throw new SnailJobServerException("Failed to query workflow batch details");
         }
 
-        return new SnailJobRpcResult(responseVO, jobRequest.getReqId());
+        return null;
     }
 
     private static boolean isNoOperation(JobTaskBatch i) {
         return JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(i.getOperationReason())
                 || i.getTaskBatchStatus() == JobTaskBatchStatusEnum.STOP.getStatus();
     }
-
 }

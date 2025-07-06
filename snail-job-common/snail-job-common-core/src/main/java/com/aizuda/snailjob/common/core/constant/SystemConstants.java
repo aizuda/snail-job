@@ -25,22 +25,6 @@ public interface SystemConstants {
      * 异常重试码
      */
     String SNAIL_JOB_STATUS_CODE = "519";
-
-    /**
-     * 客户端组名
-     */
-    String SNAIL_JOB_CLIENT_GROUP = "group";
-
-    /**
-     * 客户端组对应token
-     */
-    String SNAIL_JOB_CLIENT_GROUP_TOKEN = "token";
-
-    /**
-     * 命名空间
-     */
-    String SNAIL_JOB_CLIENT_NAMESPACE = "namespace";
-
     /**
      * 默认的调用链超时时间 单位毫秒(ms)
      */
@@ -117,11 +101,6 @@ public interface SystemConstants {
         String BATCH_REPORT_JOB_MAP_TASK = "/batch/report/job/map/task/v1";
 
         /**
-         * 执行REDUCE任务
-         */
-        String JOB_REDUCE_TASK = "/job/reduce/task/v1";
-
-        /**
          * 同步配置
          */
         String SYNC_CONFIG = "/sync/version";
@@ -156,39 +135,57 @@ public interface SystemConstants {
          */
         String RETRY_GENERATE_IDEM_ID = "/retry/generate/idempotent-id/v1";
 
-
         /**
          * 反序列化重试参数
          */
         String RETRY_DESERIALIZE_ARGS = "/retry/deserialize/args/v1";
 
+        // open api 相关接口
+        // ==================================job ========================//
         String OPENAPI_ADD_JOB = "/api/job/add";
-
         String OPENAPI_UPDATE_JOB = "/api/job/update";
-
+        String OPENAPI_GET_JOB_DETAIL_V2 = "/api/job/detail/{id}";
+        String OPENAPI_TRIGGER_JOB_V2 = "/api/job/trigger";
+        String OPENAPI_DELETE_JOB_V2 = "/api/job/delete";
+        String OPENAPI_UPDATE_JOB_STATUS_V2 = "/api/job/update/status";
+        @Deprecated
         String OPENAPI_GET_JOB_DETAIL = "/api/job/getJobDetail";
-
-        String OPENAPI_GET_JOB_BATCH_DETAIL = "/api/job/getJobBatchDetail";
-
-        String OPENAPI_GET_WORKFLOW_BATCH_DETAIL = "/api/job/getWorkflowBatchDetail";
-
+        @Deprecated
         String OPENAPI_TRIGGER_JOB = "/api/job/triggerJob";
-
-        String OPENAPI_TRIGGER_WORKFLOW = "/api/job/triggerWorkFlow";
-
-        String OPENAPI_UPDATE_JOB_STATUS = "/api/job/updateJobStatus";
-
-        String OPENAPI_UPDATE_WORKFLOW_STATUS = "/api/job/updateWorkFlowStatus";
-
+        @Deprecated
         String OPENAPI_DELETE_JOB = "/api/job/deleteJob";
+        @Deprecated
+        String OPENAPI_UPDATE_JOB_STATUS = "/api/job/updateJobStatus";
+        // ==================================job ========================//
 
+        // ==================================job batch ========================//
+        @Deprecated
+        String OPENAPI_GET_JOB_BATCH_DETAIL = "/api/job/getJobBatchDetail";
+        String OPENAPI_GET_JOB_BATCH_DETAIL_V2 = "/api/job-batch/detail/{id}";
+        // ==================================job batch ========================//
+
+        // ==================================workflow batch ========================//
+        @Deprecated
+        String OPENAPI_GET_WORKFLOW_BATCH_DETAIL = "/api/job/getWorkflowBatchDetail";
+        String OPENAPI_GET_WORKFLOW_BATCH_DETAIL_V2 = "/api/workflow-batch/detail/{id}";
+        // ==================================workflow batch ========================//
+
+        // ==================================workflow ========================//
+        @Deprecated
+        String OPENAPI_TRIGGER_WORKFLOW = "/api/job/triggerWorkFlow";
+        String OPENAPI_TRIGGER_WORKFLOW_V2 = "/api/workflow/trigger";
+        String OPENAPI_UPDATE_WORKFLOW_STATUS = "/api/job/updateWorkFlowStatus";
+        String OPENAPI_UPDATE_WORKFLOW_STATUS_V2 = "/api/workflow/update/status";
+        @Deprecated
         String OPENAPI_DELETE_WORKFLOW = "/api/job/deleteWorkFlow";
+        String OPENAPI_DELETE_WORKFLOW_V2 = "/api/workflow/delete";
+        // ==================================workflow ========================//
 
+        // ==================================retry ========================//
         String OPENAPI_ADD_RETRY = "/api/retry/query";
-
         String OPENAPI_UPDATE_RETRY_STATUS = "/api/retry/updateRetryStatus";
-
         String OPENAPI_TRIGGER_RETRY = "/api/retry/triggerRetry";
+        // ==================================retry ========================//
 
     }
 

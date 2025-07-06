@@ -79,7 +79,7 @@ public class RequestBuilder<T, R extends Result<Object>> {
 
         InvocationHandler invocationHandler;
         if (openapi) {
-            invocationHandler = new HttpClientInvokeHandler<>();
+            invocationHandler = new HttpClientInvokeHandler<>(timeout, unit);
         } else {
             invocationHandler = new GrpcClientInvokeHandler<>(async, timeout, unit, callback);
         }

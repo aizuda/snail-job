@@ -38,6 +38,7 @@ import java.util.Set;
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiTriggerWorkFlowRequestHandler extends PostHttpRequestHandler {
     private final WorkflowMapper workflowMapper;
     private final AccessTemplate accessTemplate;

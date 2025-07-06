@@ -3,7 +3,6 @@ package com.aizuda.snailjob.server.web.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
@@ -22,8 +21,8 @@ import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowBatchService;
 import com.aizuda.snailjob.server.common.convert.JobBatchResponseVOConverter;
 import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
-import com.aizuda.snailjob.server.web.service.handler.JobHandler;
 import com.aizuda.snailjob.server.common.handler.WorkflowHandler;
+import com.aizuda.snailjob.server.web.service.handler.JobHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
@@ -198,10 +197,6 @@ public class WorkflowBatchServiceImpl implements WorkflowBatchService {
                 if (Objects.nonNull(jobTask)) {
                     jobBatchResponseVO.setJobId(jobTask.getJobId());
                 }
-                // 只为前端展示提供
-//                nodeInfo.setTaskBatchStatus(NOT_HANDLE_STATUS);
-//                jobBatchResponseVO.setTaskBatchStatus(NOT_HANDLE_STATUS);
-//                jobBatchResponseVO.setOperationReason(JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason());
                 nodeInfo.setJobBatchList(Lists.newArrayList(jobBatchResponseVO));
             }
         }
