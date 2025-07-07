@@ -26,7 +26,7 @@
         <netty-all.version>4.1.119.Final</netty-all.version>
         <hutool.version>5.8.32</hutool.version>
         <mybatis-spring.version>3.0.3</mybatis-spring.version>
-        <mybatis-plus.version>3.5.9</mybatis-plus.version>
+        <mybatis-plus.version>3.5.12</mybatis-plus.version>
         <tinylog.version>1.3.6</tinylog.version>
         <tinylog2.version>2.6.2</tinylog2.version>
         <logtube.version>0.45.0</logtube.version>
@@ -127,6 +127,11 @@
             <dependency>
                 <groupId>com.aizuda</groupId>
                 <artifactId>snail-job-kingbase-datasource</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aizuda</groupId>
+                <artifactId>snail-job-gauss-datasource</artifactId>
                 <version>${revision}</version>
             </dependency>
 

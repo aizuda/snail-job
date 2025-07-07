@@ -40,8 +40,7 @@ public abstract class AbstractJobTaskGenerator implements JobTaskGenerator, Init
     protected void batchSaveJobTasks(List<JobTask> jobTasks) {
         // ORACLE 批次插入不能直接返回id，因此此处特殊处理
         // 后期版本会对snail-job-datasource进行重构，在考虑此处的兼容逻辑
-        if (Sets.newHashSet(DbTypeEnum.ORACLE.getDb(), DbTypeEnum.SQLSERVER.getDb())
-                .contains(DbUtils.getDbType().getDb())) {
+        if (List.of(DbTypeEnum.ORACLE, DbTypeEnum.SQLSERVER).contains(DbUtils.getDbType()) || DbUtils.getDbType().oracleSameType()) {
             // sqlserver oracle 不支持返回批量id,故暂时先这样处理
             for (JobTask jobTask : jobTasks) {
                 Assert.isTrue(1 == jobTaskMapper.insert(jobTask), () -> new SnailJobServerException("Adding new task instance failed"));

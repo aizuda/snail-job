@@ -4,7 +4,9 @@ import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.handler.InjectionMetaObjectHandler;
 import com.aizuda.snailjob.template.datasource.handler.SnailJobMybatisConfiguration;
 import com.aizuda.snailjob.template.datasource.utils.DbUtils;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
+import com.baomidou.mybatisplus.autoconfigure.MybatisPlusPropertiesCustomizer;
 import com.baomidou.mybatisplus.core.config.GlobalConfig;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
@@ -35,7 +37,7 @@ import java.util.List;
 public class SnailJobTemplateAutoConfiguration {
 
     @Bean("sqlSessionFactory")
-    public SqlSessionFactory sqlSessionFactory(DataSource dataSource, Environment environment,
+    public SqlSessionFactory sqlSessionFactory(DataSource dataSource,
                                                MybatisPlusInterceptor mybatisPlusInterceptor,
                                                MybatisPlusProperties mybatisPlusProperties,
                                                SnailJobMybatisConfiguration snailJobMybatisConfiguration) throws Exception {
@@ -45,7 +47,24 @@ public class SnailJobTemplateAutoConfiguration {
 
         // 动态设置mapper资源: 通用 + 数据库专用
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource[] specificMapperResource = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbTypeEnum.getDb()));
+
+        String dbCompatibilityType = null;
+        if (dbTypeEnum.equals(DbTypeEnum.OPENGAUSS)) {
+            dbCompatibilityType = "gauss";
+        } else if (dbTypeEnum.mysqlSameType()) {
+            dbCompatibilityType = "mysql";
+        } else if (dbTypeEnum.oracleSameType()) {
+            dbCompatibilityType = "oracle";
+        } else if (dbTypeEnum.postgresqlSameType()) {
+            dbCompatibilityType = "postgresql";
+        }
+
+        // 先尝试寻找枚举名称匹配的mapper定义，如果未找到尝试使用兼容的数据库mapper兜底
+        Resource[] specificMapperResource = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbTypeEnum.getName()));
+        if (specificMapperResource.length == 0 && dbCompatibilityType != null) {
+            specificMapperResource = resolver.getResources(MessageFormat.format("classpath*:/{0}/mapper/*.xml", dbCompatibilityType));
+        }
+
         Resource[] templateMapperResource = resolver.getResources("classpath*:/template/mapper/*.xml");
         List<Resource> resources = new ArrayList<>();
         resources.addAll(List.of(specificMapperResource));
@@ -74,6 +93,24 @@ public class SnailJobTemplateAutoConfiguration {
     @Bean
     public SnailJobMybatisConfiguration snailJobMybatisConfiguration() {
         return new SnailJobMybatisConfiguration();
+    }
+
+    @Bean
+    public MybatisPlusPropertiesCustomizer mybatisPlusPropertiesCustomizer(DataSource dataSource) {
+        return properties -> {
+            GlobalConfig.DbConfig dbConfig = new GlobalConfig.DbConfig();
+            DbTypeEnum dbType = DbUtils.getDbType(dataSource);
+            switch (dbType) {
+                // 高斯数据库不支持 RETURNING 语法，再此处设置使用MP内置的雪花ID
+                case GAUSS, OPENGAUSS -> {
+                    dbConfig.setIdType(IdType.ASSIGN_ID);
+                }
+                default -> {
+                    dbConfig.setIdType(IdType.AUTO);
+                }
+            }
+            properties.getGlobalConfig().setDbConfig(dbConfig);
+        };
     }
 
     @Bean

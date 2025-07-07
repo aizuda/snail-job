@@ -23,7 +23,7 @@ public final class LockStorageFactory {
     public static LockStorage getLockStorage() {
         DbTypeEnum db = DbUtils.getDbType();
         return LOCK_STORAGES.stream()
-                .filter(lockProvider -> lockProvider.supports(db.getDb()))
+                .filter(lockProvider -> lockProvider.supports(db.getName()))
                 .findFirst().orElseThrow(() -> new SnailJobServerException("Suitable lock handler not found"));
     }
 

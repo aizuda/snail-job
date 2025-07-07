@@ -36,16 +36,7 @@ public enum DashboardLineEnum {
     public static String dateFormat(String unit) {
         DashboardLineEnum mode = modeOf(unit);
 
-        if (DbUtils.getDbType().equals(DbTypeEnum.MYSQL)) {
-            switch (mode) {
-                case YEAR:
-                    return "%Y-%m";
-                case DAY:
-                    return "%H";
-                default:
-                    return "%Y-%m-%d";
-            }
-        } else if (DbUtils.getDbType().equals(DbTypeEnum.MARIADB)) {
+        if (DbUtils.getDbType().mysqlSameType()) {
             switch (mode) {
                 case YEAR:
                     return "%Y-%m";
