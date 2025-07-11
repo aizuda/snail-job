@@ -255,14 +255,16 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public Boolean updateStatus(Long id) {
-        Workflow workflow = workflowMapper.selectOne(
-                new LambdaQueryWrapper<Workflow>()
-                        .select(Workflow::getId, Workflow::getWorkflowStatus)
-                        .eq(Workflow::getId, id));
-        Assert.notNull(workflow, () -> new SnailJobServerException("Workflow does not exist"));
+        Workflow tmpWorkflow = workflowMapper.selectById(id);
+        Workflow workflow = new Workflow();
+        workflow.setId(id);
+        Assert.notNull(tmpWorkflow, () -> new SnailJobServerException("Workflow does not exist"));
 
-        if (Objects.equals(workflow.getWorkflowStatus(), StatusEnum.NO.getStatus())) {
+        if (Objects.equals(tmpWorkflow.getWorkflowStatus(), StatusEnum.NO.getStatus())) {
             workflow.setWorkflowStatus(StatusEnum.YES.getStatus());
+            // 开启时重新计算调度时间
+            WorkflowRequestVO workflowRequestVO = WorkflowConverter.INSTANCE.convertToWorkflowRequestVo(tmpWorkflow);
+            workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
         } else {
             workflow.setWorkflowStatus(StatusEnum.NO.getStatus());
         }

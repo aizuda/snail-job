@@ -58,6 +58,12 @@ public interface WorkflowConverter {
     })
     WorkflowDetailResponseVO convert(Workflow workflow);
 
+    @Mappings({
+            @Mapping(target = "notifyIds", expression = "java(WorkflowConverter.toNotifyIds(workflow.getNotifyIds()))"),
+            @Mapping(target = "triggerInterval", expression = "java(WorkflowConverter.toTriggerInterval(workflow))"),
+    })
+    WorkflowRequestVO convertToWorkflowRequestVo(Workflow workflow);
+
     List<WorkflowDetailResponseVO.NodeInfo> convertList(List<WorkflowNode> workflowNodes);
 
     @Mappings({

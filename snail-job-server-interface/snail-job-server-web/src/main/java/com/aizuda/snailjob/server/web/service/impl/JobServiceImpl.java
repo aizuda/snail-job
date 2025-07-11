@@ -250,8 +250,17 @@ public class JobServiceImpl implements JobService {
     public Boolean updateJobStatus(JobStatusUpdateRequestVO jobRequestVO) {
         Assert.notNull(jobRequestVO.getId(), () -> new SnailJobServerException("id cannot be null"));
         Job job = new Job();
-        job.setId(jobRequestVO.getId());
-        job.setJobStatus(jobRequestVO.getJobStatus());
+        if (Objects.equals(jobRequestVO.getJobStatus(), StatusEnum.YES.getStatus())) {
+            Job dbJob = jobMapper.selectById(jobRequestVO.getId());
+            Assert.notNull(job, () -> new SnailJobServerException("Update failed"));
+            job.setId(jobRequestVO.getId());
+            job.setJobStatus(jobRequestVO.getJobStatus());
+            // 如果是开启任务，需要重新计算下次触发时间
+            job.setNextTriggerAt(calculateNextTriggerAt(dbJob, DateUtils.toNowMilli()));
+        }else{
+            job.setId(jobRequestVO.getId());
+            job.setJobStatus(jobRequestVO.getJobStatus());
+        }
         return 1 == jobMapper.updateById(job);
     }
 
