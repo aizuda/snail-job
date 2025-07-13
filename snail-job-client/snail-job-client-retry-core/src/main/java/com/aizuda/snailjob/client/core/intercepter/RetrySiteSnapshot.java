@@ -75,6 +75,10 @@ public class RetrySiteSnapshot {
         });
     }
 
+    public static void removeSuspend() {
+        SUSPEND.remove();
+    }
+
     public static Integer getStage() {
         return RETRY_STAGE.get();
     }

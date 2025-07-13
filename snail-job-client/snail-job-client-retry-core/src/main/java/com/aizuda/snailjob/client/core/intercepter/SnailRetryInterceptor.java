@@ -126,6 +126,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
 
         // 无需开启重试的场景，需要清除缓存信息
         if ((RetrySiteSnapshot.isMethodEntrance(methodEntrance) && !RetrySiteSnapshot.isRunning())) {
+            RetrySiteSnapshot.removeSuspend();
             RetrySiteSnapshot.removeAll();
         }
 
