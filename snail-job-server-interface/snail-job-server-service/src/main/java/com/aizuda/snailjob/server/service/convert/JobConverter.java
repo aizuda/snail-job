@@ -6,7 +6,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.server.service.dto.JobRequestBaseDTO;
-import com.aizuda.snailjob.server.service.dto.JobResponseDTO;
+import com.aizuda.snailjob.server.service.dto.JobResponseBaseDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -41,7 +41,7 @@ public interface JobConverter {
             @Mapping(target = "nextTriggerAt", expression = "java(com.aizuda.snailjob.server.common.util.DateUtils.toLocalDateTime(job.getNextTriggerAt()))"),
             @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIds(job.getNotifyIds()))")
     })
-    JobResponseDTO convert(Job job);
+    JobResponseBaseDTO convert(Job job);
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
         if (Objects.isNull(nextTriggerAt) || nextTriggerAt == 0) {

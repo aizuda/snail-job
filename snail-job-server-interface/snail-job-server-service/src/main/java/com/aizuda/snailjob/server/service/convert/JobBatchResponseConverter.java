@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.service.convert;
 
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.service.dto.JobBatchResponseDTO;
+import com.aizuda.snailjob.server.service.dto.JobBatchResponseBaseDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import org.mapstruct.Mapper;
@@ -10,6 +10,7 @@ import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -29,7 +30,7 @@ public interface JobBatchResponseConverter {
             @Mapping(source = "jobBatch.updateDt", target = "updateDt"),
             @Mapping(target = "executionAt", expression = "java(JobBatchResponseConverter.toLocalDateTime(jobBatch.getExecutionAt()))")
     })
-    JobBatchResponseDTO convert(JobTaskBatch jobBatch, Job job);
+    JobBatchResponseBaseDTO convert(JobTaskBatch jobBatch, Job job);
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
         if (Objects.isNull(nextTriggerAt) || nextTriggerAt == 0) {
@@ -38,5 +39,7 @@ public interface JobBatchResponseConverter {
 
         return DateUtils.toLocalDateTime(nextTriggerAt);
     }
+
+    List<JobBatchResponseBaseDTO> convertListToJobBatchList(List<JobTaskBatch> jobTaskBatchList);
 
 }

@@ -1,21 +1,18 @@
 package com.aizuda.snailjob.server.openapi.job.api;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.server.common.dto.JobTriggerDTO;
 import com.aizuda.snailjob.server.openapi.job.dto.JobRequestDTO;
+import com.aizuda.snailjob.server.openapi.job.dto.JobResponseDTO;
+import com.aizuda.snailjob.server.openapi.job.dto.JobStatusUpdateRequestDTO;
+import com.aizuda.snailjob.server.openapi.job.dto.JobTriggerDTO;
 import com.aizuda.snailjob.server.openapi.job.service.JobApiService;
-import com.aizuda.snailjob.server.openapi.job.service.impl.JobApiServiceImpl;
-import com.aizuda.snailjob.server.service.dto.JobResponseDTO;
-import com.aizuda.snailjob.server.service.dto.JobStatusUpdateRequestDTO;
 import com.aizuda.snailjob.server.service.service.JobService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -61,7 +58,7 @@ public class JobApi {
 
     @GetMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_JOB_DETAIL_V2)
     public JobResponseDTO getJobById(@RequestParam("id") Long id) {
-        return jobApiService.getJobById(id);
+        return (JobResponseDTO) jobApiService.getJobById(id);
     }
 
 }

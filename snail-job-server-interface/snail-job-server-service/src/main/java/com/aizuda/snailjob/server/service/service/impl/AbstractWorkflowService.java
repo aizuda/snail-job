@@ -7,16 +7,15 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
-import com.aizuda.snailjob.server.common.dto.JobTriggerDTO;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.prepare.workflow.TerminalWorkflowPrepareHandler;
 import com.aizuda.snailjob.server.service.convert.WorkflowTaskConverter;
-import com.aizuda.snailjob.server.service.dto.JobStatusUpdateRequestDTO;
+import com.aizuda.snailjob.server.service.dto.JobStatusUpdateRequestBaseDTO;
+import com.aizuda.snailjob.server.service.dto.JobTriggerBaseDTO;
 import com.aizuda.snailjob.server.service.service.WorkflowService;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
@@ -51,7 +50,7 @@ public abstract class AbstractWorkflowService implements WorkflowService {
     protected JobSummaryMapper jobSummaryMapper;
 
     @Override
-    public boolean updateWorkFlowStatus(JobStatusUpdateRequestDTO requestDTO) {
+    public boolean updateWorkFlowStatus(JobStatusUpdateRequestBaseDTO requestDTO) {
         Workflow workflow = workflowMapper.selectOne(new LambdaQueryWrapper<Workflow>()
                 .select(Workflow::getId)
                 .eq(Workflow::getId, requestDTO.getId()));
@@ -61,7 +60,7 @@ public abstract class AbstractWorkflowService implements WorkflowService {
     }
 
     @Override
-    public boolean triggerWorkFlow(JobTriggerDTO  jobTriggerDTO) {
+    public boolean triggerWorkFlow(JobTriggerBaseDTO  jobTriggerDTO) {
         Workflow workflow = workflowMapper.selectById(jobTriggerDTO.getJobId());
         Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
         Assert.isTrue(workflow.getNamespaceId().equals(getNamespaceId()), () -> new SnailJobServerException("namespace id not match."));

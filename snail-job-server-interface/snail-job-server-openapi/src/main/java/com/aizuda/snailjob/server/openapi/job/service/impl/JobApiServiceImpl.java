@@ -2,17 +2,11 @@ package com.aizuda.snailjob.server.openapi.job.service.impl;
 
 import com.aizuda.snailjob.server.openapi.job.service.JobApiService;
 import com.aizuda.snailjob.server.openapi.util.OpenApiSessionUtils;
-import com.aizuda.snailjob.server.service.convert.JobConverter;
 import com.aizuda.snailjob.server.service.dto.JobRequestBaseDTO;
-import com.aizuda.snailjob.server.service.dto.JobResponseDTO;
 import com.aizuda.snailjob.server.service.service.impl.AbstractJobService;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * <p>

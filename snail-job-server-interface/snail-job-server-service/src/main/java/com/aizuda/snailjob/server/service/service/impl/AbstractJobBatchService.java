@@ -6,7 +6,7 @@ import com.aizuda.snailjob.server.common.dto.CallbackConfig;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.service.convert.JobBatchResponseConverter;
-import com.aizuda.snailjob.server.service.dto.JobBatchResponseDTO;
+import com.aizuda.snailjob.server.service.dto.JobBatchResponseBaseDTO;
 import com.aizuda.snailjob.server.service.service.JobBatchService;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
@@ -35,14 +35,14 @@ public abstract class AbstractJobBatchService implements JobBatchService {
     protected WorkflowNodeMapper workflowNodeMapper;
 
     @Override
-    public JobBatchResponseDTO getJobBatchById(Long jobBatchId) {
+    public JobBatchResponseBaseDTO getJobBatchById(Long jobBatchId) {
         JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(jobBatchId);
         if (Objects.isNull(jobTaskBatch)) {
             return null;
         }
 
         Job job = jobMapper.selectById(jobTaskBatch.getJobId());
-        JobBatchResponseDTO jobBatchResponse = JobBatchResponseConverter.INSTANCE.convert(jobTaskBatch, job);
+        JobBatchResponseBaseDTO jobBatchResponse = JobBatchResponseConverter.INSTANCE.convert(jobTaskBatch, job);
 
         if (jobTaskBatch.getSystemTaskType().equals(SyetemTaskTypeEnum.WORKFLOW.getType())) {
             WorkflowNode workflowNode = workflowNodeMapper.selectById(jobTaskBatch.getWorkflowNodeId());

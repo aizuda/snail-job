@@ -1,11 +1,9 @@
 package com.aizuda.snailjob.server.openapi.job.api;
 
-import com.aizuda.snailjob.server.common.dto.JobTriggerDTO;
-import com.aizuda.snailjob.server.openapi.job.service.JobApiService;
+import com.aizuda.snailjob.server.openapi.job.dto.JobStatusUpdateRequestDTO;
+import com.aizuda.snailjob.server.openapi.job.dto.JobTriggerDTO;
 import com.aizuda.snailjob.server.openapi.job.service.WorkflowApiService;
-import com.aizuda.snailjob.server.service.dto.JobStatusUpdateRequestDTO;
 import com.aizuda.snailjob.server.service.service.WorkflowService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;

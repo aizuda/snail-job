@@ -1,12 +1,11 @@
-package com.aizuda.snailjob.server.common.dto;
+package com.aizuda.snailjob.server.service.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 
 @Data
-@Deprecated
-public class JobTriggerDTO {
+public class JobTriggerBaseDTO {
 
     @NotNull(message = "jobId cannot be null")
     private Long jobId;

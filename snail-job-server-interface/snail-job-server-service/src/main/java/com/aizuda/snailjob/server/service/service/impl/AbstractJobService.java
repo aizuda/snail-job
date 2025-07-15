@@ -7,7 +7,6 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
-import com.aizuda.snailjob.server.common.dto.JobTriggerDTO;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -16,10 +15,7 @@ import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.prepare.job.TerminalJobPrepareHandler;
 import com.aizuda.snailjob.server.service.convert.JobConverter;
-import com.aizuda.snailjob.server.service.dto.CalculateNextTriggerAtDTO;
-import com.aizuda.snailjob.server.service.dto.JobRequestBaseDTO;
-import com.aizuda.snailjob.server.service.dto.JobResponseDTO;
-import com.aizuda.snailjob.server.service.dto.JobStatusUpdateRequestDTO;
+import com.aizuda.snailjob.server.service.dto.*;
 import com.aizuda.snailjob.server.service.kit.JobKit;
 import com.aizuda.snailjob.server.service.kit.TriggerIntervalKit;
 import com.aizuda.snailjob.server.service.service.JobService;
@@ -58,7 +54,7 @@ public abstract class AbstractJobService implements JobService {
     protected TerminalJobPrepareHandler terminalJobPrepareHandler;
 
     @Override
-    public Boolean trigger(JobTriggerDTO jobTrigger) {
+    public Boolean trigger(JobTriggerBaseDTO jobTrigger) {
         Job job = jobMapper.selectById(jobTrigger.getJobId());
         Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
 
@@ -173,7 +169,7 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public Boolean updateJobStatus(JobStatusUpdateRequestDTO requestDTO) {
+    public Boolean updateJobStatus(JobStatusUpdateRequestBaseDTO requestDTO) {
         Long count = jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, requestDTO.getId()));
         Assert.isTrue(count == 1, () -> new SnailJobServerException("Update job status failed"));
         Job job = new Job();
@@ -183,7 +179,7 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public JobResponseDTO getJobById(Long id) {
+    public JobResponseBaseDTO getJobById(Long id) {
         Job job = jobMapper.selectById(id);
         if (Objects.isNull(job)) {
             return null;

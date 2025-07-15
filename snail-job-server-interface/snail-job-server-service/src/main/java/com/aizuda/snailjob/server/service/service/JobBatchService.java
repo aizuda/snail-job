@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.service.service;
 
-import com.aizuda.snailjob.server.service.dto.JobBatchResponseDTO;
+import com.aizuda.snailjob.server.service.dto.JobBatchResponseBaseDTO;
 
 /**
  * <p>
@@ -12,7 +12,7 @@ import com.aizuda.snailjob.server.service.dto.JobBatchResponseDTO;
  */
 public interface JobBatchService {
 
-    JobBatchResponseDTO getJobBatchById(Long id);
+    JobBatchResponseBaseDTO getJobBatchById(Long id);
 
 
 }
