@@ -14,6 +14,7 @@ import argparse
 import pathlib
 import re
 import time
+import sys
 from abc import ABC, abstractmethod
 from typing import Dict, Generator, Optional, Tuple, Union
 
@@ -264,8 +265,9 @@ class Convertor(ABC):
 
         # 将parse失败的脚本打印出来
         if error_scripts:
+            print("!!! 注意下面脚本解析失败：\n", file=sys.stderr)
             for script in error_scripts:
-                print(script)
+                print(f"{script}\n", file=sys.stderr)
 
 
 class PostgreSQLConvertor(Convertor):
