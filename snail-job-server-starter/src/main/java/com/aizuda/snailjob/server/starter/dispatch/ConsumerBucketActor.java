@@ -82,8 +82,10 @@ public class ConsumerBucketActor extends AbstractActor {
             scanTask.setBucketStr(key);
             scanTask.setBuckets(new HashSet<>(buckets));
             ActorRef scanRetryActorRef = ActorGenerator.scanRetryActor();
-            scanRetryActorRef.tell(scanTask, scanRetryActorRef);
+
             ScanRetryActor.REPEATED_PULL.add(key);
+            scanRetryActorRef.tell(scanTask, scanRetryActorRef);
+
         }
     }
 
