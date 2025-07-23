@@ -1,9 +1,6 @@
 package com.aizuda.snailjob.server.openapi.job.service;
 
-import com.aizuda.snailjob.server.service.dto.JobResponseDTO;
 
-import java.util.List;
-import java.util.Set;
 
 /**
  * <p>
