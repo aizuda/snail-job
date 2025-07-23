@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
-import com.aizuda.snailjob.server.common.vo.JobBatchResponseVO;
+import com.aizuda.snailjob.server.web.model.request.JobBatchResponseVO;
 
 import java.util.List;
 import java.util.Set;
@@ -12,11 +12,11 @@ import java.util.Set;
  * @date : 2023-10-12 09:54
  * @since ：2.4.0
  */
-public interface JobBatchService {
+public interface JobWebBatchService {
 
     PageResult<List<JobBatchResponseVO>> getJobBatchPage(JobBatchQueryVO jobQueryVO);
 
-    JobBatchResponseVO getJobBatchDetail(Long id);
+//    JobBatchResponseVO getJobBatchDetail(Long id);
 
     boolean stop(Long taskBatchId);
 

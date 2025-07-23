@@ -5,6 +5,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.dto.CallbackConfig;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
+import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.service.convert.JobBatchResponseConverter;
 import com.aizuda.snailjob.server.service.dto.JobBatchResponseBaseDTO;
 import com.aizuda.snailjob.server.service.service.JobBatchService;
@@ -16,6 +17,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 /**
@@ -35,14 +37,21 @@ public abstract class AbstractJobBatchService implements JobBatchService {
     protected WorkflowNodeMapper workflowNodeMapper;
 
     @Override
-    public JobBatchResponseBaseDTO getJobBatchById(Long jobBatchId) {
+    public <T extends JobBatchResponseBaseDTO> T getJobBatchById(Long jobBatchId, Class<T> clazz) {
         JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(jobBatchId);
         if (Objects.isNull(jobTaskBatch)) {
             return null;
         }
 
         Job job = jobMapper.selectById(jobTaskBatch.getJobId());
-        JobBatchResponseBaseDTO jobBatchResponse = JobBatchResponseConverter.INSTANCE.convert(jobTaskBatch, job);
+
+        T jobBatchResponse;
+        try {
+            jobBatchResponse = clazz.getDeclaredConstructor().newInstance();
+            JobBatchResponseConverter.INSTANCE.fillCommonFields(jobTaskBatch, job, jobBatchResponse);
+        } catch (Exception e) {
+            throw new SnailJobServerException("getJobBatchById is error", e);
+        }
 
         if (jobTaskBatch.getSystemTaskType().equals(SyetemTaskTypeEnum.WORKFLOW.getType())) {
             WorkflowNode workflowNode = workflowNodeMapper.selectById(jobTaskBatch.getWorkflowNodeId());

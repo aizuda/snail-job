@@ -1,10 +1,11 @@
 package com.aizuda.snailjob.server.web.controller;
 
+import com.aizuda.snailjob.server.service.service.JobBatchService;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
-import com.aizuda.snailjob.server.common.vo.JobBatchResponseVO;
-import com.aizuda.snailjob.server.web.service.JobBatchService;
+import com.aizuda.snailjob.server.web.model.request.JobBatchResponseVO;
+import com.aizuda.snailjob.server.web.service.JobWebBatchService;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -23,30 +24,31 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class JobBatchController {
     private final JobBatchService jobBatchService;
+    private final JobWebBatchService jobWebBatchService;
 
     @GetMapping("/list")
     @LoginRequired
     public PageResult<List<JobBatchResponseVO>> getJobBatchPage(JobBatchQueryVO jobQueryVO) {
-        return jobBatchService.getJobBatchPage(jobQueryVO);
+        return jobWebBatchService.getJobBatchPage(jobQueryVO);
     }
 
     @GetMapping("{id}")
     @LoginRequired
     public JobBatchResponseVO getJobBatchDetail(@PathVariable("id") Long id) {
-        return jobBatchService.getJobBatchDetail(id);
+        return jobBatchService.getJobBatchById(id, JobBatchResponseVO.class);
     }
 
     @PostMapping("/stop/{taskBatchId}")
     @LoginRequired
     public Boolean stop(@PathVariable("taskBatchId") Long taskBatchId) {
-        return jobBatchService.stop(taskBatchId);
+        return jobWebBatchService.stop(taskBatchId);
     }
 
 
     @PostMapping("/retry/{taskBatchId}")
     @LoginRequired
     public Boolean retry(@PathVariable("taskBatchId") Long taskBatchId) {
-        return jobBatchService.retry(taskBatchId);
+        return jobWebBatchService.retry(taskBatchId);
     }
 
     @DeleteMapping("/ids")
@@ -55,6 +57,6 @@ public class JobBatchController {
                                        @NotEmpty(message = "ids cannot be null")
                                        @Size(max = 100, message = "Maximum {max} deletions")
                                        Set<Long> ids) {
-        return jobBatchService.deleteJobBatchByIds(ids);
+        return jobWebBatchService.deleteJobBatchByIds(ids);
     }
 }

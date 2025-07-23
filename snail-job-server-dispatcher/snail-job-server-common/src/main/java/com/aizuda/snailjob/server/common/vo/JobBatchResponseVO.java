@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
  * @since : 2.4.0
  */
 @Data
+@Deprecated
 public class JobBatchResponseVO {
 
     private Long id;

@@ -37,11 +37,6 @@ public interface JobConverter {
     })
     Job convert(JobRequestBaseDTO jobRequestDTO);
 
-    @Mappings({
-            @Mapping(target = "nextTriggerAt", expression = "java(com.aizuda.snailjob.server.common.util.DateUtils.toLocalDateTime(job.getNextTriggerAt()))"),
-            @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIds(job.getNotifyIds()))")
-    })
-    JobResponseBaseDTO convert(Job job);
 
     @Mappings({
             @Mapping(target = "nextTriggerAt", expression = "java(com.aizuda.snailjob.server.common.util.DateUtils.toLocalDateTime(job.getNextTriggerAt()))"),

@@ -25,6 +25,6 @@ public class JobBatchApi {
 
     @PostMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_JOB_BATCH_DETAIL_V2)
     public JobBatchResponseDTO getJobBatchByIds(@RequestParam("id") Long id) {
-        return (JobBatchResponseDTO) jobBatchApiService.getJobBatchById(id);
+        return jobBatchApiService.getJobBatchById(id, JobBatchResponseDTO.class);
     }
 }

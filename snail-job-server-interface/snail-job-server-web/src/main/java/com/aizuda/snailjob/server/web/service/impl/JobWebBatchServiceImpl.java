@@ -2,26 +2,19 @@ package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
-import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.server.common.dto.CallbackConfig;
-import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
+import com.aizuda.snailjob.server.service.service.impl.AbstractJobBatchService;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
+import com.aizuda.snailjob.server.web.model.request.JobBatchResponseVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
-import com.aizuda.snailjob.server.common.vo.JobBatchResponseVO;
-import com.aizuda.snailjob.server.web.service.JobBatchService;
-import com.aizuda.snailjob.server.common.convert.JobBatchResponseVOConverter;
+import com.aizuda.snailjob.server.web.service.JobWebBatchService;
+import com.aizuda.snailjob.server.web.service.convert.JobBatchResponseVOConverter;
 import com.aizuda.snailjob.server.web.service.handler.JobHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
-import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -38,13 +30,10 @@ import java.util.Set;
  * @date : 2023-10-12 09:55
  * @since ：2.4.0
  */
-@Service
+@Service("jobWebBatchService")
 @RequiredArgsConstructor
-public class JobBatchServiceImpl implements JobBatchService {
-
+public class JobWebBatchServiceImpl extends AbstractJobBatchService implements JobWebBatchService {
     private final JobTaskBatchMapper jobTaskBatchMapper;
-    private final JobMapper jobMapper;
-    private final WorkflowNodeMapper workflowNodeMapper;
     private final JobHandler jobHandler;
 
     @Override
@@ -75,37 +64,37 @@ public class JobBatchServiceImpl implements JobBatchService {
         return new PageResult<>(pageDTO, batchResponseVOList);
     }
 
-    @Override
-    public JobBatchResponseVO getJobBatchDetail(final Long id) {
-        JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(id);
-        if (Objects.isNull(jobTaskBatch)) {
-            return null;
-        }
-
-        Job job = jobMapper.selectById(jobTaskBatch.getJobId());
-        JobBatchResponseVO jobBatchResponseVO = JobBatchResponseVOConverter.INSTANCE.convert(jobTaskBatch, job);
-
-        if (jobTaskBatch.getSystemTaskType().equals(SyetemTaskTypeEnum.WORKFLOW.getType())) {
-            WorkflowNode workflowNode = workflowNodeMapper.selectById(jobTaskBatch.getWorkflowNodeId());
-            jobBatchResponseVO.setNodeName(workflowNode.getNodeName());
-
-            // 回调节点
-            if (SystemConstants.CALLBACK_JOB_ID.equals(jobTaskBatch.getJobId())) {
-                jobBatchResponseVO.setCallback(JsonUtil.parseObject(workflowNode.getNodeInfo(), CallbackConfig.class));
-                jobBatchResponseVO.setExecutionAt(jobTaskBatch.getCreateDt());
-                return jobBatchResponseVO;
-            }
-
-            // 条件节点
-            if (SystemConstants.DECISION_JOB_ID.equals(jobTaskBatch.getJobId())) {
-                jobBatchResponseVO.setDecision(JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfig.class));
-                jobBatchResponseVO.setExecutionAt(jobTaskBatch.getCreateDt());
-                return jobBatchResponseVO;
-            }
-        }
-
-        return jobBatchResponseVO;
-    }
+//    @Override
+//    public JobBatchResponseVO getJobBatchDetail(final Long id) {
+//        JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(id);
+//        if (Objects.isNull(jobTaskBatch)) {
+//            return null;
+//        }
+//
+//        Job job = jobMapper.selectById(jobTaskBatch.getJobId());
+//        JobBatchResponseVO jobBatchResponseVO = JobBatchResponseVOConverter.INSTANCE.convert(jobTaskBatch, job);
+//
+//        if (jobTaskBatch.getSystemTaskType().equals(SyetemTaskTypeEnum.WORKFLOW.getType())) {
+//            WorkflowNode workflowNode = workflowNodeMapper.selectById(jobTaskBatch.getWorkflowNodeId());
+//            jobBatchResponseVO.setNodeName(workflowNode.getNodeName());
+//
+//            // 回调节点
+//            if (SystemConstants.CALLBACK_JOB_ID.equals(jobTaskBatch.getJobId())) {
+//                jobBatchResponseVO.setCallback(JsonUtil.parseObject(workflowNode.getNodeInfo(), CallbackConfig.class));
+//                jobBatchResponseVO.setExecutionAt(jobTaskBatch.getCreateDt());
+//                return jobBatchResponseVO;
+//            }
+//
+//            // 条件节点
+//            if (SystemConstants.DECISION_JOB_ID.equals(jobTaskBatch.getJobId())) {
+//                jobBatchResponseVO.setDecision(JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfig.class));
+//                jobBatchResponseVO.setExecutionAt(jobTaskBatch.getCreateDt());
+//                return jobBatchResponseVO;
+//            }
+//        }
+//
+//        return jobBatchResponseVO;
+//    }
 
     @Override
     public boolean stop(Long taskBatchId) {
