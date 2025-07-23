@@ -41,7 +41,7 @@ public class SnailEndPointScanner implements ApplicationContextAware {
             String executorClassName = executorNotProxy.getName();
 
             // 扫描类的注解
-            SnailEndPoint jobExecutor = bean.getClass().getAnnotation(SnailEndPoint.class);
+            SnailEndPoint jobExecutor = (SnailEndPoint) executorNotProxy.getAnnotation(SnailEndPoint.class);
             if (Objects.nonNull(jobExecutor)) {
                 Map<Method, Mapping> annotatedMethods = null;
                 try {
