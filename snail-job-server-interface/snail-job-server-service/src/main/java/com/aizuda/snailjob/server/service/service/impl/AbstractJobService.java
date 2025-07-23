@@ -30,7 +30,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -88,6 +87,14 @@ public abstract class AbstractJobService implements JobService {
     @Override
     public boolean deleteJobByIds(Set<Long> ids) {
         String namespaceId = getNamespaceId();
+
+        Assert.isTrue(ids.size() == jobMapper.delete(
+                new LambdaQueryWrapper<Job>()
+                        .eq(Job::getNamespaceId, namespaceId)
+                        .eq(Job::getJobStatus, StatusEnum.NO.getStatus())
+                        .in(Job::getId, ids)
+        ), () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task status is closed"));
+
 
         List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
                 .select(JobSummary::getId)
@@ -179,15 +186,19 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public JobResponseBaseDTO getJobById(Long id) {
+    public <T extends JobResponseBaseDTO> T getJobById(Long id, Class<T> clazz) {
         Job job = jobMapper.selectById(id);
-        if (Objects.isNull(job)) {
-            return null;
+        try {
+            T instance = clazz.getDeclaredConstructor().newInstance();
+            JobConverter.INSTANCE.fillCommonFields(job, instance);
+            getJobByIdAfter(instance, job);
+            return instance;
+        } catch (Exception e) {
+           throw new  SnailJobServerException("Failed to get job by id [{}]", id, e);
         }
-
-        return JobConverter.INSTANCE.convert(job);
-
     }
+
+    protected abstract void getJobByIdAfter(JobResponseBaseDTO responseBaseDTO, Job job);
 
     protected abstract void updateJobPreValidator(JobRequestBaseDTO jobRequest);
 

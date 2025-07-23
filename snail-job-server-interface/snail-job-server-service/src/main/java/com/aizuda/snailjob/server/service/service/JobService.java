@@ -27,5 +27,5 @@ public interface JobService {
 
     Boolean updateJobStatus(JobStatusUpdateRequestBaseDTO requestDTO);
 
-    JobResponseBaseDTO getJobById(Long id);
+    <T extends JobResponseBaseDTO> T getJobById(Long id, Class<T> clazz);
 }

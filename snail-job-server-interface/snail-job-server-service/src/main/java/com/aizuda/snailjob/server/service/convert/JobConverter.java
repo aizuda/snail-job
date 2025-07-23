@@ -10,6 +10,7 @@ import com.aizuda.snailjob.server.service.dto.JobResponseBaseDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
@@ -36,12 +37,17 @@ public interface JobConverter {
     })
     Job convert(JobRequestBaseDTO jobRequestDTO);
 
-
     @Mappings({
             @Mapping(target = "nextTriggerAt", expression = "java(com.aizuda.snailjob.server.common.util.DateUtils.toLocalDateTime(job.getNextTriggerAt()))"),
             @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIds(job.getNotifyIds()))")
     })
     JobResponseBaseDTO convert(Job job);
+
+    @Mappings({
+            @Mapping(target = "nextTriggerAt", expression = "java(com.aizuda.snailjob.server.common.util.DateUtils.toLocalDateTime(job.getNextTriggerAt()))"),
+            @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIds(job.getNotifyIds()))")
+    })
+    void fillCommonFields(Job job, @MappingTarget JobResponseBaseDTO target);
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
         if (Objects.isNull(nextTriggerAt) || nextTriggerAt == 0) {

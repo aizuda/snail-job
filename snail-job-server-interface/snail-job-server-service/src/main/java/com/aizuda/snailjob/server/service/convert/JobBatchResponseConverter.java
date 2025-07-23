@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.service.convert;
 
-import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.service.dto.JobBatchResponseBaseDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
@@ -11,7 +10,6 @@ import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author: shuguang.zhang
@@ -33,11 +31,7 @@ public interface JobBatchResponseConverter {
     JobBatchResponseBaseDTO convert(JobTaskBatch jobBatch, Job job);
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
-        if (Objects.isNull(nextTriggerAt) || nextTriggerAt == 0) {
-            return null;
-        }
-
-        return DateUtils.toLocalDateTime(nextTriggerAt);
+        return JobConverter.toLocalDateTime(nextTriggerAt);
     }
 
     List<JobBatchResponseBaseDTO> convertListToJobBatchList(List<JobTaskBatch> jobTaskBatchList);

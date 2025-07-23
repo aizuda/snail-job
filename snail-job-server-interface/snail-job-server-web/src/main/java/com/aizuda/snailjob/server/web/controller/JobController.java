@@ -1,15 +1,17 @@
 package com.aizuda.snailjob.server.web.controller;
 
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
+import com.aizuda.snailjob.server.service.dto.JobTriggerBaseDTO;
+import com.aizuda.snailjob.server.service.service.JobService;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
-import com.aizuda.snailjob.server.web.service.JobService;
+import com.aizuda.snailjob.server.web.service.JobWebService;
 import com.aizuda.snailjob.server.web.util.ExportUtils;
 import com.aizuda.snailjob.server.web.util.ImportUtils;
 import jakarta.validation.constraints.NotEmpty;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -27,34 +29,33 @@ import java.util.Set;
  */
 @RestController
 @RequestMapping("/job")
+@RequiredArgsConstructor
 public class JobController {
-
-
-    @Autowired
-    private JobService jobService;
+    private final JobService jobService;
+    private final JobWebService jobWebService;
 
     @GetMapping("/page/list")
     @LoginRequired
     public PageResult<List<JobResponseVO>> getJobPage(JobQueryVO jobQueryVO) {
-        return jobService.getJobPage(jobQueryVO);
+        return jobWebService.getJobPage(jobQueryVO);
     }
 
     @GetMapping("/list")
     @LoginRequired
     public List<JobResponseVO> getJobList(@RequestParam("groupName") String groupName) {
-        return jobService.getJobList(groupName);
+        return jobWebService.getJobList(groupName);
     }
 
     @GetMapping("{id}")
     @LoginRequired
     public JobResponseVO getJobDetail(@PathVariable("id") Long id) {
-        return jobService.getJobDetail(id);
+        return jobService.getJobById(id, JobResponseVO.class);
     }
 
     @PostMapping
     @LoginRequired
-    public Boolean saveJob(@RequestBody @Validated JobRequestVO jobRequestVO) {
-        return jobService.saveJob(jobRequestVO);
+    public Long saveJob(@RequestBody @Validated JobRequestVO jobRequestVO) {
+        return jobService.addJob(jobRequestVO);
     }
 
     @PutMapping
@@ -78,7 +79,7 @@ public class JobController {
     @GetMapping("/cron")
     @LoginRequired
     public List<String> getTimeByCron(@RequestParam("cron") String cron) {
-        return jobService.getTimeByCron(cron);
+        return jobWebService.getTimeByCron(cron);
     }
 
     @GetMapping("/job-name/list")
@@ -88,26 +89,29 @@ public class JobController {
             @RequestParam(value = "jobId", required = false) Long jobId,
             @RequestParam(value = "groupName", required = false) String groupName
     ) {
-        return jobService.getJobNameList(keywords, jobId, groupName);
+        return jobWebService.getJobNameList(keywords, jobId, groupName);
     }
 
     @PostMapping("/trigger")
     @LoginRequired
     public Boolean trigger(@RequestBody @Validated JobTriggerVO jobTrigger) {
-        return jobService.trigger(jobTrigger);
+        JobTriggerBaseDTO triggerDTO = new JobTriggerBaseDTO();
+        triggerDTO.setJobId(jobTrigger.getJobId());
+        triggerDTO.setTmpArgsStr(jobTrigger.getTmpArgsStr());
+        return jobService.trigger(triggerDTO);
     }
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LoginRequired
     public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
-        jobService.importJobs(ImportUtils.parseList(file, JobRequestVO.class));
+        jobWebService.importJobs(ImportUtils.parseList(file, JobRequestVO.class));
     }
 
     @PostMapping("/export")
     @LoginRequired
     @OriginalControllerReturnValue
     public ResponseEntity<String> exportGroup(@RequestBody ExportJobVO exportJobVO) {
-        return ExportUtils.doExport(jobService.exportJobs(exportJobVO));
+        return ExportUtils.doExport(jobWebService.exportJobs(exportJobVO));
     }
 
 }

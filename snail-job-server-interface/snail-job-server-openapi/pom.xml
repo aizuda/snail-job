@@ -39,11 +39,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
-        </dependency>
-
         <!--   libs     -->
         <dependency>
             <groupId>com.auth0</groupId>
@@ -53,52 +48,6 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-crypto</artifactId>
         </dependency>
-
-        <!--   SnailJOb     -->
-<!--        <dependency>-->
-<!--            <groupId>com.aizuda</groupId>-->
-<!--            <artifactId>snail-job-server-common</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.aizuda</groupId>-->
-<!--            <artifactId>snail-job-datasource-template</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.aizuda</groupId>-->
-<!--            <artifactId>snail-job-mysql-datasource</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.aizuda</groupId>-->
-<!--            <artifactId>snail-job-postgres-datasource</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.aizuda</groupId>-->
-<!--            <artifactId>snail-job-mariadb-datasource</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.aizuda</groupId>-->
-<!--            <artifactId>snail-job-oracle-datasource</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.aizuda</groupId>-->
-<!--            <artifactId>snail-job-sqlserver-datasource</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.aizuda</groupId>-->
-<!--            <artifactId>snail-job-dm8-datasource</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.aizuda</groupId>-->
-<!--            <artifactId>snail-job-kingbase-datasource</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.aizuda</groupId>-->
-<!--            <artifactId>snail-job-server-retry-task</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.aizuda</groupId>-->
-<!--            <artifactId>snail-job-server-job-task</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-server-service</artifactId>

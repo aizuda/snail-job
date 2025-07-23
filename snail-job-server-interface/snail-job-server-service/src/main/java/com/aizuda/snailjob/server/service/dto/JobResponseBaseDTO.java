@@ -136,11 +136,6 @@ public class JobResponseBaseDTO {
     private Set<Long> notifyIds;
 
     /**
-     * 负责人id
-     */
-    private Long ownerId;
-
-    /**
      * 标签
      * json格式，如：{"key1":"value1","key2":"value2"}
      */
