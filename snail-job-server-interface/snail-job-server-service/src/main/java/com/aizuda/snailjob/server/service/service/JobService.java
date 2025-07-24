@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.service.service;
 
 import com.aizuda.snailjob.server.service.dto.JobRequestBaseDTO;
 import com.aizuda.snailjob.server.service.dto.JobResponseBaseDTO;
-import com.aizuda.snailjob.server.service.dto.JobStatusUpdateRequestBaseDTO;
+import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestBaseDTO;
 import com.aizuda.snailjob.server.service.dto.JobTriggerBaseDTO;
 
 import java.util.Set;
@@ -25,7 +25,7 @@ public interface JobService {
 
     Boolean trigger(JobTriggerBaseDTO jobTrigger);
 
-    Boolean updateJobStatus(JobStatusUpdateRequestBaseDTO requestDTO);
+    Boolean updateJobStatus(StatusUpdateRequestBaseDTO requestDTO);
 
     <T extends JobResponseBaseDTO> T getJobById(Long id, Class<T> clazz);
 }

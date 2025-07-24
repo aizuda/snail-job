@@ -9,12 +9,12 @@ import lombok.Data;
  * @since 2.4.0
  */
 @Data
-public class JobStatusUpdateRequestBaseDTO {
+public class StatusUpdateRequestBaseDTO {
 
     @NotNull(message = "id cannot be null")
     private Long id;
 
-    @NotNull(message = "jobStatus cannot be null")
-    private Integer jobStatus;
+    @NotNull(message = "status cannot be null")
+    private Integer status;
 
 }

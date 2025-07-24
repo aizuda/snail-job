@@ -17,23 +17,22 @@ import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.ExpressionTypeEnum;
-import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.*;
+import com.aizuda.snailjob.server.service.kit.WorkflowKit;
+import com.aizuda.snailjob.server.service.service.impl.AbstractWorkflowService;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
-import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.WorkflowPrePareHandler;
-import com.aizuda.snailjob.server.job.task.support.WorkflowTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO.NodeConfig;
 import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
-import com.aizuda.snailjob.server.web.service.WorkflowService;
+import com.aizuda.snailjob.server.web.service.WorkflowWebService;
 import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
 import com.aizuda.snailjob.server.web.service.handler.GroupHandler;
 import com.aizuda.snailjob.server.common.handler.WorkflowHandler;
@@ -70,42 +69,15 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 @Validated
-public class WorkflowServiceImpl implements WorkflowService {
+public class WorkflowWebServiceImpl extends AbstractWorkflowService implements WorkflowWebService {
 
     private final WorkflowMapper workflowMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
     private final SystemProperties systemProperties;
     private final WorkflowHandler workflowHandler;
-    private final WorkflowPrePareHandler terminalWorkflowPrepareHandler;
     private final JobMapper jobMapper;
-    private final AccessTemplate accessTemplate;
     private final GroupHandler groupHandler;
-    private final JobSummaryMapper jobSummaryMapper;
     private final SystemUserMapper systemUserMapper;
-
-    private static Long calculateNextTriggerAt(final WorkflowRequestVO workflowRequestVO, Long time) {
-        checkExecuteInterval(workflowRequestVO);
-
-        WaitStrategy waitStrategy = WaitStrategies.WaitStrategyEnum.getWaitStrategy(workflowRequestVO.getTriggerType());
-        WaitStrategies.WaitStrategyContext waitStrategyContext = new WaitStrategies.WaitStrategyContext();
-        waitStrategyContext.setTriggerInterval(workflowRequestVO.getTriggerInterval());
-        waitStrategyContext.setNextTriggerAt(time);
-        return waitStrategy.computeTriggerTime(waitStrategyContext);
-    }
-
-    private static void checkExecuteInterval(WorkflowRequestVO requestVO) {
-        if (Lists.newArrayList(WaitStrategies.WaitStrategyEnum.FIXED.getType(),
-                        WaitStrategies.WaitStrategyEnum.RANDOM.getType())
-                .contains(requestVO.getTriggerType())) {
-            if (Integer.parseInt(requestVO.getTriggerInterval()) < 10) {
-                throw new SnailJobServerException("Trigger interval must not be less than 10");
-            }
-        } else if (Objects.equals(requestVO.getTriggerType(), WaitStrategies.WaitStrategyEnum.CRON.getType())) {
-            if (CronUtils.getExecuteInterval(requestVO.getTriggerInterval()) < 10 * 1000) {
-                throw new SnailJobServerException("Trigger interval must not be less than 10");
-            }
-        }
-    }
 
     @Override
     @Transactional
@@ -123,7 +95,8 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         workflow.setVersion(1);
         workflowRequestVO.setTriggerInterval(workflow.getTriggerInterval());
-        workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
+        workflow.setNextTriggerAt(WorkflowKit.calculateNextTriggerAt(workflowRequestVO.getTriggerType(),
+                workflowRequestVO.getTriggerInterval(), DateUtils.toNowMilli()));
         workflow.setFlowInfo(StrUtil.EMPTY);
         workflow.setBucketIndex(
                 HashUtil.bkdrHash(workflowRequestVO.getGroupName() + workflowRequestVO.getWorkflowName())
@@ -237,7 +210,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.setId(workflowRequestVO.getId());
         workflow.setVersion(version);
         workflowRequestVO.setTriggerInterval(workflow.getTriggerInterval());
-        workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
+        workflow.setNextTriggerAt(WorkflowKit.calculateNextTriggerAt(workflowRequestVO.getTriggerType(),
+                workflowRequestVO.getTriggerInterval(), DateUtils.toNowMilli()));
         workflow.setFlowInfo(JsonUtil.toJsonString(GraphUtils.serializeGraphToJson(graph)));
         // 不允许更新组
         workflow.setGroupName(null);
@@ -249,53 +223,6 @@ public class WorkflowServiceImpl implements WorkflowService {
 
         Assert.isTrue(workflowMapper.update(workflow, updateWrapper) > 0,
                 () -> new SnailJobServerException("Update failed"));
-
-        return Boolean.TRUE;
-    }
-
-    @Override
-    public Boolean updateStatus(Long id) {
-        Workflow tmpWorkflow = workflowMapper.selectById(id);
-        Workflow workflow = new Workflow();
-        workflow.setId(id);
-        Assert.notNull(tmpWorkflow, () -> new SnailJobServerException("Workflow does not exist"));
-
-        if (Objects.equals(tmpWorkflow.getWorkflowStatus(), StatusEnum.NO.getStatus())) {
-            workflow.setWorkflowStatus(StatusEnum.YES.getStatus());
-            // 开启时重新计算调度时间
-            WorkflowRequestVO workflowRequestVO = WorkflowConverter.INSTANCE.convertToWorkflowRequestVo(tmpWorkflow);
-            workflow.setNextTriggerAt(calculateNextTriggerAt(workflowRequestVO, DateUtils.toNowMilli()));
-        } else {
-            workflow.setWorkflowStatus(StatusEnum.NO.getStatus());
-        }
-
-        return 1 == workflowMapper.updateById(workflow);
-    }
-
-    @Override
-    public Boolean trigger(WorkflowTriggerVO triggerVO) {
-        Workflow workflow = workflowMapper.selectById(triggerVO.getWorkflowId());
-        Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
-
-        long count = accessTemplate.getGroupConfigAccess().count(
-                new LambdaQueryWrapper<GroupConfig>()
-                        .eq(GroupConfig::getGroupName, workflow.getGroupName())
-                        .eq(GroupConfig::getNamespaceId, workflow.getNamespaceId())
-                        .eq(GroupConfig::getGroupStatus, StatusEnum.YES.getStatus())
-        );
-
-        Assert.isTrue(count > 0,
-                () -> new SnailJobServerException("Group [{}] is closed, manual execution is not supported.", workflow.getGroupName()));
-
-        WorkflowTaskPrepareDTO prepareDTO = WorkflowTaskConverter.INSTANCE.toWorkflowTaskPrepareDTO(workflow);
-        // 设置now表示立即执行
-        prepareDTO.setNextTriggerAt(DateUtils.toNowMilli());
-        prepareDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType());
-        String tmpWfContext = triggerVO.getTmpWfContext();
-        if (StrUtil.isNotBlank(tmpWfContext) && !JsonUtil.isEmptyJson(tmpWfContext)) {
-            prepareDTO.setWfContext(tmpWfContext);
-        }
-        terminalWorkflowPrepareHandler.handler(prepareDTO);
 
         return Boolean.TRUE;
     }
@@ -367,40 +294,13 @@ public class WorkflowServiceImpl implements WorkflowService {
         return JsonUtil.toJsonString(resultList);
     }
 
-    @Override
-    @Transactional
-    public Boolean deleteByIds(Set<Long> ids) {
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
-
-        Assert.isTrue(ids.size() == workflowMapper.delete(
-                new LambdaQueryWrapper<Workflow>()
-                        .eq(Workflow::getNamespaceId, namespaceId)
-                        .eq(Workflow::getWorkflowStatus, StatusEnum.NO.getStatus())
-                        .in(Workflow::getId, ids)
-        ), () -> new SnailJobServerException("Failed to delete workflow task, please check if the task status is closed"));
-
-        List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
-                .select(JobSummary::getId)
-                .in(JobSummary::getBusinessId, ids)
-                .eq(JobSummary::getNamespaceId, namespaceId)
-                .eq(JobSummary::getSystemTaskType, SyetemTaskTypeEnum.WORKFLOW.getType())
-        );
-        if (CollUtil.isNotEmpty(jobSummaries)) {
-            Assert.isTrue(jobSummaries.size() ==
-                            jobSummaryMapper.deleteByIds(StreamUtils.toSet(jobSummaries, JobSummary::getId)),
-                    () -> new SnailJobServerException("Summary table deletion failed")
-            );
-        }
-        return Boolean.TRUE;
-    }
-
     private void batchSaveWorkflowTask(final List<WorkflowRequestVO> workflowRequestVOList, final String namespaceId) {
 
         Set<String> groupNameSet = StreamUtils.toSet(workflowRequestVOList, WorkflowRequestVO::getGroupName);
         groupHandler.validateGroupExistence(groupNameSet, namespaceId);
 
         for (final WorkflowRequestVO workflowRequestVO : workflowRequestVOList) {
-            checkExecuteInterval(workflowRequestVO);
+            WorkflowKit.checkExecuteInterval(workflowRequestVO.getTriggerType(), workflowRequestVO.getTriggerInterval());
             workflowRequestVO.setId(null);
             saveWorkflow(workflowRequestVO);
         }
@@ -446,6 +346,10 @@ public class WorkflowServiceImpl implements WorkflowService {
         return responseVO;
     }
 
+    @Override
+    protected String getNamespaceId() {
+        return UserSessionUtils.currentUserSession().getNamespaceId();
+    }
 
     @EqualsAndHashCode(callSuper = true)
     @Getter

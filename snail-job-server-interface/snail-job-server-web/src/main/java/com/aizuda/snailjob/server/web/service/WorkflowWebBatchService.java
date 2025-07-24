@@ -13,11 +13,9 @@ import java.util.Set;
  * @date 2023-12-23 17:48:23
  * @since 2.6.0
  */
-public interface WorkflowBatchService {
+public interface WorkflowWebBatchService {
 
     PageResult<List<WorkflowBatchResponseVO>> listPage(WorkflowBatchQueryVO queryVO);
-
-    WorkflowDetailResponseVO getWorkflowBatchDetail(Long id);
 
     Boolean stop(Long id);
 

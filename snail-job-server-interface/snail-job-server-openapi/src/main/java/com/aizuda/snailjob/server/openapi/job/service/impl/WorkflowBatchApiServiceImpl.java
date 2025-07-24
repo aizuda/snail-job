@@ -14,8 +14,6 @@ import org.springframework.stereotype.Component;
  */
 @Component("workflowBatchApiService")
 public class WorkflowBatchApiServiceImpl extends AbstractWorkflowBatchService implements WorkflowBatchApiService {
-    private static final Integer WORKFLOW_DECISION_FAILED_STATUS = 98;
-
 
 
 }

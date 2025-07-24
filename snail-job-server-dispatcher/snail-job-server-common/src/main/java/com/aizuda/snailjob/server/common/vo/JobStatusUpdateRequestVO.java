@@ -9,6 +9,7 @@ import lombok.Data;
  * @since 2.4.0
  */
 @Data
+@Deprecated
 public class JobStatusUpdateRequestVO {
 
     @NotNull(message = "id cannot be null")

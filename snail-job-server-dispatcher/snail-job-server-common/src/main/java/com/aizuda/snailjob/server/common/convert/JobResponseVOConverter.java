@@ -22,6 +22,7 @@ import java.util.Set;
  * @since 2.4.0
  */
 @Mapper
+@Deprecated
 public interface JobResponseVOConverter {
 
     JobResponseVOConverter INSTANCE = Mappers.getMapper(JobResponseVOConverter.class);

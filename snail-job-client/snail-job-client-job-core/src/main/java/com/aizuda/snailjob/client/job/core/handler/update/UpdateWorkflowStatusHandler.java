@@ -66,6 +66,7 @@ public class UpdateWorkflowStatusHandler extends AbstractJobRequestHandler<Boole
      */
     public UpdateWorkflowStatusHandler setStatus(StatusEnum status) {
         this.statusDTO.setJobStatus(status.getStatus());
+        this.statusDTO.setStatus(status.getStatus());
         return this;
     }
 }

@@ -18,7 +18,7 @@ import java.util.Set;
  * @date 2023-12-12 21:53:59
  * @since 2.6.0
  */
-public interface WorkflowService {
+public interface WorkflowWebService {
 
     boolean saveWorkflow(WorkflowRequestVO workflowRequestVO);
 
@@ -28,10 +28,6 @@ public interface WorkflowService {
 
     Boolean updateWorkflow(WorkflowRequestVO workflowRequestVO);
 
-    Boolean updateStatus(Long id);
-
-    Boolean trigger(WorkflowTriggerVO triggerVO);
-
     List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName);
 
     Pair<Integer, Object> checkNodeExpression(CheckDecisionVO decisionVO);
@@ -40,5 +36,4 @@ public interface WorkflowService {
 
     String exportWorkflowTask(ExportWorkflowVO exportWorkflowVO);
 
-    Boolean deleteByIds(Set<Long> ids);
 }

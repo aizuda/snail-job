@@ -1,8 +1,10 @@
-package com.aizuda.snailjob.server.common.vo;
+package com.aizuda.snailjob.server.web.model.response;
 
 import com.aizuda.snailjob.server.common.dto.CallbackConfig;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
+import com.aizuda.snailjob.server.common.vo.JobBatchResponseVO;
+import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseBaseDTO;
 import lombok.Data;
 
 import java.util.List;
@@ -14,8 +16,7 @@ import java.util.Set;
  * @since 2.6.0
  */
 @Data
-@Deprecated
-public class WorkflowDetailResponseVO {
+public class WorkflowDetailResponseVO extends WorkflowDetailResponseBaseDTO {
 
     /**
      * 工作流ID

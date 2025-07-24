@@ -15,6 +15,10 @@ public class RequestUpdateStatusDTO {
     private Long id;
 
     @NotNull(message = "jobStatus cannot be null")
+    @Deprecated
     private Integer jobStatus;
+
+    @NotNull(message = "jobStatus cannot be null")
+    private Integer status;
 
 }

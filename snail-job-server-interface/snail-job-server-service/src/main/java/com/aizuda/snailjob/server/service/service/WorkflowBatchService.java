@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.server.service.service;
 
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseBaseDTO;
 
 /**
@@ -13,5 +12,5 @@ import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseBaseDTO;
  */
 public interface WorkflowBatchService {
 
-    WorkflowDetailResponseBaseDTO getWorkflowBatchById(Long id);
+    <T extends WorkflowDetailResponseBaseDTO> T getWorkflowBatchById(Long id, Class<T> clazz);
 }

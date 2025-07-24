@@ -66,7 +66,7 @@ public class JobController {
 
     @PutMapping("/status")
     @LoginRequired
-    public Boolean updateJobStatus(@RequestBody @Validated JobStatusUpdateRequestVO jobRequestVO) {
+    public Boolean updateJobStatus(@RequestBody @Validated StatusUpdateRequestVO jobRequestVO) {
         return jobService.updateJobStatus(jobRequestVO);
     }
 

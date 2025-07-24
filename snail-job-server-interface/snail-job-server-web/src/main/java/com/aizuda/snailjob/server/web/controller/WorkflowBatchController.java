@@ -1,12 +1,13 @@
 package com.aizuda.snailjob.server.web.controller;
 
+import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
+import com.aizuda.snailjob.server.service.service.WorkflowBatchService;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.WorkflowBatchQueryVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
-import com.aizuda.snailjob.server.web.service.WorkflowBatchService;
+import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
+import com.aizuda.snailjob.server.web.service.WorkflowWebBatchService;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -24,24 +25,25 @@ import java.util.Set;
 @RequestMapping("/workflow/batch")
 @RequiredArgsConstructor
 public class WorkflowBatchController {
+    private final WorkflowWebBatchService workflowWebBatchService;
     private final WorkflowBatchService workflowBatchService;
 
     @LoginRequired
     @GetMapping("/page/list")
     public PageResult<List<WorkflowBatchResponseVO>> listPage(WorkflowBatchQueryVO queryVO) {
-        return workflowBatchService.listPage(queryVO);
+        return workflowWebBatchService.listPage(queryVO);
     }
 
     @LoginRequired
     @GetMapping("{id}")
     public WorkflowDetailResponseVO getWorkflowBatchDetail(@PathVariable("id") Long id) {
-        return workflowBatchService.getWorkflowBatchDetail(id);
+        return workflowBatchService.getWorkflowBatchById(id, WorkflowDetailResponseVO.class);
     }
 
     @PostMapping("/stop/{id}")
     @LoginRequired
     public Boolean stop(@PathVariable("id") Long id) {
-        return workflowBatchService.stop(id);
+        return workflowWebBatchService.stop(id);
     }
 
     @DeleteMapping("/ids")
@@ -50,6 +52,6 @@ public class WorkflowBatchController {
                                @NotEmpty(message = "ids cannot be null")
                                @Size(max = 100, message = "Maximum {max} deletions")
                                Set<Long> ids) {
-        return workflowBatchService.deleteByIds(ids);
+        return workflowWebBatchService.deleteByIds(ids);
     }
 }

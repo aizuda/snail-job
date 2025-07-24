@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.openapi.job.api;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.server.openapi.job.dto.JobRequestDTO;
 import com.aizuda.snailjob.server.openapi.job.dto.JobResponseDTO;
-import com.aizuda.snailjob.server.openapi.job.dto.JobStatusUpdateRequestDTO;
+import com.aizuda.snailjob.server.openapi.job.dto.StatusUpdateRequestDTO;
 import com.aizuda.snailjob.server.openapi.job.dto.JobTriggerDTO;
 import com.aizuda.snailjob.server.openapi.job.service.JobApiService;
 import com.aizuda.snailjob.server.service.service.JobService;
@@ -52,7 +52,7 @@ public class JobApi {
     }
 
     @PostMapping(SystemConstants.HTTP_PATH.OPENAPI_UPDATE_JOB_STATUS_V2)
-    public Boolean updateJobStatus(@RequestBody @Validated JobStatusUpdateRequestDTO requestDTO) {
+    public Boolean updateJobStatus(@RequestBody @Validated StatusUpdateRequestDTO requestDTO) {
         return jobApiService.updateJobStatus(requestDTO);
     }
 

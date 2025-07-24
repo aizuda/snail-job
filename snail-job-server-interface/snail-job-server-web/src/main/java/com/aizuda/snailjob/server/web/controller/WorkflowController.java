@@ -3,13 +3,15 @@ package com.aizuda.snailjob.server.web.controller;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
+import com.aizuda.snailjob.server.service.dto.JobTriggerBaseDTO;
+import com.aizuda.snailjob.server.service.service.WorkflowService;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
-import com.aizuda.snailjob.server.web.service.WorkflowService;
+import com.aizuda.snailjob.server.web.service.WorkflowWebService;
 import com.aizuda.snailjob.server.web.util.ExportUtils;
 import com.aizuda.snailjob.server.web.util.ImportUtils;
 import jakarta.validation.constraints.NotEmpty;
@@ -34,48 +36,52 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class WorkflowController {
 
+    private final WorkflowWebService workflowWebService;
     private final WorkflowService workflowService;
 
     @PostMapping
     @LoginRequired(role = RoleEnum.USER)
     public Boolean saveWorkflow(@RequestBody @Validated WorkflowRequestVO workflowRequestVO) {
-        return workflowService.saveWorkflow(workflowRequestVO);
+        return workflowWebService.saveWorkflow(workflowRequestVO);
     }
 
     @GetMapping("/page/list")
     @LoginRequired(role = RoleEnum.USER)
     public PageResult<List<WorkflowResponseVO>> listPage(WorkflowQueryVO queryVO) {
-        return workflowService.listPage(queryVO);
+        return workflowWebService.listPage(queryVO);
     }
 
     @PutMapping
     @LoginRequired(role = RoleEnum.USER)
     public Boolean updateWorkflow(@RequestBody @Validated WorkflowRequestVO workflowRequestVO) {
-        return workflowService.updateWorkflow(workflowRequestVO);
+        return workflowWebService.updateWorkflow(workflowRequestVO);
     }
 
     @GetMapping("{id}")
     @LoginRequired(role = RoleEnum.USER)
     public WorkflowDetailResponseVO getWorkflowDetail(@PathVariable("id") Long id) throws IOException {
-        return workflowService.getWorkflowDetail(id);
+        return workflowWebService.getWorkflowDetail(id);
     }
 
-    @PutMapping("/update/status/{id}")
+    @PutMapping("/update/status")
     @LoginRequired(role = RoleEnum.USER)
-    public Boolean updateStatus(@PathVariable("id") Long id) {
-        return workflowService.updateStatus(id);
+    public Boolean updateStatus(@RequestBody @Validated StatusUpdateRequestVO requestVO) {
+        return workflowService.updateWorkFlowStatus(requestVO);
     }
 
     @DeleteMapping("/ids")
     @LoginRequired(role = RoleEnum.USER)
     public Boolean deleteByIds(@RequestBody @NotEmpty(message = "ids cannot be null") Set<Long> ids) {
-        return workflowService.deleteByIds(ids);
+        return workflowService.deleteWorkflowByIds(ids);
     }
 
     @PostMapping("/trigger")
     @LoginRequired(role = RoleEnum.USER)
     public Boolean trigger(@RequestBody @Validated WorkflowTriggerVO triggerVO) {
-        return workflowService.trigger(triggerVO);
+        JobTriggerBaseDTO triggerBaseDTO = new JobTriggerBaseDTO();
+        triggerBaseDTO.setTmpArgsStr(triggerVO.getTmpWfContext());
+        triggerBaseDTO.setJobId(triggerVO.getWorkflowId());
+        return workflowService.triggerWorkFlow(triggerBaseDTO);
     }
 
     @GetMapping("/workflow-name/list")
@@ -84,27 +90,27 @@ public class WorkflowController {
             @RequestParam(value = "keywords", required = false) String keywords,
             @RequestParam(value = "workflowId", required = false) Long workflowId,
             @RequestParam(value = "groupName", required = false) String groupName) {
-        return workflowService.getWorkflowNameList(keywords, workflowId, groupName);
+        return workflowWebService.getWorkflowNameList(keywords, workflowId, groupName);
     }
 
     @PostMapping("/check-node-expression")
     @LoginRequired(role = RoleEnum.USER)
     public Pair<Integer, Object> checkNodeExpression(@RequestBody @Validated CheckDecisionVO checkDecisionVO) {
-        return workflowService.checkNodeExpression(checkDecisionVO);
+        return workflowWebService.checkNodeExpression(checkDecisionVO);
     }
 
     @LoginRequired
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
         // 写入数据
-        workflowService.importWorkflowTask(ImportUtils.parseList(file, WorkflowRequestVO.class));
+        workflowWebService.importWorkflowTask(ImportUtils.parseList(file, WorkflowRequestVO.class));
     }
 
     @LoginRequired
     @PostMapping("/export")
     @OriginalControllerReturnValue
     public ResponseEntity<String> export(@RequestBody ExportWorkflowVO exportWorkflowVO) {
-        return ExportUtils.doExport(workflowService.exportWorkflowTask(exportWorkflowVO));
+        return ExportUtils.doExport(workflowWebService.exportWorkflowTask(exportWorkflowVO));
     }
 
 }

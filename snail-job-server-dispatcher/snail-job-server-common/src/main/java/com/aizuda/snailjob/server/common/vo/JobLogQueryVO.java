@@ -11,6 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Deprecated
 public class JobLogQueryVO extends BaseQueryVO {
     private Long jobId;
     private Long taskBatchId;

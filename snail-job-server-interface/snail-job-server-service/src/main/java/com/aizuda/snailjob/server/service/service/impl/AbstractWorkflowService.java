@@ -14,8 +14,9 @@ import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.prepare.workflow.TerminalWorkflowPrepareHandler;
 import com.aizuda.snailjob.server.service.convert.WorkflowTaskConverter;
-import com.aizuda.snailjob.server.service.dto.JobStatusUpdateRequestBaseDTO;
+import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestBaseDTO;
 import com.aizuda.snailjob.server.service.dto.JobTriggerBaseDTO;
+import com.aizuda.snailjob.server.service.kit.WorkflowKit;
 import com.aizuda.snailjob.server.service.service.WorkflowService;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
@@ -26,10 +27,7 @@ import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p>
@@ -50,17 +48,30 @@ public abstract class AbstractWorkflowService implements WorkflowService {
     protected JobSummaryMapper jobSummaryMapper;
 
     @Override
-    public boolean updateWorkFlowStatus(JobStatusUpdateRequestBaseDTO requestDTO) {
+    public boolean updateWorkFlowStatus(StatusUpdateRequestBaseDTO requestDTO) {
         Workflow workflow = workflowMapper.selectOne(new LambdaQueryWrapper<Workflow>()
                 .select(Workflow::getId)
                 .eq(Workflow::getId, requestDTO.getId()));
         Assert.notNull(workflow, "workflow does not exist");
-        workflow.setWorkflowStatus(requestDTO.getJobStatus());
+
+        // 直接幂等
+        if (Objects.equals(requestDTO.getStatus(), workflow.getWorkflowStatus())) {
+            return true;
+        }
+
+        Workflow updateWorkflow = new Workflow();
+        if (Objects.equals(requestDTO.getStatus(), StatusEnum.YES.getStatus())) {
+            // 开启时重新计算调度时间
+            workflow.setNextTriggerAt(WorkflowKit.calculateNextTriggerAt(workflow.getTriggerType(), workflow.getTriggerInterval(), DateUtils.toNowMilli()));
+        }
+
+        updateWorkflow.setId(workflow.getId());
+        workflow.setWorkflowStatus(requestDTO.getStatus());
         return 1 == workflowMapper.updateById(workflow);
     }
 
     @Override
-    public boolean triggerWorkFlow(JobTriggerBaseDTO  jobTriggerDTO) {
+    public boolean triggerWorkFlow(JobTriggerBaseDTO jobTriggerDTO) {
         Workflow workflow = workflowMapper.selectById(jobTriggerDTO.getJobId());
         Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
         Assert.isTrue(workflow.getNamespaceId().equals(getNamespaceId()), () -> new SnailJobServerException("namespace id not match."));
@@ -90,7 +101,11 @@ public abstract class AbstractWorkflowService implements WorkflowService {
         // 设置工作流上下文
         String tmpWfContext = jobTriggerDTO.getTmpArgsStr();
         if (StrUtil.isNotBlank(tmpWfContext) && !JsonUtil.isEmptyJson(tmpWfContext)) {
-            prepareDTO.setWfContext(tmpWfContext);
+            Map<String, Object> tmpWfContextMap = JsonUtil.parseHashMap(tmpWfContext);
+            Map<String, Object> wfContextMap = JsonUtil.parseHashMap(workflow.getWfContext());
+            tmpWfContextMap.putAll(wfContextMap);
+            // 设置合并之后的上下文
+            prepareDTO.setWfContext(JsonUtil.toJsonString(tmpWfContextMap));
         }
         terminalWorkflowPrepareHandler.handler(prepareDTO);
         return true;

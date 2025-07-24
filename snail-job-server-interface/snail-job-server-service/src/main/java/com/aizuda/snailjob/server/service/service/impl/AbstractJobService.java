@@ -30,6 +30,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -176,12 +177,22 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public Boolean updateJobStatus(JobStatusUpdateRequestBaseDTO requestDTO) {
-        Long count = jobMapper.selectCount(new LambdaQueryWrapper<Job>().eq(Job::getId, requestDTO.getId()));
-        Assert.isTrue(count == 1, () -> new SnailJobServerException("Update job status failed"));
-        Job job = new Job();
-        job.setId(requestDTO.getId());
-        job.setJobStatus(requestDTO.getJobStatus());
+    public Boolean updateJobStatus(StatusUpdateRequestBaseDTO requestDTO) {
+        Job job = jobMapper.selectById(requestDTO.getId());
+        Assert.notNull(job, () -> new SnailJobServerException("update job status failed"));
+        // 直接幂等
+        if (Objects.equals(requestDTO.getStatus(), job.getJobStatus())) {
+            return true;
+        }
+        Job update = new Job();
+        if (StatusEnum.YES.getStatus().equals(job.getJobStatus())) {
+            // 开启时重新计算调度时间
+            update.setNextTriggerAt(JobKit.calculateNextTriggerAt(job.getTriggerType(), job.getTriggerInterval(), DateUtils.toNowMilli()));
+        }
+
+        update.setJobStatus(requestDTO.getStatus());
+        update.setId(requestDTO.getId());
+
         return 1 == jobMapper.updateById(job);
     }
 
@@ -194,7 +205,7 @@ public abstract class AbstractJobService implements JobService {
             getJobByIdAfter(instance, job);
             return instance;
         } catch (Exception e) {
-           throw new  SnailJobServerException("Failed to get job by id [{}]", id, e);
+            throw new SnailJobServerException("Failed to get job by id [{}]", id, e);
         }
     }
 

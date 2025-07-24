@@ -5,6 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
+@Deprecated
 public class RetryResponseVO {
     private Long id;
 

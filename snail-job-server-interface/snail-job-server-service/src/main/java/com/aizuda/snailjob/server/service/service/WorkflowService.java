@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.service.service;
 
-import com.aizuda.snailjob.server.service.dto.JobStatusUpdateRequestBaseDTO;
+import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestBaseDTO;
 import com.aizuda.snailjob.server.service.dto.JobTriggerBaseDTO;
 
 import java.util.Set;
@@ -19,6 +19,6 @@ public interface WorkflowService {
 
     boolean triggerWorkFlow(JobTriggerBaseDTO jobTriggerDTO);
 
-    boolean updateWorkFlowStatus(JobStatusUpdateRequestBaseDTO requestDTO);
+    boolean updateWorkFlowStatus(StatusUpdateRequestBaseDTO requestDTO);
 
 }

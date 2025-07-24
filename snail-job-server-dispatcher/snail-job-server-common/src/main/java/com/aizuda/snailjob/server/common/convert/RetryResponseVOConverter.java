@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Mapper
+@Deprecated
 public interface RetryResponseVOConverter {
     RetryResponseVOConverter INSTANCE = Mappers.getMapper(RetryResponseVOConverter.class);
 

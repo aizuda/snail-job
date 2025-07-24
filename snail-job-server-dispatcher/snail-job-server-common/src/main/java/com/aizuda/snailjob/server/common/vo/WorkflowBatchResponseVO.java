@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
  * @since 2.6.0
  */
 @Data
+@Deprecated
 public class WorkflowBatchResponseVO {
 
     private Long id;

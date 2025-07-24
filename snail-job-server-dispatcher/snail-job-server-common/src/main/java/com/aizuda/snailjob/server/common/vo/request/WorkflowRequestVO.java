@@ -18,6 +18,7 @@ import java.util.Set;
  * @since 2.6.0
  */
 @Data
+@Deprecated
 public class WorkflowRequestVO {
 
     private Long id;

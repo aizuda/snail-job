@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.openapi.job.api;
 
-import com.aizuda.snailjob.server.openapi.job.dto.JobStatusUpdateRequestDTO;
+import com.aizuda.snailjob.server.openapi.job.dto.StatusUpdateRequestDTO;
 import com.aizuda.snailjob.server.openapi.job.dto.JobTriggerDTO;
 import com.aizuda.snailjob.server.openapi.job.service.WorkflowApiService;
 import com.aizuda.snailjob.server.service.service.WorkflowService;
@@ -44,7 +44,7 @@ public class WorkflowApi {
     }
 
     @PostMapping(OPENAPI_UPDATE_WORKFLOW_STATUS_V2)
-    public boolean updateWorkFlowStatus(@RequestBody @Validated JobStatusUpdateRequestDTO requestDTO) {
+    public boolean updateWorkFlowStatus(@RequestBody @Validated StatusUpdateRequestDTO requestDTO) {
         return workflowApiService.updateWorkFlowStatus(requestDTO);
     }
 }

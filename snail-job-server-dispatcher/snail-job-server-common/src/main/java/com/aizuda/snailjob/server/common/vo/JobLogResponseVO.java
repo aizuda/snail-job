@@ -10,6 +10,7 @@ import java.util.List;
  * @since : 2.4.0
  */
 @Data
+@Deprecated
 public class JobLogResponseVO {
 
     private Long id;

@@ -19,6 +19,7 @@ import java.util.List;
  * @since 1.5.0
  */
 @Mapper
+@Deprecated
 public interface JobLogMessageConverter {
 
     JobLogMessageConverter INSTANCE = Mappers.getMapper(JobLogMessageConverter.class);

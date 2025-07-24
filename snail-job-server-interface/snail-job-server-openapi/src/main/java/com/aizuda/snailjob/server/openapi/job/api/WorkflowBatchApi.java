@@ -26,6 +26,6 @@ public class WorkflowBatchApi {
 
     @PostMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_WORKFLOW_BATCH_DETAIL_V2)
     public WorkflowDetailResponseDTO getWorkflowBatchById(@RequestParam("id") Long id) {
-        return (WorkflowDetailResponseDTO) workflowBatchApiService.getWorkflowBatchById(id);
+        return workflowBatchApiService.getWorkflowBatchById(id, WorkflowDetailResponseDTO.class);
     }
 }

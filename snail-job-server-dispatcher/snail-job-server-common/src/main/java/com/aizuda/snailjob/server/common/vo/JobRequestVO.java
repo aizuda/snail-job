@@ -17,6 +17,7 @@ import java.util.Set;
  * @since 2.4.0
  */
 @Data
+@Deprecated
 public class JobRequestVO {
 
     private Long id;

@@ -66,6 +66,7 @@ public class UpdateJobStatusHandler extends AbstractJobRequestHandler<Boolean> {
      */
     public UpdateJobStatusHandler setStatus(StatusEnum status) {
         this.statusDTO.setJobStatus(status.getStatus());
+        this.statusDTO.setStatus(status.getStatus());
         return this;
     }
 }

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
  * @since 2.0
  */
 @Data
+@Deprecated
 public class BaseQueryVO {
 
     /**

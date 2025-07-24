@@ -29,7 +29,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class JobTaskServiceImpl implements JobTaskService {
     private final JobTaskMapper jobTaskMapper;
-    private final JobLogMessageMapper jobLogMessageMapper;
 
     @Override
     public PageResult<List<JobTaskResponseVO>> getJobTaskPage(final JobTaskQueryVO queryVO) {

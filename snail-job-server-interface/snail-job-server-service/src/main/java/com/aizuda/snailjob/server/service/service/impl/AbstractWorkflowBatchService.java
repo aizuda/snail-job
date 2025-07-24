@@ -32,6 +32,7 @@ import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +67,7 @@ public abstract class AbstractWorkflowBatchService implements WorkflowBatchServi
     protected WorkflowHandler workflowHandler;
 
     @Override
-    public WorkflowDetailResponseBaseDTO getWorkflowBatchById(Long workflowBatchId) {
+    public <T extends WorkflowDetailResponseBaseDTO> T getWorkflowBatchById(Long workflowBatchId, Class<T> clazz) {
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectById(workflowBatchId);
         if (Objects.isNull(workflowTaskBatch)) {
             return null;
@@ -74,7 +75,14 @@ public abstract class AbstractWorkflowBatchService implements WorkflowBatchServi
 
         Workflow workflow = workflowMapper.selectById(workflowTaskBatch.getWorkflowId());
 
-        WorkflowDetailResponseBaseDTO responseVO = WorkflowConverter.INSTANCE.convert(workflow);
+        T responseVO;
+        try {
+            responseVO = clazz.getDeclaredConstructor().newInstance();
+            WorkflowConverter.INSTANCE.fillCommonFields(workflow, responseVO);
+        } catch (Exception e) {
+            throw new SnailJobServerException("Failed to get workflow batch by id [{}]", workflowBatchId, e);
+        }
+
         responseVO.setWorkflowBatchStatus(workflowTaskBatch.getTaskBatchStatus());
         responseVO.setWfContext(workflowTaskBatch.getWfContext());
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
