@@ -11,6 +11,8 @@ import lombok.Data;
  */
 @Data
 public class RetryArgsDeserializeDTO {
+    @NotBlank(message = "namespace cannot be null")
+    private String namespaceId;
     @NotBlank(message = "group cannot be null")
     private String group;
     @NotBlank(message = "scene cannot be null")

@@ -20,12 +20,12 @@ import com.aizuda.snailjob.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskResponseVO;
-import com.aizuda.snailjob.server.web.service.RetryService;
+import com.aizuda.snailjob.server.web.service.RetryWebService;
 import com.aizuda.snailjob.server.web.service.RetryTaskService;
 import com.aizuda.snailjob.server.retry.task.convert.RetryConverter;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskLogResponseVOConverter;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskResponseVOConverter;
-import com.aizuda.snailjob.server.web.service.handler.RetryArgsDeserializeHandler;
+import com.aizuda.snailjob.server.service.handler.RetryArgsDeserializeHandler;
 import com.aizuda.snailjob.server.web.timer.LogTimerWheel;
 import com.aizuda.snailjob.server.web.timer.RetryTaskLogTimerTask;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
@@ -62,7 +62,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
     private final RetryTaskLogMessageMapper retryTaskLogMessageMapper;
     private final RetryTaskStopHandler retryTaskStopHandler;
     private final AccessTemplate accessTemplate;
-    private final RetryService retryService;
+    private final RetryWebService retryWebService;
     private final RetryArgsDeserializeHandler retryArgsDeserializeHandler;
 
     @Override
@@ -186,6 +186,7 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         retryArgsDeserializeDTO.setScene(retryResponseVO.getSceneName());
         retryArgsDeserializeDTO.setGroup(retryResponseVO.getGroupName());
         retryArgsDeserializeDTO.setSerializerName(retryResponseVO.getSerializerName());
+        retryArgsDeserializeDTO.setNamespaceId(retryTask.getNamespaceId());
         retryResponseVO.setArgsStr(retryArgsDeserializeHandler.deserialize(retryArgsDeserializeDTO));
         responseVO.setResponseVO(retryResponseVO);
         return responseVO;

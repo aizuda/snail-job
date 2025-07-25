@@ -182,9 +182,13 @@ public interface SystemConstants {
         // ==================================workflow ========================//
 
         // ==================================retry ========================//
-        String OPENAPI_ADD_RETRY = "/api/retry/query";
+        String OPENAPI_QUERY_RETRY = "/api/retry/query";
+        @Deprecated
         String OPENAPI_UPDATE_RETRY_STATUS = "/api/retry/updateRetryStatus";
+        String OPENAPI_UPDATE_RETRY_STATUS_V2 = "/api/retry/update/status";
+        @Deprecated
         String OPENAPI_TRIGGER_RETRY = "/api/retry/triggerRetry";
+        String OPENAPI_TRIGGER_RETRY_V2 = "/api/retry/trigger";
         // ==================================retry ========================//
 
     }

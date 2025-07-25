@@ -7,7 +7,6 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.model.RetryArgsDeserializeDTO;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
@@ -23,7 +22,7 @@ import com.aizuda.snailjob.server.web.model.request.RetryDeadLetterQueryVO;
 import com.aizuda.snailjob.server.web.model.response.RetryDeadLetterResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryDeadLetterService;
 import com.aizuda.snailjob.server.web.service.convert.RetryDeadLetterResponseVOConverter;
-import com.aizuda.snailjob.server.web.service.handler.RetryArgsDeserializeHandler;
+import com.aizuda.snailjob.server.service.handler.RetryArgsDeserializeHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
@@ -90,6 +89,7 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         retryArgsDeserializeDTO.setScene(responseVO.getSceneName());
         retryArgsDeserializeDTO.setGroup(responseVO.getGroupName());
         retryArgsDeserializeDTO.setSerializerName(responseVO.getSerializerName());
+        retryArgsDeserializeDTO.setNamespaceId(retryDeadLetter.getNamespaceId());
         responseVO.setArgsStr(retryArgsDeserializeHandler.deserialize(retryArgsDeserializeDTO));
 
         return responseVO;

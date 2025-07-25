@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiGetRetryDetailRequestHandler extends PostHttpRequestHandler {
 
     private final RetryMapper retryMapper;
@@ -41,7 +42,7 @@ public class OpenApiGetRetryDetailRequestHandler extends PostHttpRequestHandler 
 
     @Override
     public boolean supports(String path) {
-        return SystemConstants.HTTP_PATH.OPENAPI_ADD_RETRY.equals(path);
+        return SystemConstants.HTTP_PATH.OPENAPI_QUERY_RETRY.equals(path);
     }
 
     @Override

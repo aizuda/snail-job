@@ -33,6 +33,7 @@ import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiTriggerRetryRequestHandler extends PostHttpRequestHandler {
 
     private final RetryMapper retryMapper;

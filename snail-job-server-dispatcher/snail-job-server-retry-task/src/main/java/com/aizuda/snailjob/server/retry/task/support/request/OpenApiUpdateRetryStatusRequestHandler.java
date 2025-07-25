@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
+@Deprecated
 public class OpenApiUpdateRetryStatusRequestHandler extends PostHttpRequestHandler {
 
     private final RetryMapper retryMapper;
