@@ -1,12 +1,10 @@
 package com.aizuda.snailjob.server.web.service.convert;
 
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.dto.PointInTimeDTO;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
-import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
+import com.aizuda.snailjob.server.web.model.response.JobResponseWebVO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -30,7 +28,7 @@ public interface JobResponseVOConverter {
     @Mappings({
             @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIds(job.getNotifyIds()))")
     })
-    List<JobResponseVO> convertList(List<Job> jobs);
+    List<JobResponseWebVO> convertList(List<Job> jobs);
 
     @Mappings({
             @Mapping(target = "nextTriggerAt", expression = "java(JobResponseVOConverter.toLocalDateTime(job.getNextTriggerAt()))"),
@@ -38,7 +36,7 @@ public interface JobResponseVOConverter {
             @Mapping(target = "triggerInterval", expression = "java(JobResponseVOConverter.toTriggerInterval(job))"),
             @Mapping(target = "ownerId", expression = "java(JobResponseVOConverter.getOwnerId(job))")
     })
-    JobResponseVO convert(Job job);
+    JobResponseWebVO convert(Job job);
 
     static Long getOwnerId(Job job) {
         return Objects.nonNull(job.getOwnerId()) && job.getOwnerId() > 0 ? job.getOwnerId() : null;

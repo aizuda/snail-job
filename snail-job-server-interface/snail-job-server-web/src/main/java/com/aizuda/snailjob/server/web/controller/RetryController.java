@@ -5,10 +5,9 @@ import com.aizuda.snailjob.server.service.service.RetryService;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
+import com.aizuda.snailjob.server.web.model.response.RetryResponseWebVO;
 import com.aizuda.snailjob.server.web.service.RetryWebService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,19 +28,19 @@ public class RetryController {
 
     @LoginRequired
     @GetMapping("list")
-    public PageResult<List<RetryResponseVO>> getRetryTaskPage(RetryQueryVO queryVO) {
+    public PageResult<List<RetryResponseWebVO>> getRetryTaskPage(RetryQueryVO queryVO) {
         return retryWebService.getRetryPage(queryVO);
     }
 
     @LoginRequired
     @GetMapping("{id}")
-    public RetryResponseVO getRetryTaskById(@PathVariable("id") Long id) {
-        return retryService.getRetryById(id, RetryResponseVO.class);
+    public RetryResponseWebVO getRetryTaskById(@PathVariable("id") Long id) {
+        return retryService.getRetryById(id, RetryResponseWebVO.class);
     }
 
     @LoginRequired
     @PutMapping("status")
-    public boolean updateRetryTaskStatus(@RequestBody StatusUpdateRequestVO retryUpdateStatusRequestVO) {
+    public boolean updateRetryTaskStatus(@RequestBody StatusUpdateRequestWebVO retryUpdateStatusRequestVO) {
         return retryService.updateRetryStatus(retryUpdateStatusRequestVO);
     }
 

@@ -1,11 +1,9 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
-import com.aizuda.snailjob.client.model.RetryArgsDeserializeDTO;
 import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
 import com.aizuda.snailjob.server.common.dto.InstanceSelectCondition;
 import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.service.service.impl.AbstractRetryService;
-import com.aizuda.snailjob.server.service.handler.RetryArgsDeserializeHandler;
 import lombok.RequiredArgsConstructor;
 import org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
@@ -17,15 +15,12 @@ import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
-import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.enums.RetryTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.enums.TaskGeneratorSceneEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
-import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyContext;
-import com.aizuda.snailjob.server.common.strategy.WaitStrategies.WaitStrategyEnum;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import com.aizuda.snailjob.server.retry.task.client.RetryRpcClient;
@@ -34,7 +29,7 @@ import com.aizuda.snailjob.server.retry.task.support.generator.retry.TaskContext
 import com.aizuda.snailjob.server.retry.task.support.generator.retry.TaskGenerator;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
+import com.aizuda.snailjob.server.web.model.response.RetryResponseWebVO;
 import com.aizuda.snailjob.server.web.service.RetryWebService;
 import com.aizuda.snailjob.server.retry.task.convert.RetryConverter;
 import com.aizuda.snailjob.server.web.service.convert.RetryTaskResponseVOConverter;
@@ -50,8 +45,6 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,7 +78,7 @@ public class RetryWebServiceImpl extends AbstractRetryService implements RetryWe
     private final InstanceManager instanceManager;
 
     @Override
-    public PageResult<List<RetryResponseVO>> getRetryPage(RetryQueryVO queryVO) {
+    public PageResult<List<RetryResponseWebVO>> getRetryPage(RetryQueryVO queryVO) {
 
         PageDTO<Retry> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
@@ -115,13 +108,13 @@ public class RetryWebServiceImpl extends AbstractRetryService implements RetryWe
            callbackMap = StreamUtils.toIdentityMap(callbackTaskList, Retry::getParentId);
         }
 
-        List<RetryResponseVO> retryResponseList = RetryTaskResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords());
-        for (RetryResponseVO retryResponseVO : retryResponseList) {
-            RetryResponseVO responseVO = RetryTaskResponseVOConverter.INSTANCE.convert(callbackMap.get(retryResponseVO.getId()));
+        List<RetryResponseWebVO> retryResponseList = RetryTaskResponseVOConverter.INSTANCE.convertList(pageDTO.getRecords());
+        for (RetryResponseWebVO retryResponseWebVO : retryResponseList) {
+            RetryResponseWebVO responseVO = RetryTaskResponseVOConverter.INSTANCE.convert(callbackMap.get(retryResponseWebVO.getId()));
             if (Objects.isNull(responseVO)) {
-                retryResponseVO.setChildren(Lists.newArrayList());
+                retryResponseWebVO.setChildren(Lists.newArrayList());
             } else {
-                retryResponseVO.setChildren(Lists.newArrayList(responseVO));
+                retryResponseWebVO.setChildren(Lists.newArrayList(responseVO));
             }
         }
 
@@ -362,6 +355,6 @@ public class RetryWebServiceImpl extends AbstractRetryService implements RetryWe
 
     @Override
     protected String getNamespaceId() {
-        return UserSessionUtils.currentUserSession().getNamespaceId();;
+        return UserSessionUtils.currentUserSession().getNamespaceId();
     }
 }

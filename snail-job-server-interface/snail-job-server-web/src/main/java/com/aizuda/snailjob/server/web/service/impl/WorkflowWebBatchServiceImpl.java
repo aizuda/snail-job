@@ -3,26 +3,18 @@ package com.aizuda.snailjob.server.web.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjUtil;
-import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
-import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.job.task.support.cache.MutableGraphCache;
 import com.aizuda.snailjob.server.job.task.support.handler.WorkflowBatchHandler;
 import com.aizuda.snailjob.server.service.service.impl.AbstractWorkflowBatchService;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowBatchQueryVO;
-import com.aizuda.snailjob.server.common.vo.JobBatchResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowWebBatchService;
-import com.aizuda.snailjob.server.common.convert.JobBatchResponseVOConverter;
-import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
-import com.aizuda.snailjob.server.common.handler.WorkflowHandler;
+import com.aizuda.snailjob.server.web.service.convert.WorkflowWebConverter;
 import com.aizuda.snailjob.server.web.service.handler.JobHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
@@ -31,17 +23,12 @@ import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author xiaowoniu
@@ -88,7 +75,7 @@ public class WorkflowWebBatchServiceImpl extends AbstractWorkflowBatchService im
                 wrapper);
 
         List<WorkflowBatchResponseVO> batchResponseVOList =
-                WorkflowConverter.INSTANCE.convertListToWorkflowBatchList(batchResponseDOList);
+                WorkflowWebConverter.INSTANCE.convertListToWorkflowBatchList(batchResponseDOList);
 
         return new PageResult<>(pageDTO, batchResponseVOList);
     }

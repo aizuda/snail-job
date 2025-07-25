@@ -18,7 +18,7 @@ import com.aizuda.snailjob.server.web.model.event.WsSendEvent;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskLogMessageQueryVO;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
-import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
+import com.aizuda.snailjob.server.web.model.response.RetryResponseWebVO;
 import com.aizuda.snailjob.server.web.model.response.RetryTaskResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryWebService;
 import com.aizuda.snailjob.server.web.service.RetryTaskService;
@@ -179,16 +179,17 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         Retry retry = retryMapper.selectById(retryTask.getRetryId());
         RetryTaskResponseVO responseVO = RetryTaskLogResponseVOConverter.INSTANCE.convert(retryTask);
 
-        RetryResponseVO retryResponseVO = RetryTaskResponseVOConverter.INSTANCE.convert(retry);
+        RetryResponseWebVO retryResponseWebVO = RetryTaskResponseVOConverter.INSTANCE.convert(retry);
         RetryArgsDeserializeDTO retryArgsDeserializeDTO = new RetryArgsDeserializeDTO();
-        retryArgsDeserializeDTO.setArgsStr(retryResponseVO.getArgsStr());
-        retryArgsDeserializeDTO.setExecutorName(retryResponseVO.getExecutorName());
-        retryArgsDeserializeDTO.setScene(retryResponseVO.getSceneName());
-        retryArgsDeserializeDTO.setGroup(retryResponseVO.getGroupName());
-        retryArgsDeserializeDTO.setSerializerName(retryResponseVO.getSerializerName());
-        retryArgsDeserializeDTO.setNamespaceId(retryTask.getNamespaceId());
-        retryResponseVO.setArgsStr(retryArgsDeserializeHandler.deserialize(retryArgsDeserializeDTO));
-        responseVO.setResponseVO(retryResponseVO);
+        retryArgsDeserializeDTO.setArgsStr(retry.getArgsStr());
+        retryArgsDeserializeDTO.setExecutorName(retry.getExecutorName());
+        retryArgsDeserializeDTO.setScene(retry.getSceneName());
+        retryArgsDeserializeDTO.setGroup(retry.getGroupName());
+        retryArgsDeserializeDTO.setSerializerName(retry.getSerializerName());
+        retryArgsDeserializeDTO.setNamespaceId(retry.getNamespaceId());
+        retryResponseWebVO.setArgsStr(retryArgsDeserializeHandler.deserialize(retryArgsDeserializeDTO));
+
+        responseVO.setResponseVO(retryResponseWebVO);
         return responseVO;
     }
 

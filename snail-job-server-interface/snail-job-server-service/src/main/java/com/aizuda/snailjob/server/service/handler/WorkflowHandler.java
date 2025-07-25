@@ -11,7 +11,7 @@ import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
-import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseBaseDTO;
+import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseDTO;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
 import com.google.common.collect.Lists;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * @date 2023-12-30 23:26:43
  * @since 2.6.0
  */
-@Component("webWorkflowHandler")
+@Component
 @Slf4j
 @RequiredArgsConstructor
 public class WorkflowHandler {
@@ -46,18 +46,18 @@ public class WorkflowHandler {
      * @param workflowNodeMap 工作流节点Map
      * @return 构建的节点配置
      */
-    public WorkflowDetailResponseBaseDTO.NodeConfig buildNodeConfig(MutableGraph<Long> graph,
-                                                                    Long parentId,
-                                                                    Map<Long, WorkflowDetailResponseBaseDTO.NodeConfig> nodeConfigMap,
-                                                                    Map<Long, WorkflowDetailResponseBaseDTO.NodeInfo> workflowNodeMap) {
+    public WorkflowDetailResponseDTO.NodeConfig buildNodeConfig(MutableGraph<Long> graph,
+                                                                Long parentId,
+                                                                Map<Long, WorkflowDetailResponseDTO.NodeConfig> nodeConfigMap,
+                                                                Map<Long, WorkflowDetailResponseDTO.NodeInfo> workflowNodeMap) {
 
         Set<Long> successors = graph.successors(parentId);
         if (CollUtil.isEmpty(successors)) {
             return null;
         }
 
-        WorkflowDetailResponseBaseDTO.NodeInfo previousNodeInfo = workflowNodeMap.get(parentId);
-        WorkflowDetailResponseBaseDTO.NodeConfig currentConfig = new WorkflowDetailResponseBaseDTO.NodeConfig();
+        WorkflowDetailResponseDTO.NodeInfo previousNodeInfo = workflowNodeMap.get(parentId);
+        WorkflowDetailResponseDTO.NodeConfig currentConfig = new WorkflowDetailResponseDTO.NodeConfig();
         currentConfig.setConditionNodes(Lists.newArrayList());
 
         // 是否挂载子节点
@@ -65,7 +65,7 @@ public class WorkflowHandler {
 
         for (Long successor : Sets.newTreeSet(successors)) {
             Set<Long> predecessors = graph.predecessors(successor);
-            WorkflowDetailResponseBaseDTO.NodeInfo nodeInfo = workflowNodeMap.get(successor);
+            WorkflowDetailResponseDTO.NodeInfo nodeInfo = workflowNodeMap.get(successor);
             currentConfig.setNodeType(nodeInfo.getNodeType());
             currentConfig.getConditionNodes().add(nodeInfo);
             nodeConfigMap.put(successor, currentConfig);
@@ -85,7 +85,7 @@ public class WorkflowHandler {
                 }
 
                 Long commonAncestor = intersection.stream().toList().get(intersection.size() - 1);
-                WorkflowDetailResponseBaseDTO.NodeConfig parentNodeConfig = nodeConfigMap.get(
+                WorkflowDetailResponseDTO.NodeConfig parentNodeConfig = nodeConfigMap.get(
                         Sets.newTreeSet(graph.successors(commonAncestor)).stream().findFirst().get());
                 parentNodeConfig.setChildNode(currentConfig);
                 mount = false;
@@ -100,7 +100,7 @@ public class WorkflowHandler {
             previousNodeInfo.setChildNode(currentConfig);
         }
 
-        currentConfig.getConditionNodes().sort(Comparator.comparing(WorkflowDetailResponseBaseDTO.NodeInfo::getPriorityLevel));
+        currentConfig.getConditionNodes().sort(Comparator.comparing(WorkflowDetailResponseDTO.NodeInfo::getPriorityLevel));
         return currentConfig;
     }
 

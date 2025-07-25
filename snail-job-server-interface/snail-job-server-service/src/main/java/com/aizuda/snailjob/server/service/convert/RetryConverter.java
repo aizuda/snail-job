@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.service.convert;
 
-import com.aizuda.snailjob.server.service.dto.RetryResponseBaseDTO;
+import com.aizuda.snailjob.server.service.dto.RetryResponseDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,9 +15,9 @@ public interface RetryConverter {
     RetryConverter INSTANCE = Mappers.getMapper(RetryConverter.class);
 
     @Mappings({
-            @Mapping(target = "nextTriggerAt", expression = "java(RetryResponseVOConverter.toLocalDateTime(retry.getNextTriggerAt()))"),
+            @Mapping(target = "nextTriggerAt", expression = "java(RetryConverter.toLocalDateTime(retry.getNextTriggerAt()))"),
     })
-    void toRetryResponseVO(Retry retry, @MappingTarget RetryResponseBaseDTO baseDTO);
+    void toRetryResponseVO(Retry retry, @MappingTarget RetryResponseDTO baseDTO);
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
         return JobConverter.toLocalDateTime(nextTriggerAt);

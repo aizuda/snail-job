@@ -14,12 +14,12 @@ import com.aizuda.snailjob.server.common.util.CronUtils;
 import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
 import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.server.job.task.support.JobPrepareHandler;
-import com.aizuda.snailjob.server.service.dto.JobRequestBaseDTO;
-import com.aizuda.snailjob.server.service.dto.JobResponseBaseDTO;
+import com.aizuda.snailjob.server.service.dto.JobRequestDTO;
+import com.aizuda.snailjob.server.service.dto.JobResponseDTO;
 import com.aizuda.snailjob.server.service.service.impl.AbstractJobService;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
+import com.aizuda.snailjob.server.web.model.response.JobResponseWebVO;
 import com.aizuda.snailjob.server.web.service.JobWebService;
 import com.aizuda.snailjob.server.web.service.convert.JobConverter;
 import com.aizuda.snailjob.server.web.service.convert.JobResponseVOConverter;
@@ -76,7 +76,7 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
     }
 
     @Override
-    public PageResult<List<JobResponseVO>> getJobPage(JobQueryVO queryVO) {
+    public PageResult<List<JobResponseWebVO>> getJobPage(JobQueryVO queryVO) {
 
         PageDTO<Job> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
@@ -92,13 +92,13 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                         .eq(Objects.nonNull(queryVO.getOwnerId()), Job::getOwnerId, queryVO.getOwnerId())
                         .orderByDesc(Job::getId));
-        List<JobResponseVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
+        List<JobResponseWebVO> jobResponseList = JobResponseVOConverter.INSTANCE.convertList(selectPage.getRecords());
 
-        for (JobResponseVO jobResponseVO : jobResponseList) {
+        for (JobResponseWebVO jobResponseWebVO : jobResponseList) {
             // 兼容Oracle OwnerId Null查询异常：java.sql.SQLException: 无效的列类型: 1111
-            if (Objects.nonNull(jobResponseVO.getOwnerId()) && jobResponseVO.getOwnerId() > 0) {
-                SystemUser systemUser = systemUserMapper.selectById(jobResponseVO.getOwnerId());
-                jobResponseVO.setOwnerName(systemUser.getUsername());
+            if (Objects.nonNull(jobResponseWebVO.getOwnerId()) && jobResponseWebVO.getOwnerId() > 0) {
+                SystemUser systemUser = systemUserMapper.selectById(jobResponseWebVO.getOwnerId());
+                jobResponseWebVO.setOwnerName(systemUser.getUsername());
             }
         }
         return new PageResult<>(pageDTO, jobResponseList);
@@ -116,7 +116,7 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
     }
 
     @Override
-    public List<JobResponseVO> getJobNameList(String keywords, Long jobId, String groupName) {
+    public List<JobResponseWebVO> getJobNameList(String keywords, Long jobId, String groupName) {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         PageDTO<Job> selectPage = jobMapper.selectPage(
@@ -151,8 +151,8 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
 //        return 1 == jobMapper.insert(job);
 //    }
 
-    private void checkTriggerInterval(JobRequestVO jobRequestVO) {
-        TriggerIntervalUtils.checkTriggerInterval(jobRequestVO.getTriggerInterval(), jobRequestVO.getTriggerType());
+    private void checkTriggerInterval(JobRequestWebVO jobRequestWebVO) {
+        TriggerIntervalUtils.checkTriggerInterval(jobRequestWebVO.getTriggerInterval(), jobRequestWebVO.getTriggerType());
     }
 
 //    @Override
@@ -275,7 +275,7 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
 //    }
 
     @Override
-    public List<JobResponseVO> getJobList(String groupName) {
+    public List<JobResponseWebVO> getJobList(String groupName) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         List<Job> jobs = jobMapper.selectList(
                 new LambdaQueryWrapper<Job>()
@@ -289,10 +289,10 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void importJobs(List<JobRequestVO> requestList) {
+    public void importJobs(List<JobRequestWebVO> requestList) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
         groupHandler.validateGroupExistence(
-                StreamUtils.toSet(requestList, JobRequestVO::getGroupName), namespaceId
+                StreamUtils.toSet(requestList, JobRequestWebVO::getGroupName), namespaceId
         );
         requestList.forEach(this::addJob);
     }
@@ -301,7 +301,7 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
     public String exportJobs(ExportJobVO exportJobVO) {
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
-        List<JobRequestVO> requestList = new ArrayList<>();
+        List<JobRequestWebVO> requestList = new ArrayList<>();
         PartitionTaskUtils.process(startId -> {
                     List<Job> jobList = jobMapper.selectPage(new PageDTO<>(0, 100, Boolean.FALSE),
                             new LambdaQueryWrapper<Job>()
@@ -351,17 +351,17 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
 //    }
 
     @Override
-    protected void getJobByIdAfter(JobResponseBaseDTO responseBaseDTO, Job job) {
-        JobResponseVO  jobResponseVO = (JobResponseVO) responseBaseDTO;
+    protected void getJobByIdAfter(JobResponseDTO responseBaseDTO, Job job) {
+        JobResponseWebVO jobResponseWebVO = (JobResponseWebVO) responseBaseDTO;
         SystemUser systemUser = systemUserMapper.selectById(job.getOwnerId());
         if (Objects.nonNull(systemUser)) {
-            jobResponseVO.setOwnerName(systemUser.getUsername());
+            jobResponseWebVO.setOwnerName(systemUser.getUsername());
         }
-        jobResponseVO.setOwnerId(job.getOwnerId());
+        jobResponseWebVO.setOwnerId(job.getOwnerId());
     }
 
     @Override
-    protected void updateJobPreValidator(JobRequestBaseDTO jobRequest) {
+    protected void updateJobPreValidator(JobRequestDTO jobRequest) {
 
     }
 
@@ -371,12 +371,12 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
     }
 
     @Override
-    protected void addJobPopulate(Job job, JobRequestBaseDTO request) {
+    protected void addJobPopulate(Job job, JobRequestDTO request) {
 
     }
 
     @Override
-    protected void addJobPreValidator(JobRequestBaseDTO request) {
+    protected void addJobPreValidator(JobRequestDTO request) {
 
     }
 

@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.openapi.dto;
 
-import com.aizuda.snailjob.server.service.dto.JobRequestBaseDTO;
+import com.aizuda.snailjob.server.service.dto.RetryResponseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,10 +10,9 @@ import lombok.EqualsAndHashCode;
  * </p>
  *
  * @author opensnail
- * @date 2025-07-05
+ * @date 2025-07-25
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class JobRequestDTO extends JobRequestBaseDTO {
-
+public class RetryResponseApiDTO extends RetryResponseDTO {
 }

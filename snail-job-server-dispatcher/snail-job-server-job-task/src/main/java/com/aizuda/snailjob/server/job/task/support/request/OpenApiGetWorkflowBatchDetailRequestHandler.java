@@ -51,7 +51,7 @@ public class OpenApiGetWorkflowBatchDetailRequestHandler extends PostHttpRequest
     private final WorkflowMapper workflowMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
-    private final WorkflowHandler workflowHandler;
+    private final WorkflowHandler webWorkflowHandlerOpenApi;
     private final JobMapper jobMapper;
 
     @Override
@@ -178,7 +178,7 @@ public class OpenApiGetWorkflowBatchDetailRequestHandler extends PostHttpRequest
 
         try {
             // 反序列化构建图
-            WorkflowDetailResponseVO.NodeConfig config = workflowHandler.buildNodeConfig(graph, SystemConstants.ROOT,
+            WorkflowDetailResponseVO.NodeConfig config = webWorkflowHandlerOpenApi.buildNodeConfig(graph, SystemConstants.ROOT,
                     new HashMap<>(), workflowNodeMap);
             responseVO.setNodeConfig(config);
         } catch (Exception e) {

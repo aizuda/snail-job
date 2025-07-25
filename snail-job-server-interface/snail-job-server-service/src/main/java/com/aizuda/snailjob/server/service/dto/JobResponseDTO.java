@@ -11,7 +11,7 @@ import java.util.Set;
  * @since 2.4.0
  */
 @Data
-public class JobResponseBaseDTO {
+public class JobResponseDTO {
 
     private Long id;
 

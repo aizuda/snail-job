@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.openapi.api;
 
-import com.aizuda.snailjob.server.openapi.dto.RetryResponseDTO;
-import com.aizuda.snailjob.server.openapi.dto.StatusUpdateRequestDTO;
+import com.aizuda.snailjob.server.openapi.dto.RetryResponseApiDTO;
+import com.aizuda.snailjob.server.openapi.dto.StatusUpdateRequestApiDTO;
 import com.aizuda.snailjob.server.service.dto.TriggerRetryDTO;
 import com.aizuda.snailjob.server.service.service.RetryService;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +24,12 @@ public class RetryApi {
     private final RetryService retryService;
 
     @GetMapping(OPENAPI_QUERY_RETRY)
-    public RetryResponseDTO getRetryTaskById(@RequestParam("id") Long id) {
-        return retryService.getRetryById(id, RetryResponseDTO.class);
+    public RetryResponseApiDTO getRetryTaskById(@RequestParam("id") Long id) {
+        return retryService.getRetryById(id, RetryResponseApiDTO.class);
     }
 
     @PutMapping(OPENAPI_UPDATE_RETRY_STATUS_V2)
-    public boolean updateRetryTaskStatus(@RequestBody @Validated StatusUpdateRequestDTO requestDTO) {
+    public boolean updateRetryTaskStatus(@RequestBody @Validated StatusUpdateRequestApiDTO requestDTO) {
         return retryService.updateRetryStatus(requestDTO);
     }
 

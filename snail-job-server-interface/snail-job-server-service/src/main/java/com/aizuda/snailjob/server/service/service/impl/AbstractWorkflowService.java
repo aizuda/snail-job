@@ -14,8 +14,8 @@ import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.prepare.workflow.TerminalWorkflowPrepareHandler;
 import com.aizuda.snailjob.server.service.convert.WorkflowTaskConverter;
-import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestBaseDTO;
-import com.aizuda.snailjob.server.service.dto.JobTriggerBaseDTO;
+import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestDTO;
+import com.aizuda.snailjob.server.service.dto.JobTriggerDTO;
 import com.aizuda.snailjob.server.service.kit.WorkflowKit;
 import com.aizuda.snailjob.server.service.service.WorkflowService;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
@@ -48,7 +48,7 @@ public abstract class AbstractWorkflowService implements WorkflowService {
     protected JobSummaryMapper jobSummaryMapper;
 
     @Override
-    public boolean updateWorkFlowStatus(StatusUpdateRequestBaseDTO requestDTO) {
+    public boolean updateWorkFlowStatus(StatusUpdateRequestDTO requestDTO) {
         Workflow workflow = workflowMapper.selectOne(new LambdaQueryWrapper<Workflow>()
                 .select(Workflow::getId)
                 .eq(Workflow::getId, requestDTO.getId()));
@@ -71,7 +71,7 @@ public abstract class AbstractWorkflowService implements WorkflowService {
     }
 
     @Override
-    public boolean triggerWorkFlow(JobTriggerBaseDTO jobTriggerDTO) {
+    public boolean triggerWorkFlow(JobTriggerDTO jobTriggerDTO) {
         Workflow workflow = workflowMapper.selectById(jobTriggerDTO.getJobId());
         Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
         Assert.isTrue(workflow.getNamespaceId().equals(getNamespaceId()), () -> new SnailJobServerException("namespace id not match."));

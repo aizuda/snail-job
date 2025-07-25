@@ -3,11 +3,8 @@ package com.aizuda.snailjob.server.web.service.convert;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.server.common.dto.PointInTimeDTO;
-import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
-import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
-import com.aizuda.snailjob.server.web.model.request.JobRequestVO;
+import com.aizuda.snailjob.server.web.model.request.JobRequestWebVO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -29,18 +26,18 @@ public interface JobConverter {
 
     JobConverter INSTANCE = Mappers.getMapper(JobConverter.class);
 
-    List<JobRequestVO> convertList(List<Job> jobs);
+    List<JobRequestWebVO> convertList(List<Job> jobs);
 
     @Mappings({
             @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIds(job.getNotifyIds()))")
     })
-    JobRequestVO convert(Job job);
+    JobRequestWebVO convert(Job job);
 
     @Mappings({
-            @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIdsStr(jobRequestVO.getNotifyIds()))"),
-            @Mapping(target = "triggerInterval", expression = "java(JobConverter.toTriggerInterval(jobRequestVO))")
+            @Mapping(target = "notifyIds", expression = "java(JobConverter.toNotifyIdsStr(jobRequestWebVO.getNotifyIds()))"),
+            @Mapping(target = "triggerInterval", expression = "java(JobConverter.toTriggerInterval(jobRequestWebVO))")
     })
-    Job convert(JobRequestVO jobRequestVO);
+    Job convert(JobRequestWebVO jobRequestWebVO);
 
     static Set<Long> toNotifyIds(String notifyIds) {
         if (StrUtil.isBlank(notifyIds)) {
@@ -58,12 +55,12 @@ public interface JobConverter {
         return JsonUtil.toJsonString(notifyIds);
     }
 
-    static String toTriggerInterval(JobRequestVO jobRequestVO) {
-        String triggerInterval = jobRequestVO.getTriggerInterval();
-        if (StrUtil.isBlank(triggerInterval) || Objects.isNull(jobRequestVO.getTriggerType())) {
+    static String toTriggerInterval(JobRequestWebVO jobRequestWebVO) {
+        String triggerInterval = jobRequestWebVO.getTriggerInterval();
+        if (StrUtil.isBlank(triggerInterval) || Objects.isNull(jobRequestWebVO.getTriggerType())) {
             return StrUtil.EMPTY;
         }
 
-        return TriggerIntervalUtils.getPointInTimeStr(triggerInterval, jobRequestVO.getTriggerType());
+        return TriggerIntervalUtils.getPointInTimeStr(triggerInterval, jobRequestWebVO.getTriggerType());
     }
 }

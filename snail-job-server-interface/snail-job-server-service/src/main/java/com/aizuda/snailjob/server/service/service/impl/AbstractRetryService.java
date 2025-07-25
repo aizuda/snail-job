@@ -13,8 +13,8 @@ import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskPrepareDTO;
 import com.aizuda.snailjob.server.service.convert.RetryConverter;
-import com.aizuda.snailjob.server.service.dto.RetryResponseBaseDTO;
-import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestBaseDTO;
+import com.aizuda.snailjob.server.service.dto.RetryResponseDTO;
+import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestDTO;
 import com.aizuda.snailjob.server.service.dto.TriggerRetryDTO;
 import com.aizuda.snailjob.server.service.handler.RetryArgsDeserializeHandler;
 import com.aizuda.snailjob.server.service.service.RetryService;
@@ -45,7 +45,7 @@ public abstract class AbstractRetryService implements RetryService {
     private RetryArgsDeserializeHandler retryArgsDeserializeHandler;
 
     @Override
-    public <T extends RetryResponseBaseDTO> T getRetryById(Long retryId, Class<T> clazz) {
+    public <T extends RetryResponseDTO> T getRetryById(Long retryId, Class<T> clazz) {
         Retry retry = accessTemplate.getRetryAccess().one(new LambdaQueryWrapper<Retry>().eq(Retry::getId, retryId));
 
         Assert.notNull(retry, () -> new SnailJobServerException("Retry task not found:[{}].", retryId));
@@ -97,7 +97,7 @@ public abstract class AbstractRetryService implements RetryService {
     }
 
     @Override
-    public boolean updateRetryStatus(StatusUpdateRequestBaseDTO requestDTO) {
+    public boolean updateRetryStatus(StatusUpdateRequestDTO requestDTO) {
         RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(requestDTO.getStatus());
         if (Objects.isNull(retryStatusEnum)) {
             throw new SnailJobServerException("Retry status error. [{}]", requestDTO.getStatus());

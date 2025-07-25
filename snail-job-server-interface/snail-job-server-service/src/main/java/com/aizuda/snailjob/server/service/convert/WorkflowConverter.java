@@ -15,10 +15,8 @@ import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
-import com.aizuda.snailjob.server.service.dto.JobResponseBaseDTO;
-import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseBaseDTO;
+import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseDTO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
@@ -57,17 +55,16 @@ public interface WorkflowConverter {
             @Mapping(target = "triggerInterval", expression = "java(WorkflowConverter.toTriggerInterval(workflow))"),
             @Mapping(target = "ownerId", expression = "java(WorkflowConverter.getOwnerId(workflow))")
     })
-    WorkflowDetailResponseBaseDTO convert(Workflow workflow);
-
+    WorkflowDetailResponseDTO convert(Workflow workflow);
 
     @Mappings({
             @Mapping(target = "notifyIds", expression = "java(WorkflowConverter.toNotifyIds(workflow.getNotifyIds()))"),
             @Mapping(target = "triggerInterval", expression = "java(WorkflowConverter.toTriggerInterval(workflow))"),
             @Mapping(target = "ownerId", expression = "java(WorkflowConverter.getOwnerId(workflow))")
     })
-    void fillCommonFields(Workflow workflow, @MappingTarget WorkflowDetailResponseBaseDTO target);
+    void fillCommonFields(Workflow workflow, @MappingTarget WorkflowDetailResponseDTO target);
 
-    List<WorkflowDetailResponseBaseDTO.NodeInfo> convertList(List<WorkflowNode> workflowNodes);
+    List<WorkflowDetailResponseDTO.NodeInfo> convertList(List<WorkflowNode> workflowNodes);
 
     @Mappings({
             @Mapping(target = "decision", expression = "java(WorkflowConverter.parseDecisionConfig(workflowNode))"),

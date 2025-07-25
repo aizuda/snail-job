@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.server.service.convert;
 
-import com.aizuda.snailjob.server.service.dto.JobBatchResponseBaseDTO;
-import com.aizuda.snailjob.server.service.dto.JobResponseBaseDTO;
+import com.aizuda.snailjob.server.service.dto.JobBatchResponseDTO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import org.mapstruct.Mapper;
@@ -30,7 +29,7 @@ public interface JobBatchResponseConverter {
             @Mapping(source = "jobBatch.updateDt", target = "updateDt"),
             @Mapping(target = "executionAt", expression = "java(JobBatchResponseConverter.toLocalDateTime(jobBatch.getExecutionAt()))")
     })
-    JobBatchResponseBaseDTO convert(JobTaskBatch jobBatch, Job job);
+    JobBatchResponseDTO convert(JobTaskBatch jobBatch, Job job);
 
     @Mappings({
             @Mapping(source = "jobBatch.groupName", target = "groupName"),
@@ -39,12 +38,12 @@ public interface JobBatchResponseConverter {
             @Mapping(source = "jobBatch.updateDt", target = "updateDt"),
             @Mapping(target = "executionAt", expression = "java(JobBatchResponseConverter.toLocalDateTime(jobBatch.getExecutionAt()))")
     })
-    void fillCommonFields(JobTaskBatch jobBatch, Job job, @MappingTarget JobBatchResponseBaseDTO target);
+    void fillCommonFields(JobTaskBatch jobBatch, Job job, @MappingTarget JobBatchResponseDTO target);
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
         return JobConverter.toLocalDateTime(nextTriggerAt);
     }
 
-    List<JobBatchResponseBaseDTO> convertListToJobBatchList(List<JobTaskBatch> jobTaskBatchList);
+    List<JobBatchResponseDTO> convertListToJobBatchList(List<JobTaskBatch> jobTaskBatchList);
 
 }

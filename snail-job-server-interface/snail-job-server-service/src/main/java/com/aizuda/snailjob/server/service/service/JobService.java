@@ -1,9 +1,9 @@
 package com.aizuda.snailjob.server.service.service;
 
-import com.aizuda.snailjob.server.service.dto.JobRequestBaseDTO;
-import com.aizuda.snailjob.server.service.dto.JobResponseBaseDTO;
-import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestBaseDTO;
-import com.aizuda.snailjob.server.service.dto.JobTriggerBaseDTO;
+import com.aizuda.snailjob.server.service.dto.JobRequestDTO;
+import com.aizuda.snailjob.server.service.dto.JobResponseDTO;
+import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestDTO;
+import com.aizuda.snailjob.server.service.dto.JobTriggerDTO;
 
 import java.util.Set;
 
@@ -17,15 +17,15 @@ import java.util.Set;
  */
 public interface JobService {
 
-    Long addJob(JobRequestBaseDTO request);
+    Long addJob(JobRequestDTO request);
 
-    boolean updateJob(JobRequestBaseDTO jobRequestVO);
+    boolean updateJob(JobRequestDTO jobRequestVO);
 
     boolean deleteJobByIds(Set<Long> ids);
 
-    Boolean trigger(JobTriggerBaseDTO jobTrigger);
+    Boolean trigger(JobTriggerDTO jobTrigger);
 
-    Boolean updateJobStatus(StatusUpdateRequestBaseDTO requestDTO);
+    Boolean updateJobStatus(StatusUpdateRequestDTO requestDTO);
 
-    <T extends JobResponseBaseDTO> T getJobById(Long id, Class<T> clazz);
+    <T extends JobResponseDTO> T getJobById(Long id, Class<T> clazz);
 }

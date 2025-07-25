@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.convert;
+package com.aizuda.snailjob.server.web.service.convert;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
@@ -12,9 +12,10 @@ import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
+import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseWebVO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
@@ -36,47 +37,46 @@ import java.util.Set;
  * @since : 2.5.0
  */
 @Mapper
-@Deprecated
-public interface WorkflowConverter {
+public interface WorkflowWebConverter {
 
-    WorkflowConverter INSTANCE = Mappers.getMapper(WorkflowConverter.class);
+    WorkflowWebConverter INSTANCE = Mappers.getMapper(WorkflowWebConverter.class);
 
     @Mappings({
-            @Mapping(target = "notifyIds", expression = "java(WorkflowConverter.toNotifyIdsStr(workflowRequestVO.getNotifyIds()))"),
-            @Mapping(target = "triggerInterval", expression = "java(WorkflowConverter.toTriggerInterval(workflowRequestVO))")
+            @Mapping(target = "notifyIds", expression = "java(WorkflowWebConverter.toNotifyIdsStr(workflowRequestVO.getNotifyIds()))"),
+            @Mapping(target = "triggerInterval", expression = "java(WorkflowWebConverter.toTriggerInterval(workflowRequestVO))")
     })
     Workflow convert(WorkflowRequestVO workflowRequestVO);
 
     WorkflowNode convert(WorkflowRequestVO.NodeInfo nodeInfo);
 
     @Mappings({
-            @Mapping(target = "notifyIds", expression = "java(WorkflowConverter.toNotifyIds(workflow.getNotifyIds()))"),
-            @Mapping(target = "triggerInterval", expression = "java(WorkflowConverter.toTriggerInterval(workflow))"),
-            @Mapping(target = "ownerId", expression = "java(WorkflowConverter.getOwnerId(workflow))")
+            @Mapping(target = "notifyIds", expression = "java(WorkflowWebConverter.toNotifyIds(workflow.getNotifyIds()))"),
+            @Mapping(target = "triggerInterval", expression = "java(WorkflowWebConverter.toTriggerInterval(workflow))"),
+            @Mapping(target = "ownerId", expression = "java(WorkflowWebConverter.getOwnerId(workflow))")
     })
-    WorkflowDetailResponseVO convert(Workflow workflow);
+    WorkflowDetailResponseWebVO convert(Workflow workflow);
 
     @Mappings({
-            @Mapping(target = "notifyIds", expression = "java(WorkflowConverter.toNotifyIds(workflow.getNotifyIds()))"),
-            @Mapping(target = "triggerInterval", expression = "java(WorkflowConverter.toTriggerInterval(workflow))"),
+            @Mapping(target = "notifyIds", expression = "java(WorkflowWebConverter.toNotifyIds(workflow.getNotifyIds()))"),
+            @Mapping(target = "triggerInterval", expression = "java(WorkflowWebConverter.toTriggerInterval(workflow))"),
     })
     WorkflowRequestVO convertToWorkflowRequestVo(Workflow workflow);
 
     List<WorkflowDetailResponseVO.NodeInfo> convertList(List<WorkflowNode> workflowNodes);
 
     @Mappings({
-            @Mapping(target = "decision", expression = "java(WorkflowConverter.parseDecisionConfig(workflowNode))"),
-            @Mapping(target = "callback", expression = "java(WorkflowConverter.parseCallbackConfig(workflowNode))"),
-            @Mapping(target = "jobTask", expression = "java(WorkflowConverter.parseJobTaskConfig(workflowNode))")
+            @Mapping(target = "decision", expression = "java(WorkflowWebConverter.parseDecisionConfig(workflowNode))"),
+            @Mapping(target = "callback", expression = "java(WorkflowWebConverter.parseCallbackConfig(workflowNode))"),
+            @Mapping(target = "jobTask", expression = "java(WorkflowWebConverter.parseJobTaskConfig(workflowNode))")
     })
     WorkflowDetailResponseVO.NodeInfo convert(WorkflowNode workflowNode);
 
     List<WorkflowResponseVO> convertListToWorkflowList(List<Workflow> workflowList);
 
     @Mappings({
-            @Mapping(target = "nextTriggerAt", expression = "java(WorkflowConverter.toLocalDateTime(workflow.getNextTriggerAt()))"),
-            @Mapping(target = "notifyIds", expression = "java(WorkflowConverter.toNotifyIds(workflow.getNotifyIds()))"),
-            @Mapping(target = "triggerInterval", expression = "java(WorkflowConverter.toTriggerInterval(workflow))")
+            @Mapping(target = "nextTriggerAt", expression = "java(WorkflowWebConverter.toLocalDateTime(workflow.getNextTriggerAt()))"),
+            @Mapping(target = "notifyIds", expression = "java(WorkflowWebConverter.toNotifyIds(workflow.getNotifyIds()))"),
+            @Mapping(target = "triggerInterval", expression = "java(WorkflowWebConverter.toTriggerInterval(workflow))")
     })
     WorkflowResponseVO convertToWorkflow(Workflow workflow);
 
@@ -86,7 +86,7 @@ public interface WorkflowConverter {
             @Mapping(source = "workflowTaskBatch.groupName", target = "groupName"),
             @Mapping(source = "workflowTaskBatch.id", target = "id"),
             @Mapping(source = "workflowTaskBatch.createDt", target = "createDt"),
-            @Mapping(target = "executionAt", expression = "java(WorkflowConverter.toLocalDateTime(workflowTaskBatch.getExecutionAt()))")
+            @Mapping(target = "executionAt", expression = "java(WorkflowWebConverter.toLocalDateTime(workflowTaskBatch.getExecutionAt()))")
     })
     WorkflowBatchResponseVO convert(WorkflowTaskBatch workflowTaskBatch, Workflow workflow);
 

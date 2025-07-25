@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.web.service.convert;
 
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
+import com.aizuda.snailjob.server.web.model.response.RetryResponseWebVO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,9 +25,9 @@ public interface RetryTaskResponseVOConverter {
     @Mappings({
             @Mapping(target = "nextTriggerAt", expression = "java(RetryTaskResponseVOConverter.toLocalDateTime(retry.getNextTriggerAt()))")
     })
-    RetryResponseVO convert(Retry retry);
+    RetryResponseWebVO convert(Retry retry);
 
-    List<RetryResponseVO> convertList(List<Retry> retries);
+    List<RetryResponseWebVO> convertList(List<Retry> retries);
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
         if (Objects.isNull(nextTriggerAt) || nextTriggerAt == 0) {

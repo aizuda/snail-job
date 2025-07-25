@@ -6,6 +6,7 @@ import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseWebVO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
@@ -22,7 +23,7 @@ public interface WorkflowWebService {
 
     boolean saveWorkflow(WorkflowRequestVO workflowRequestVO);
 
-    WorkflowDetailResponseVO getWorkflowDetail(Long id) throws IOException;
+    WorkflowDetailResponseWebVO getWorkflowDetail(Long id);
 
     PageResult<List<WorkflowResponseVO>> listPage(WorkflowQueryVO queryVO);
 

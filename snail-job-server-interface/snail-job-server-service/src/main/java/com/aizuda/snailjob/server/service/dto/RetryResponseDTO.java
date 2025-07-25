@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class RetryResponseBaseDTO {
+public class RetryResponseDTO {
 
     private Long id;
 
@@ -24,6 +24,8 @@ public class RetryResponseBaseDTO {
     private String extAttrs;
 
     private String executorName;
+
+    private String serializerName;
 
     /**
      * 下次触发时间

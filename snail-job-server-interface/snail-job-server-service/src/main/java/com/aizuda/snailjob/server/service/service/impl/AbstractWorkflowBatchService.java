@@ -12,8 +12,8 @@ import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.job.task.support.cache.MutableGraphCache;
 import com.aizuda.snailjob.server.service.convert.JobBatchResponseConverter;
 import com.aizuda.snailjob.server.service.convert.WorkflowConverter;
-import com.aizuda.snailjob.server.service.dto.JobBatchResponseBaseDTO;
-import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseBaseDTO;
+import com.aizuda.snailjob.server.service.dto.JobBatchResponseDTO;
+import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseDTO;
 import com.aizuda.snailjob.server.service.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.service.service.WorkflowBatchService;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
@@ -32,7 +32,6 @@ import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +66,7 @@ public abstract class AbstractWorkflowBatchService implements WorkflowBatchServi
     protected WorkflowHandler workflowHandler;
 
     @Override
-    public <T extends WorkflowDetailResponseBaseDTO> T getWorkflowBatchById(Long workflowBatchId, Class<T> clazz) {
+    public <T extends WorkflowDetailResponseDTO> T getWorkflowBatchById(Long workflowBatchId, Class<T> clazz) {
         WorkflowTaskBatch workflowTaskBatch = workflowTaskBatchMapper.selectById(workflowBatchId);
         if (Objects.isNull(workflowTaskBatch)) {
             return null;
@@ -102,13 +101,13 @@ public abstract class AbstractWorkflowBatchService implements WorkflowBatchServi
 
         Map<Long, List<JobTaskBatch>> jobTaskBatchMap = StreamUtils.groupByKey(alJobTaskBatchList,
                 JobTaskBatch::getWorkflowNodeId);
-        List<WorkflowDetailResponseBaseDTO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.convertList(workflowNodes);
+        List<WorkflowDetailResponseDTO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.convertList(workflowNodes);
 
         String flowInfo = workflowTaskBatch.getFlowInfo();
         MutableGraph<Long> graph = MutableGraphCache.getOrDefault(workflowBatchId, flowInfo);
 
         Set<Long> allNoOperationNode = Sets.newHashSet();
-        Map<Long, WorkflowDetailResponseBaseDTO.NodeInfo> workflowNodeMap = nodeInfos.stream()
+        Map<Long, WorkflowDetailResponseDTO.NodeInfo> workflowNodeMap = nodeInfos.stream()
                 .peek(nodeInfo -> {
 
                     JobTaskConfig jobTask = nodeInfo.getJobTask();
@@ -151,10 +150,10 @@ public abstract class AbstractWorkflowBatchService implements WorkflowBatchServi
                         }
                     }
                 })
-                .collect(Collectors.toMap(WorkflowDetailResponseBaseDTO.NodeInfo::getId, Function.identity()));
+                .collect(Collectors.toMap(WorkflowDetailResponseDTO.NodeInfo::getId, Function.identity()));
 
         for (Long noOperationNodeId : allNoOperationNode) {
-            WorkflowDetailResponseBaseDTO.NodeInfo nodeInfo = workflowNodeMap.get(noOperationNodeId);
+            WorkflowDetailResponseDTO.NodeInfo nodeInfo = workflowNodeMap.get(noOperationNodeId);
             List<JobTaskBatch> jobTaskBatches = jobTaskBatchMap.get(nodeInfo.getId());
 
             if (CollUtil.isNotEmpty(jobTaskBatches)) {
@@ -164,18 +163,18 @@ public abstract class AbstractWorkflowBatchService implements WorkflowBatchServi
                 nodeInfo.setJobBatchList(
                         JobBatchResponseConverter.INSTANCE.convertListToJobBatchList(jobTaskBatches));
             } else {
-                JobBatchResponseBaseDTO jobBatchResponseBaseDTO = new JobBatchResponseBaseDTO();
+                JobBatchResponseDTO jobBatchResponseDTO = new JobBatchResponseDTO();
                 JobTaskConfig jobTask = nodeInfo.getJobTask();
                 if (Objects.nonNull(jobTask)) {
-                    jobBatchResponseBaseDTO.setJobId(jobTask.getJobId());
+                    jobBatchResponseDTO.setJobId(jobTask.getJobId());
                 }
-                nodeInfo.setJobBatchList(Lists.newArrayList(jobBatchResponseBaseDTO));
+                nodeInfo.setJobBatchList(Lists.newArrayList(jobBatchResponseDTO));
             }
         }
 
         try {
             // 反序列化构建图
-            WorkflowDetailResponseBaseDTO.NodeConfig config = workflowHandler.buildNodeConfig(graph, SystemConstants.ROOT,
+            WorkflowDetailResponseDTO.NodeConfig config = workflowHandler.buildNodeConfig(graph, SystemConstants.ROOT,
                     new HashMap<>(), workflowNodeMap);
             responseVO.setNodeConfig(config);
         } catch (Exception e) {

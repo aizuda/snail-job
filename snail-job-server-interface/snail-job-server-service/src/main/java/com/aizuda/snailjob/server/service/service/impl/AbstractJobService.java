@@ -54,7 +54,7 @@ public abstract class AbstractJobService implements JobService {
     protected TerminalJobPrepareHandler terminalJobPrepareHandler;
 
     @Override
-    public Boolean trigger(JobTriggerBaseDTO jobTrigger) {
+    public Boolean trigger(JobTriggerDTO jobTrigger) {
         Job job = jobMapper.selectById(jobTrigger.getJobId());
         Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
 
@@ -118,7 +118,7 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public boolean updateJob(JobRequestBaseDTO jobRequest) {
+    public boolean updateJob(JobRequestDTO jobRequest) {
         Assert.notNull(jobRequest.getId(), () -> new SnailJobServerException("ID cannot be empty"));
         Job job = jobMapper.selectById(jobRequest.getId());
         Assert.notNull(job, () -> new SnailJobServerException("Job is null, update failed"));
@@ -153,7 +153,7 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public Long addJob(JobRequestBaseDTO request) {
+    public Long addJob(JobRequestDTO request) {
 
         // 前置校验
         addJobPreValidator(request);
@@ -177,7 +177,7 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public Boolean updateJobStatus(StatusUpdateRequestBaseDTO requestDTO) {
+    public Boolean updateJobStatus(StatusUpdateRequestDTO requestDTO) {
         Job job = jobMapper.selectById(requestDTO.getId());
         Assert.notNull(job, () -> new SnailJobServerException("update job status failed"));
         // 直接幂等
@@ -197,7 +197,7 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public <T extends JobResponseBaseDTO> T getJobById(Long id, Class<T> clazz) {
+    public <T extends JobResponseDTO> T getJobById(Long id, Class<T> clazz) {
         Job job = jobMapper.selectById(id);
         try {
             T instance = clazz.getDeclaredConstructor().newInstance();
@@ -209,17 +209,17 @@ public abstract class AbstractJobService implements JobService {
         }
     }
 
-    protected abstract void getJobByIdAfter(JobResponseBaseDTO responseBaseDTO, Job job);
+    protected abstract void getJobByIdAfter(JobResponseDTO responseBaseDTO, Job job);
 
-    protected abstract void updateJobPreValidator(JobRequestBaseDTO jobRequest);
+    protected abstract void updateJobPreValidator(JobRequestDTO jobRequest);
 
     protected abstract String getNamespaceId();
 
-    protected abstract void addJobPopulate(Job job, JobRequestBaseDTO request);
+    protected abstract void addJobPopulate(Job job, JobRequestDTO request);
 
-    protected void checkTriggerInterval(JobRequestBaseDTO jobRequestVO) {
+    protected void checkTriggerInterval(JobRequestDTO jobRequestVO) {
         TriggerIntervalKit.checkTriggerInterval(jobRequestVO.getTriggerInterval(), jobRequestVO.getTriggerType());
     }
 
-    protected abstract void addJobPreValidator(JobRequestBaseDTO request);
+    protected abstract void addJobPreValidator(JobRequestDTO request);
 }

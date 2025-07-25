@@ -1,12 +1,12 @@
 package com.aizuda.snailjob.server.web.controller;
 
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
-import com.aizuda.snailjob.server.service.dto.JobTriggerBaseDTO;
+import com.aizuda.snailjob.server.service.dto.JobTriggerDTO;
 import com.aizuda.snailjob.server.service.service.JobService;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
+import com.aizuda.snailjob.server.web.model.response.JobResponseWebVO;
 import com.aizuda.snailjob.server.web.service.JobWebService;
 import com.aizuda.snailjob.server.web.util.ExportUtils;
 import com.aizuda.snailjob.server.web.util.ImportUtils;
@@ -36,37 +36,37 @@ public class JobController {
 
     @GetMapping("/page/list")
     @LoginRequired
-    public PageResult<List<JobResponseVO>> getJobPage(JobQueryVO jobQueryVO) {
+    public PageResult<List<JobResponseWebVO>> getJobPage(JobQueryVO jobQueryVO) {
         return jobWebService.getJobPage(jobQueryVO);
     }
 
     @GetMapping("/list")
     @LoginRequired
-    public List<JobResponseVO> getJobList(@RequestParam("groupName") String groupName) {
+    public List<JobResponseWebVO> getJobList(@RequestParam("groupName") String groupName) {
         return jobWebService.getJobList(groupName);
     }
 
     @GetMapping("{id}")
     @LoginRequired
-    public JobResponseVO getJobDetail(@PathVariable("id") Long id) {
-        return jobService.getJobById(id, JobResponseVO.class);
+    public JobResponseWebVO getJobDetail(@PathVariable("id") Long id) {
+        return jobService.getJobById(id, JobResponseWebVO.class);
     }
 
     @PostMapping
     @LoginRequired
-    public Long saveJob(@RequestBody @Validated JobRequestVO jobRequestVO) {
-        return jobService.addJob(jobRequestVO);
+    public Long saveJob(@RequestBody @Validated JobRequestWebVO jobRequestWebVO) {
+        return jobService.addJob(jobRequestWebVO);
     }
 
     @PutMapping
     @LoginRequired
-    public Boolean updateJob(@RequestBody @Validated JobRequestVO jobRequestVO) {
-        return jobService.updateJob(jobRequestVO);
+    public Boolean updateJob(@RequestBody @Validated JobRequestWebVO jobRequestWebVO) {
+        return jobService.updateJob(jobRequestWebVO);
     }
 
     @PutMapping("/status")
     @LoginRequired
-    public Boolean updateJobStatus(@RequestBody @Validated StatusUpdateRequestVO jobRequestVO) {
+    public Boolean updateJobStatus(@RequestBody @Validated StatusUpdateRequestWebVO jobRequestVO) {
         return jobService.updateJobStatus(jobRequestVO);
     }
 
@@ -84,7 +84,7 @@ public class JobController {
 
     @GetMapping("/job-name/list")
     @LoginRequired
-    public List<JobResponseVO> getJobNameList(
+    public List<JobResponseWebVO> getJobNameList(
             @RequestParam(value = "keywords", required = false) String keywords,
             @RequestParam(value = "jobId", required = false) Long jobId,
             @RequestParam(value = "groupName", required = false) String groupName
@@ -95,7 +95,7 @@ public class JobController {
     @PostMapping("/trigger")
     @LoginRequired
     public Boolean trigger(@RequestBody @Validated JobTriggerVO jobTrigger) {
-        JobTriggerBaseDTO triggerDTO = new JobTriggerBaseDTO();
+        JobTriggerDTO triggerDTO = new JobTriggerDTO();
         triggerDTO.setJobId(jobTrigger.getJobId());
         triggerDTO.setTmpArgsStr(jobTrigger.getTmpArgsStr());
         return jobService.trigger(triggerDTO);
@@ -104,7 +104,7 @@ public class JobController {
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @LoginRequired
     public void importScene(@RequestPart("file") MultipartFile file) throws IOException {
-        jobWebService.importJobs(ImportUtils.parseList(file, JobRequestVO.class));
+        jobWebService.importJobs(ImportUtils.parseList(file, JobRequestWebVO.class));
     }
 
     @PostMapping("/export")

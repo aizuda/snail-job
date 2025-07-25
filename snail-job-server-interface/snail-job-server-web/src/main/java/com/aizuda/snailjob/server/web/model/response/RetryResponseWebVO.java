@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.web.model.response;
 
-import com.aizuda.snailjob.server.service.dto.RetryResponseBaseDTO;
+import com.aizuda.snailjob.server.service.dto.RetryResponseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,7 +13,7 @@ import java.util.List;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class RetryResponseVO extends RetryResponseBaseDTO {
-    private List<RetryResponseVO> children;
+public class RetryResponseWebVO extends RetryResponseDTO {
+    private List<RetryResponseWebVO> children;
 
 }

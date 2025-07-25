@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.openapi.api;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.server.openapi.dto.WorkflowDetailResponseDTO;
+import com.aizuda.snailjob.server.openapi.dto.WorkflowDetailResponseApiDTO;
 import com.aizuda.snailjob.server.openapi.service.WorkflowBatchApiService;
 import com.aizuda.snailjob.server.service.service.WorkflowBatchService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class WorkflowBatchApi {
     private final WorkflowBatchService workflowBatchApiService;
 
     @PostMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_WORKFLOW_BATCH_DETAIL_V2)
-    public WorkflowDetailResponseDTO getWorkflowBatchById(@RequestParam("id") Long id) {
-        return workflowBatchApiService.getWorkflowBatchById(id, WorkflowDetailResponseDTO.class);
+    public WorkflowDetailResponseApiDTO getWorkflowBatchById(@RequestParam("id") Long id) {
+        return workflowBatchApiService.getWorkflowBatchById(id, WorkflowDetailResponseApiDTO.class);
     }
 }

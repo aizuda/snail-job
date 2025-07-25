@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.openapi.dto;
 
-import com.aizuda.snailjob.server.service.dto.JobBatchResponseBaseDTO;
+import com.aizuda.snailjob.server.service.dto.JobTriggerDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -8,10 +8,10 @@ import lombok.EqualsAndHashCode;
  * @Author：srzou
  * @Package：com.aizuda.snailjob.server.openapi.job.dto
  * @Project：snail-job
- * @Date：2025/7/11 10:36
- * @Filename：JobBatchResponseDTO
+ * @Date：2025/7/11 10:18
+ * @Filename：JobTriggerDTO
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class JobBatchResponseDTO extends JobBatchResponseBaseDTO {
+public class JobTriggerApiDTO extends JobTriggerDTO {
 }

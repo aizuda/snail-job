@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.web.model.response.JobResponseVO;
+import com.aizuda.snailjob.server.web.model.response.JobResponseWebVO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
@@ -14,7 +14,7 @@ import java.util.List;
  * @since 2.4.0
  */
 public interface JobWebService {
-    PageResult<List<JobResponseVO>> getJobPage(JobQueryVO jobQueryVO);
+    PageResult<List<JobResponseWebVO>> getJobPage(JobQueryVO jobQueryVO);
 
 //    JobResponseVO getJobDetail(Long id);
 
@@ -26,13 +26,13 @@ public interface JobWebService {
 
     List<String> getTimeByCron(String cron);
 
-    List<JobResponseVO> getJobNameList(String keywords, Long jobId, String groupName);
+    List<JobResponseWebVO> getJobNameList(String keywords, Long jobId, String groupName);
 
 //    boolean trigger(JobTriggerVO jobTrigger);
 
-    List<JobResponseVO> getJobList(String groupName);
+    List<JobResponseWebVO> getJobList(String groupName);
 
-    void importJobs(@Valid @NotEmpty(message = "Import data cannot be empty") List<JobRequestVO> requestList);
+    void importJobs(@Valid @NotEmpty(message = "Import data cannot be empty") List<JobRequestWebVO> requestList);
 
     String exportJobs(ExportJobVO exportJobVO);
 

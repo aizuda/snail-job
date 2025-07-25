@@ -14,7 +14,7 @@ import java.util.Set;
  * @since 2.6.0
  */
 @Data
-public class WorkflowDetailResponseBaseDTO {
+public class WorkflowDetailResponseDTO {
 
     /**
      * 工作流ID
@@ -147,7 +147,7 @@ public class WorkflowDetailResponseBaseDTO {
         /**
          * 定时任务批次信息
          */
-        private List<JobBatchResponseBaseDTO> jobBatchList;
+        private List<JobBatchResponseDTO> jobBatchList;
 
         /**
          * 子节点

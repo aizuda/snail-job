@@ -20,7 +20,7 @@ import java.util.Set;
  * @date 2025-07-05
  */
 @Data
-public class JobRequestBaseDTO {
+public class JobRequestDTO {
 
     private Long id;
 

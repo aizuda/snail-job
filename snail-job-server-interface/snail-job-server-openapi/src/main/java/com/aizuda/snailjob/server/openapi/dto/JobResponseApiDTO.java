@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.openapi.dto;
 
-import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestBaseDTO;
+import com.aizuda.snailjob.server.service.dto.JobResponseDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -8,10 +8,10 @@ import lombok.EqualsAndHashCode;
  * @Author：srzou
  * @Package：com.aizuda.snailjob.server.openapi.job.dto
  * @Project：snail-job
- * @Date：2025/7/11 10:22
- * @Filename：JobStatusUpdateRequestDTO
+ * @Date：2025/7/11 10:24
+ * @Filename：JobResponseDTO
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class StatusUpdateRequestDTO extends StatusUpdateRequestBaseDTO {
+public class JobResponseApiDTO extends JobResponseDTO {
 }

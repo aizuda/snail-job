@@ -6,7 +6,7 @@ import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.WorkflowBatchQueryVO;
-import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseWebVO;
 import com.aizuda.snailjob.server.web.service.WorkflowWebBatchService;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -36,8 +36,8 @@ public class WorkflowBatchController {
 
     @LoginRequired
     @GetMapping("{id}")
-    public WorkflowDetailResponseVO getWorkflowBatchDetail(@PathVariable("id") Long id) {
-        return workflowBatchService.getWorkflowBatchById(id, WorkflowDetailResponseVO.class);
+    public WorkflowDetailResponseWebVO getWorkflowBatchDetail(@PathVariable("id") Long id) {
+        return workflowBatchService.getWorkflowBatchById(id, WorkflowDetailResponseWebVO.class);
     }
 
     @PostMapping("/stop/{id}")

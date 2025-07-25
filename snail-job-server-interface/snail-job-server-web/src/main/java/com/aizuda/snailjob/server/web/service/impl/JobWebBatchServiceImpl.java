@@ -6,7 +6,7 @@ import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.service.service.impl.AbstractJobBatchService;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
-import com.aizuda.snailjob.server.web.model.request.JobBatchResponseVO;
+import com.aizuda.snailjob.server.web.model.request.JobBatchResponseWebVO;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.service.JobWebBatchService;
 import com.aizuda.snailjob.server.web.service.convert.JobBatchResponseVOConverter;
@@ -37,7 +37,7 @@ public class JobWebBatchServiceImpl extends AbstractJobBatchService implements J
     private final JobHandler jobHandler;
 
     @Override
-    public PageResult<List<JobBatchResponseVO>> getJobBatchPage(final JobBatchQueryVO queryVO) {
+    public PageResult<List<JobBatchResponseWebVO>> getJobBatchPage(final JobBatchQueryVO queryVO) {
         PageDTO<JobTaskBatch> pageDTO = new PageDTO<>(queryVO.getPage(), queryVO.getSize());
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
@@ -59,7 +59,7 @@ public class JobWebBatchServiceImpl extends AbstractJobBatchService implements J
                 .eq("batch.deleted", 0)
                 .orderByDesc("batch.id");
         List<JobBatchResponseDO> batchResponseDOList = jobTaskBatchMapper.selectJobBatchPageList(pageDTO, wrapper);
-        List<JobBatchResponseVO> batchResponseVOList = JobBatchResponseVOConverter.INSTANCE.convertList(
+        List<JobBatchResponseWebVO> batchResponseVOList = JobBatchResponseVOConverter.INSTANCE.convertList(
                 batchResponseDOList);
         return new PageResult<>(pageDTO, batchResponseVOList);
     }

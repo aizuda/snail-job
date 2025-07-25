@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.web.service.convert;
 
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.web.model.request.JobBatchResponseVO;
+import com.aizuda.snailjob.server.web.model.request.JobBatchResponseWebVO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.JobBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
@@ -24,19 +24,19 @@ public interface JobBatchResponseVOConverter {
 
     JobBatchResponseVOConverter INSTANCE = Mappers.getMapper(JobBatchResponseVOConverter.class);
 
-    List<JobBatchResponseVO> convertList(List<JobBatchResponseDO> jobBatches);
+    List<JobBatchResponseWebVO> convertList(List<JobBatchResponseDO> jobBatches);
 
     @Mappings({
             @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobBatchResponseDO.getExecutionAt()))")
     })
-    JobBatchResponseVO convert(JobBatchResponseDO jobBatchResponseDO);
+    JobBatchResponseWebVO convert(JobBatchResponseDO jobBatchResponseDO);
 
-    List<JobBatchResponseVO> convertListToJobBatchList(List<JobTaskBatch> jobTaskBatchList);
+    List<JobBatchResponseWebVO> convertListToJobBatchList(List<JobTaskBatch> jobTaskBatchList);
 
     @Mappings({
             @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobTaskBatch.getExecutionAt()))")
     })
-    JobBatchResponseVO convert(JobTaskBatch jobTaskBatch);
+    JobBatchResponseWebVO convert(JobTaskBatch jobTaskBatch);
 
     @Mappings({
             @Mapping(source = "jobBatch.groupName", target = "groupName"),
@@ -45,7 +45,7 @@ public interface JobBatchResponseVOConverter {
             @Mapping(source = "jobBatch.updateDt", target = "updateDt"),
             @Mapping(target = "executionAt", expression = "java(JobBatchResponseVOConverter.toLocalDateTime(jobBatch.getExecutionAt()))")
     })
-    JobBatchResponseVO convert(JobTaskBatch jobBatch, Job job);
+    JobBatchResponseWebVO convert(JobTaskBatch jobBatch, Job job);
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
         if (Objects.isNull(nextTriggerAt) || nextTriggerAt == 0) {

@@ -21,5 +21,4 @@ public class CalculateNextTriggerAtDTO {
     private Integer newResident;
     private Integer triggerType;
     private String triggerInterval;
-//    private Date nextTriggerAt;
 }

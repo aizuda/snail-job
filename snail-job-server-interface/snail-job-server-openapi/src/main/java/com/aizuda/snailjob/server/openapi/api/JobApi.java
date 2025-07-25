@@ -1,10 +1,10 @@
 package com.aizuda.snailjob.server.openapi.api;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.server.openapi.dto.JobRequestDTO;
-import com.aizuda.snailjob.server.openapi.dto.JobResponseDTO;
-import com.aizuda.snailjob.server.openapi.dto.StatusUpdateRequestDTO;
-import com.aizuda.snailjob.server.openapi.dto.JobTriggerDTO;
+import com.aizuda.snailjob.server.openapi.dto.JobRequestApiDTO;
+import com.aizuda.snailjob.server.openapi.dto.JobResponseApiDTO;
+import com.aizuda.snailjob.server.openapi.dto.StatusUpdateRequestApiDTO;
+import com.aizuda.snailjob.server.openapi.dto.JobTriggerApiDTO;
 import com.aizuda.snailjob.server.openapi.service.JobApiService;
 import com.aizuda.snailjob.server.service.service.JobService;
 import jakarta.validation.constraints.NotEmpty;
@@ -30,12 +30,12 @@ public class JobApi {
     private final JobService jobApiService;
 
     @PostMapping(SystemConstants.HTTP_PATH.OPENAPI_ADD_JOB)
-    public Long addJob(@RequestBody @Validated JobRequestDTO jobRequest) {
+    public Long addJob(@RequestBody @Validated JobRequestApiDTO jobRequest) {
         return jobApiService.addJob(jobRequest);
     }
 
     @PutMapping(SystemConstants.HTTP_PATH.OPENAPI_UPDATE_JOB)
-    public boolean updateJob(@RequestBody @Validated JobRequestDTO jobRequest) {
+    public boolean updateJob(@RequestBody @Validated JobRequestApiDTO jobRequest) {
         return jobApiService.updateJob(jobRequest);
     }
 
@@ -47,18 +47,18 @@ public class JobApi {
     }
 
     @PostMapping(SystemConstants.HTTP_PATH.OPENAPI_TRIGGER_JOB_V2)
-    public Boolean trigger(@RequestBody @Validated JobTriggerDTO jobTrigger) {
+    public Boolean trigger(@RequestBody @Validated JobTriggerApiDTO jobTrigger) {
         return jobApiService.trigger(jobTrigger);
     }
 
     @PostMapping(SystemConstants.HTTP_PATH.OPENAPI_UPDATE_JOB_STATUS_V2)
-    public Boolean updateJobStatus(@RequestBody @Validated StatusUpdateRequestDTO requestDTO) {
+    public Boolean updateJobStatus(@RequestBody @Validated StatusUpdateRequestApiDTO requestDTO) {
         return jobApiService.updateJobStatus(requestDTO);
     }
 
     @GetMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_JOB_DETAIL_V2)
-    public JobResponseDTO getJobById(@RequestParam("id") Long id) {
-        return jobApiService.getJobById(id, JobResponseDTO.class);
+    public JobResponseApiDTO getJobById(@RequestParam("id") Long id) {
+        return jobApiService.getJobById(id, JobResponseApiDTO.class);
     }
 
 }

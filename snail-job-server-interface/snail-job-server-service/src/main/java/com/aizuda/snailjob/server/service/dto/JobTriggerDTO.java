@@ -5,7 +5,7 @@ import lombok.Data;
 
 
 @Data
-public class JobTriggerBaseDTO {
+public class JobTriggerDTO {
 
     @NotNull(message = "jobId cannot be null")
     private Long jobId;

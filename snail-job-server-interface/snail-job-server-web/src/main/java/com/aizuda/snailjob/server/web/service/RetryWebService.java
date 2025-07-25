@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.web.service;
 
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.web.model.response.RetryResponseVO;
+import com.aizuda.snailjob.server.web.model.response.RetryResponseWebVO;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface RetryWebService {
 
-    PageResult<List<RetryResponseVO>> getRetryPage(RetryQueryVO queryVO);
+    PageResult<List<RetryResponseWebVO>> getRetryPage(RetryQueryVO queryVO);
 
     /**
      * 手动新增重试任务

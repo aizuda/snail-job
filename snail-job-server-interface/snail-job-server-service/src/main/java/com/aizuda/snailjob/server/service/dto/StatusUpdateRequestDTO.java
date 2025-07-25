@@ -9,7 +9,7 @@ import lombok.Data;
  * @since 2.4.0
  */
 @Data
-public class StatusUpdateRequestBaseDTO {
+public class StatusUpdateRequestDTO {
 
     @NotNull(message = "id cannot be null")
     private Long id;

@@ -4,7 +4,7 @@ import com.aizuda.snailjob.server.service.service.JobBatchService;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobBatchQueryVO;
-import com.aizuda.snailjob.server.web.model.request.JobBatchResponseVO;
+import com.aizuda.snailjob.server.web.model.request.JobBatchResponseWebVO;
 import com.aizuda.snailjob.server.web.service.JobWebBatchService;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -28,14 +28,14 @@ public class JobBatchController {
 
     @GetMapping("/list")
     @LoginRequired
-    public PageResult<List<JobBatchResponseVO>> getJobBatchPage(JobBatchQueryVO jobQueryVO) {
+    public PageResult<List<JobBatchResponseWebVO>> getJobBatchPage(JobBatchQueryVO jobQueryVO) {
         return jobWebBatchService.getJobBatchPage(jobQueryVO);
     }
 
     @GetMapping("{id}")
     @LoginRequired
-    public JobBatchResponseVO getJobBatchDetail(@PathVariable("id") Long id) {
-        return jobBatchService.getJobBatchById(id, JobBatchResponseVO.class);
+    public JobBatchResponseWebVO getJobBatchDetail(@PathVariable("id") Long id) {
+        return jobBatchService.getJobBatchById(id, JobBatchResponseWebVO.class);
     }
 
     @PostMapping("/stop/{taskBatchId}")

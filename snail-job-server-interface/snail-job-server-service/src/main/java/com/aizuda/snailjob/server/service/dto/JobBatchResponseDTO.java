@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * @since : 2.4.0
  */
 @Data
-public class JobBatchResponseBaseDTO {
+public class JobBatchResponseDTO {
 
     private Long id;
 

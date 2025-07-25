@@ -12,32 +12,29 @@ import com.aizuda.snailjob.common.core.expression.ExpressionFactory;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.ExpressionTypeEnum;
-import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.*;
+import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
+import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
+import com.aizuda.snailjob.server.service.convert.WorkflowConverter;
+import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseDTO;
+import com.aizuda.snailjob.server.service.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.service.kit.WorkflowKit;
 import com.aizuda.snailjob.server.service.service.impl.AbstractWorkflowService;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
-import com.aizuda.snailjob.server.job.task.support.WorkflowPrePareHandler;
 import com.aizuda.snailjob.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO.NodeConfig;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseWebVO;
 import com.aizuda.snailjob.server.web.service.WorkflowWebService;
-import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
+import com.aizuda.snailjob.server.web.service.convert.WorkflowWebConverter;
 import com.aizuda.snailjob.server.web.service.handler.GroupHandler;
-import com.aizuda.snailjob.server.common.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
-import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -106,7 +103,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
         Assert.isTrue(1 == workflowMapper.insert(workflow), () -> new SnailJobServerException("Failed to add workflow"));
 
         // 获取DAG节点配置
-        NodeConfig nodeConfig = workflowRequestVO.getNodeConfig();
+        WorkflowRequestVO.NodeConfig nodeConfig = workflowRequestVO.getNodeConfig();
 
         // 递归构建图
         workflowHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT),
@@ -137,7 +134,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
     }
 
     @Override
-    public WorkflowDetailResponseVO getWorkflowDetail(Long id) {
+    public WorkflowDetailResponseWebVO getWorkflowDetail(Long id) {
 
         Workflow workflow = workflowMapper.selectOne(
                 new LambdaQueryWrapper<Workflow>()
@@ -168,7 +165,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
                         .eq(Objects.nonNull(queryVO.getOwnerId()), Workflow::getOwnerId, queryVO.getOwnerId())
                         .orderByDesc(Workflow::getId));
 
-        List<WorkflowResponseVO> workflowResponseVOList = WorkflowConverter.INSTANCE.convertListToWorkflowList(page.getRecords());
+        List<WorkflowResponseVO> workflowResponseVOList = WorkflowWebConverter.INSTANCE.convertListToWorkflowList(page.getRecords());
         for (WorkflowResponseVO responseVO : workflowResponseVOList) {
             if (Objects.nonNull(responseVO.getOwnerId()) && responseVO.getOwnerId() > 0) {
                 SystemUser systemUser = systemUserMapper.selectById(responseVO.getOwnerId());
@@ -193,7 +190,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
         graph.addNode(SystemConstants.ROOT);
 
         // 获取DAG节点配置
-        NodeConfig nodeConfig = workflowRequestVO.getNodeConfig();
+        WorkflowRequestVO.NodeConfig nodeConfig = workflowRequestVO.getNodeConfig();
 
         int version = workflow.getVersion();
         // 递归构建图
@@ -239,7 +236,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
                         .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())
                         .orderByDesc(Workflow::getId));
 
-        return WorkflowConverter.INSTANCE.convertListToWorkflowList(selectPage.getRecords());
+        return WorkflowWebConverter.INSTANCE.convertListToWorkflowList(selectPage.getRecords());
     }
 
     @Override
@@ -267,7 +264,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
     @Override
     public String exportWorkflowTask(ExportWorkflowVO exportVO) {
 
-        List<WorkflowDetailResponseVO> resultList = new ArrayList<>();
+        List<WorkflowDetailResponseWebVO> resultList = new ArrayList<>();
         PartitionTaskUtils.process(startId -> {
             List<Workflow> workflowList = workflowMapper.selectPage(new PageDTO<>(0, 100, Boolean.FALSE),
                     new LambdaQueryWrapper<Workflow>()
@@ -306,8 +303,8 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
         }
     }
 
-    private WorkflowDetailResponseVO doGetWorkflowDetail(final Workflow workflow) {
-        WorkflowDetailResponseVO responseVO = WorkflowConverter.INSTANCE.convert(workflow);
+    private WorkflowDetailResponseWebVO doGetWorkflowDetail(final Workflow workflow) {
+        WorkflowDetailResponseWebVO responseVO = WorkflowWebConverter.INSTANCE.convert(workflow);
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
                 .eq(WorkflowNode::getDeleted, 0)
                 .eq(WorkflowNode::getVersion, workflow.getVersion())
@@ -320,22 +317,22 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
 
         Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
 
-        List<WorkflowDetailResponseVO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.convertList(workflowNodes);
+        List<WorkflowDetailResponseDTO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.convertList(workflowNodes);
 
-        Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
+        Map<Long, WorkflowDetailResponseWebVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
                 .peek(nodeInfo -> {
                     JobTaskConfig jobTask = nodeInfo.getJobTask();
                     if (Objects.nonNull(jobTask)) {
                         jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
                         jobTask.setLabels(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getLabels());
                     }
-                }).collect(Collectors.toMap(WorkflowDetailResponseVO.NodeInfo::getId, i -> i));
+                }).collect(Collectors.toMap(WorkflowDetailResponseDTO.NodeInfo::getId, i -> i));
 
         String flowInfo = workflow.getFlowInfo();
         try {
             MutableGraph<Long> graph = GraphUtils.deserializeJsonToGraph(flowInfo);
             // 反序列化构建图
-            WorkflowDetailResponseVO.NodeConfig config = workflowHandler.buildNodeConfig(graph, SystemConstants.ROOT,
+            WorkflowDetailResponseWebVO.NodeConfig config = workflowHandler.buildNodeConfig(graph, SystemConstants.ROOT,
                     new HashMap<>(),
                     workflowNodeMap);
             responseVO.setNodeConfig(config);
@@ -355,9 +352,9 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
     @Getter
     private static class WorkflowPartitionTask extends PartitionTask {
 
-        private final WorkflowDetailResponseVO responseVO;
+        private final WorkflowDetailResponseWebVO responseVO;
 
-        public WorkflowPartitionTask(@NotNull WorkflowDetailResponseVO responseVO) {
+        public WorkflowPartitionTask(@NotNull WorkflowDetailResponseWebVO responseVO) {
             this.responseVO = responseVO;
             setId(responseVO.getId());
         }

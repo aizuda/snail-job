@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.service.service;
 
-import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestBaseDTO;
-import com.aizuda.snailjob.server.service.dto.JobTriggerBaseDTO;
+import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestDTO;
+import com.aizuda.snailjob.server.service.dto.JobTriggerDTO;
 
 import java.util.Set;
 
@@ -17,8 +17,8 @@ public interface WorkflowService {
 
     boolean deleteWorkflowByIds(Set<Long> ids);
 
-    boolean triggerWorkFlow(JobTriggerBaseDTO jobTriggerDTO);
+    boolean triggerWorkFlow(JobTriggerDTO jobTriggerDTO);
 
-    boolean updateWorkFlowStatus(StatusUpdateRequestBaseDTO requestDTO);
+    boolean updateWorkFlowStatus(StatusUpdateRequestDTO requestDTO);
 
 }

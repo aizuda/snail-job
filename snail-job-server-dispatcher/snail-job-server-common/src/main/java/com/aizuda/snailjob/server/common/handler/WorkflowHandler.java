@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
 import com.aizuda.snailjob.server.common.dto.CallbackConfig;
 import com.aizuda.snailjob.server.common.dto.DecisionConfig;
 import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
@@ -13,7 +14,6 @@ import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO.NodeConfig;
 import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO.NodeInfo;
-import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
 import com.google.common.collect.Lists;
@@ -32,9 +32,10 @@ import java.util.stream.Collectors;
  * @date 2023-12-30 23:26:43
  * @since 2.6.0
  */
-@Component("webWorkflowHandler")
+@Component("webWorkflowHandlerOpenApi")
 @Slf4j
 @RequiredArgsConstructor
+@Deprecated
 public class WorkflowHandler {
 
     private final WorkflowNodeMapper workflowNodeMapper;
