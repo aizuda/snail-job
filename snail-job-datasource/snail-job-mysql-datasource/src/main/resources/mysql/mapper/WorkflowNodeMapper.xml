@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper">
+
+    <select id="selectJobUsedInNonLatestWorkflow" parameterType="java.util.Set" resultType="java.lang.Long">
+        SELECT wfn.id
+            FROM sj_workflow_node wfn
+        JOIN sj_workflow wf ON wfn.workflow_id = wf.id AND wfn.version = wf.version
+        WHERE wfn.job_id IN
+            <foreach collection="jobIds" item="jobId" open="(" close=")" separator=",">
+                #{jobId}
+            </foreach>
+    </select>
+
+</mapper>

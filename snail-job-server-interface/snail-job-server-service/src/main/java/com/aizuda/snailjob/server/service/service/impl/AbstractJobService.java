@@ -19,12 +19,13 @@ import com.aizuda.snailjob.server.service.dto.*;
 import com.aizuda.snailjob.server.service.kit.JobKit;
 import com.aizuda.snailjob.server.service.kit.TriggerIntervalKit;
 import com.aizuda.snailjob.server.service.service.JobService;
+import com.aizuda.snailjob.server.service.service.WorkflowService;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobSummary;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,8 @@ public abstract class AbstractJobService implements JobService {
     protected AccessTemplate accessTemplate;
     @Autowired
     protected TerminalJobPrepareHandler terminalJobPrepareHandler;
+    @Autowired
+    protected WorkflowNodeMapper workflowNodeMapper;
 
     @Override
     public Boolean trigger(JobTriggerDTO jobTrigger) {
@@ -90,12 +93,14 @@ public abstract class AbstractJobService implements JobService {
         String namespaceId = getNamespaceId();
 
         Assert.isTrue(ids.size() == jobMapper.selectList(
-                new LambdaQueryWrapper<Job>()
+                new LambdaQueryWrapper<Job>().select(Job::getId)
                         .eq(Job::getNamespaceId, namespaceId)
                         .eq(Job::getJobStatus, StatusEnum.NO.getStatus())
                         .in(Job::getId, ids)
         ).size(), () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task status is closed"));
 
+        Assert.isTrue(workflowNodeMapper.selectJobUsedInNonLatestWorkflow(ids).size() == 0,
+                () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task is used in the workflow"));
 
         List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
                 .select(JobSummary::getId)
