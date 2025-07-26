@@ -193,7 +193,7 @@ public abstract class AbstractJobService implements JobService {
         update.setJobStatus(requestDTO.getStatus());
         update.setId(requestDTO.getId());
 
-        return 1 == jobMapper.updateById(job);
+        return 1 == jobMapper.updateById(update);
     }
 
     @Override
