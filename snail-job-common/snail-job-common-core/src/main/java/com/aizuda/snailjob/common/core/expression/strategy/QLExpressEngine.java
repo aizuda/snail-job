@@ -21,7 +21,6 @@ import java.util.Set;
  */
 public class QLExpressEngine extends AbstractExpressionEngine {
 
-    private static final Set<String> BLACK_SET = Sets.newHashSet("javax.naming.InitialContext.doLookup");
     private static final ExpressRunner ENGINE = new ExpressRunner();
 
     static {
