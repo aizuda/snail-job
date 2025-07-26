@@ -35,7 +35,7 @@ import java.util.*;
  * @date 2023-12-23 17:48:31
  * @since 2.6.0
  */
-@Service
+@Service("WorkflowWebBatchCommonService")
 @Slf4j
 @RequiredArgsConstructor
 public class WorkflowWebBatchServiceImpl extends AbstractWorkflowBatchService implements WorkflowWebBatchService {

@@ -11,6 +11,7 @@ import com.aizuda.snailjob.server.web.service.WorkflowWebBatchService;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class WorkflowBatchController {
     private final WorkflowWebBatchService workflowWebBatchService;
+    @Qualifier("WorkflowWebBatchCommonService")
     private final WorkflowBatchService workflowBatchService;
 
     @LoginRequired

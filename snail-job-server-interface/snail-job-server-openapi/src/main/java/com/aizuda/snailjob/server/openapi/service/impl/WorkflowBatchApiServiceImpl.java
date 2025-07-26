@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * @author opensnail
  * @date 2025-07-06
  */
-@Component("workflowBatchApiService")
+@Component("workflowBatchApiCommonService")
 public class WorkflowBatchApiServiceImpl extends AbstractWorkflowBatchService implements WorkflowBatchApiService {
 
 

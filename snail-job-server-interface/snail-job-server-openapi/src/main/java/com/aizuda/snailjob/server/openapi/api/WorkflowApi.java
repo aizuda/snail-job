@@ -7,6 +7,7 @@ import com.aizuda.snailjob.server.service.service.WorkflowService;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,22 +30,23 @@ import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH
 @RequiredArgsConstructor
 public class WorkflowApi {
     private final WorkflowApiService apiService;
-    private final WorkflowService workflowApiService;
+    @Qualifier("workflowApiCommonService")
+    private final WorkflowService workflowService;
 
     @DeleteMapping(OPENAPI_DELETE_WORKFLOW_V2)
     public boolean deleteWorkflowByIds(@RequestBody
                                        @NotEmpty(message = "ids cannot be null")
                                        @Size(max = 100, message = "Maximum {max} deletions") Set<Long> ids) {
-        return workflowApiService.deleteWorkflowByIds(ids);
+        return workflowService.deleteWorkflowByIds(ids);
     }
 
     @PostMapping(OPENAPI_TRIGGER_WORKFLOW_V2)
     public boolean triggerWorkFlow(@RequestBody @Validated JobTriggerApiDTO jobTriggerApiDTO) {
-        return workflowApiService.triggerWorkFlow(jobTriggerApiDTO);
+        return workflowService.triggerWorkFlow(jobTriggerApiDTO);
     }
 
     @PostMapping(OPENAPI_UPDATE_WORKFLOW_STATUS_V2)
     public boolean updateWorkFlowStatus(@RequestBody @Validated StatusUpdateRequestApiDTO requestDTO) {
-        return workflowApiService.updateWorkFlowStatus(requestDTO);
+        return workflowService.updateWorkFlowStatus(requestDTO);
     }
 }

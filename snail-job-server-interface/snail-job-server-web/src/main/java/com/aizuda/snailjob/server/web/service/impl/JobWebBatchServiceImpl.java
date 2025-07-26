@@ -30,7 +30,7 @@ import java.util.Set;
  * @date : 2023-10-12 09:55
  * @since ：2.4.0
  */
-@Service("jobWebBatchService")
+@Service("jobWebBatchCommonService")
 @RequiredArgsConstructor
 public class JobWebBatchServiceImpl extends AbstractJobBatchService implements JobWebBatchService {
     private final JobTaskBatchMapper jobTaskBatchMapper;

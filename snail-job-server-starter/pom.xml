@@ -102,6 +102,10 @@
             <groupId>com.aizuda</groupId>
             <artifactId>snail-job-server-ui</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-server-openapi</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

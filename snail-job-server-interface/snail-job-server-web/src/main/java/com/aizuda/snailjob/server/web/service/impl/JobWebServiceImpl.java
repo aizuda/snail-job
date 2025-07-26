@@ -49,7 +49,7 @@ import java.util.*;
  * @date 2023-10-11 22:20:42
  * @since 2.4.0
  */
-@Service("jobWebService")
+@Service("jobWebCommonService")
 @Slf4j
 @RequiredArgsConstructor
 @Validated

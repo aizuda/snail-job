@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * @author opensnail
  * @date 2025-07-06
  */
-@Component("workflowApiService")
+@Component("workflowApiCommonService")
 public class WorkflowApiServiceImpl extends AbstractWorkflowService implements WorkflowApiService {
 
     @Override

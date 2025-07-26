@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
  * @author opensnail
  * @date 2025-07-05
  */
-@Service("jobApiService")
+@Service("jobApiCommonService")
 @RequiredArgsConstructor
 public class JobApiServiceImpl extends AbstractJobService implements JobApiService {
 

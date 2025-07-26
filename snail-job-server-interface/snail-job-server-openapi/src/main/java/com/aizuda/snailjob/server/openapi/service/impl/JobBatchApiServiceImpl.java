@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * @author opensnail
  * @date 2025-07-06
  */
-@Component("jobBatchApiService")
+@Component("jobBatchApiCommonService")
 public class JobBatchApiServiceImpl extends AbstractJobBatchService implements JobBatchApiService {
 
 }

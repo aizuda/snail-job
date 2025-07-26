@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
  * @date 2023-12-12 21:54:05
  * @since 2.6.0
  */
-@Service
+@Service("workflowWebCommonService")
 @Slf4j
 @RequiredArgsConstructor
 @Validated

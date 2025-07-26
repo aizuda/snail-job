@@ -8,6 +8,7 @@ import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.RetryResponseWebVO;
 import com.aizuda.snailjob.server.web.service.RetryWebService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RetryController {
     private final RetryWebService retryWebService;
+    @Qualifier("retryWebCommonService")
     private final RetryService retryService;
 
     @LoginRequired

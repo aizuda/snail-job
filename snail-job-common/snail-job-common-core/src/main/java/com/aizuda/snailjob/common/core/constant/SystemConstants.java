@@ -161,7 +161,7 @@ public interface SystemConstants {
         // ==================================job batch ========================//
         @Deprecated
         String OPENAPI_GET_JOB_BATCH_DETAIL = "/api/job/getJobBatchDetail";
-        String OPENAPI_GET_JOB_BATCH_DETAIL_V2 = "/api/job-batch/detail/id}";
+        String OPENAPI_GET_JOB_BATCH_DETAIL_V2 = "/api/job-batch/detail/{id}";
         // ==================================job batch ========================//
 
         // ==================================workflow batch ========================//

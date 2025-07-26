@@ -67,7 +67,7 @@ import static com.aizuda.snailjob.common.core.enums.RetryStatusEnum.ALLOW_DELETE
  * @date 2022-02-27
  * @since 2.0
  */
-@Service
+@Service("retryWebCommonService")
 @RequiredArgsConstructor
 public class RetryWebServiceImpl extends AbstractRetryService implements RetryWebService {
     private final RetryTaskMapper retryTaskMapper;

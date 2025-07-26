@@ -21,20 +21,20 @@ import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH
 @RestController
 @RequiredArgsConstructor
 public class RetryApi {
-    private final RetryService retryService;
+    private final RetryService retryApiService;
 
     @GetMapping(OPENAPI_QUERY_RETRY)
     public RetryResponseApiDTO getRetryTaskById(@RequestParam("id") Long id) {
-        return retryService.getRetryById(id, RetryResponseApiDTO.class);
+        return retryApiService.getRetryById(id, RetryResponseApiDTO.class);
     }
 
     @PutMapping(OPENAPI_UPDATE_RETRY_STATUS_V2)
     public boolean updateRetryTaskStatus(@RequestBody @Validated StatusUpdateRequestApiDTO requestDTO) {
-        return retryService.updateRetryStatus(requestDTO);
+        return retryApiService.updateRetryStatus(requestDTO);
     }
 
     @PutMapping(OPENAPI_TRIGGER_RETRY_V2)
     public boolean triggerRetry(@RequestBody @Validated TriggerRetryDTO requestDTO) {
-        return retryService.triggerRetry(requestDTO);
+        return retryApiService.triggerRetry(requestDTO);
     }
 }

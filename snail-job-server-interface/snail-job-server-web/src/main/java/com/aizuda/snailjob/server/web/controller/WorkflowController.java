@@ -17,6 +17,7 @@ import com.aizuda.snailjob.server.web.util.ExportUtils;
 import com.aizuda.snailjob.server.web.util.ImportUtils;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -36,8 +37,8 @@ import java.util.Set;
 @RequestMapping("/workflow")
 @RequiredArgsConstructor
 public class WorkflowController {
-
     private final WorkflowWebService workflowWebService;
+    @Qualifier("workflowWebCommonService")
     private final WorkflowService workflowService;
 
     @PostMapping

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
  * @author opensnail
  * @date 2025-07-25
  */
-@Service
+@Service("retryApiService")
 @RequiredArgsConstructor
 public class RetryApiServiceImpl extends AbstractRetryService implements RetryApiService {
     @Override
