@@ -3,6 +3,8 @@ package com.aizuda.snailjob.client.common.rpc.client.openapi;
 import cn.hutool.core.util.ServiceLoaderUtil;
 import com.aizuda.snailjob.client.common.annotation.Header;
 import com.aizuda.snailjob.client.common.annotation.Mapping;
+import com.aizuda.snailjob.client.common.config.SnailJobProperties;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.model.SnailJobOpenApiResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -25,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2025-07-05
  */
 @AllArgsConstructor
-public class HttpClientInvokeHandler <R extends Result<Object>> implements InvocationHandler {
+public class HttpClientInvokeHandler<R extends Result<Object>> implements InvocationHandler {
     private final long timeout;
     private final TimeUnit unit;
 
@@ -67,10 +69,15 @@ public class HttpClientInvokeHandler <R extends Result<Object>> implements Invoc
      * @return {@link SnailHttpClient} 默认为RestTemplateClient
      */
     public static SnailHttpClient loadSnailJobHttpClient() {
+        SnailJobProperties properties = SnailSpringContext.getBean(SnailJobProperties.class);
+        SnailHttpClientConfig httpConfig = properties.getHttpConfig();
+        if (httpConfig.getHost() == null) {
+            httpConfig.setHost(properties.getServer().getHost());
+        }
         return ServiceLoaderUtil.loadList(SnailHttpClient.class)
                 .stream()
                 .findAny()
-                .orElse(new DefaultHttpClient(null));
+                .orElse(new DefaultHttpClient(httpConfig));
     }
 
 }

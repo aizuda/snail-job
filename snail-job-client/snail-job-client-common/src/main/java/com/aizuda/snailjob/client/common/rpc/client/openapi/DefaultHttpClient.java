@@ -20,7 +20,7 @@ import java.text.MessageFormat;
  * @date 2025-07-05
  */
 public class DefaultHttpClient implements SnailHttpClient {
-    private final static String URL = "{0}://{1}:{2}/openapi/{3}";
+    private final static String URL = "{0}://{1}:{2,number,#}/openapi/{3}";
     private final SnailHttpClientConfig config;
 
     public DefaultHttpClient(SnailHttpClientConfig config) {
