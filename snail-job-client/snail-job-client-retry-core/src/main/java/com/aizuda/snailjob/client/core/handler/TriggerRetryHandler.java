@@ -19,7 +19,12 @@ public class TriggerRetryHandler extends AbstractRetryRequestHandler<Boolean> {
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result = client.triggerRetryTask(triggerRetryDTO);
+        Result<Object> result;
+        if (isOpenApiV2()){
+            result = clientV2.triggerRetryTask(triggerRetryDTO);
+        } else {
+            result = client.triggerRetryTask(triggerRetryDTO);
+        }
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         return (Boolean) result.getData();
