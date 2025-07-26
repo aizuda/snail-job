@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.client.job.core.openapi;
 
 import com.aizuda.snailjob.client.common.annotation.Mapping;
+import com.aizuda.snailjob.client.common.annotation.RequestParam;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.client.job.core.dto.JobTriggerDTO;
 import com.aizuda.snailjob.client.job.core.dto.RequestAddOrUpdateJobDTO;
@@ -20,13 +21,13 @@ public interface JobOpenApiClientV2 {
     Result<Object> updateJob(RequestAddOrUpdateJobDTO requestUpdateJobDTO);
 
     @Mapping(method = RequestMethod.GET, path = OPENAPI_GET_JOB_DETAIL_V2)
-    Result<Object> getJobDetail(Long jobId);
+    Result<Object> getJobDetail(@RequestParam("id") Long jobId);
 
     @Mapping(method = RequestMethod.GET, path = OPENAPI_GET_JOB_BATCH_DETAIL_V2)
-    Result<Object> getJobBatchDetail(Long jobBatchId);
+    Result<Object> getJobBatchDetail(@RequestParam("id") Long jobBatchId);
 
     @Mapping(method = RequestMethod.GET, path = OPENAPI_GET_WORKFLOW_BATCH_DETAIL_V2)
-    Result<Object> getWorkflowBatchDetail(Long jobBatchId);
+    Result<Object> getWorkflowBatchDetail(@RequestParam("id") Long jobBatchId);
 
     @Mapping(method = RequestMethod.POST, path = OPENAPI_TRIGGER_JOB_V2)
     Result<Object> triggerJob(JobTriggerDTO jobTriggerDTO);

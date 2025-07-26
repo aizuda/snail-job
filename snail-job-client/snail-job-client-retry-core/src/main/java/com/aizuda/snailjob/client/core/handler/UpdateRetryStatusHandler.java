@@ -20,6 +20,7 @@ public class UpdateRetryStatusHandler extends AbstractRetryRequestHandler<Boolea
 
     public UpdateRetryStatusHandler setRetryStatus(RetryStatusEnum retryStatusEnum) {
         updateRetryStatusDTO.setRetryStatus(retryStatusEnum.getStatus());
+        updateRetryStatusDTO.setStatus(retryStatusEnum.getStatus());
         return this;
     }
 

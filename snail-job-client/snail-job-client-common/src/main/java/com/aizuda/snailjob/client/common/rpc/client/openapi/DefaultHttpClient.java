@@ -20,7 +20,7 @@ import java.text.MessageFormat;
  * @date 2025-07-05
  */
 public class DefaultHttpClient implements SnailHttpClient {
-    private final static String URL = "{0}://{1}:{2,number,#}/openapi/{3}";
+    private final static String URL = "{0}://{1}:{2,number,#}/snail-job/{3}";
     private final SnailHttpClientConfig config;
 
     public DefaultHttpClient(SnailHttpClientConfig config) {
@@ -41,7 +41,12 @@ public class DefaultHttpClient implements SnailHttpClient {
         }
 
         String url = MessageFormat.format(URL, config.isHttps() ? "https" : "http", host, config.getPort(), path);
+        if (StrUtil.isNotBlank(request.getData())){
+            url += request.getData();
+        }
         HttpRequest httpRequest = HttpUtil.createRequest(Method.valueOf(request.getMethod()), url);
+        httpRequest.body(request.getBody());
+        httpRequest.addHeaders(request.getHeaders());
         return httpRequest.thenFunction(httpResponse ->
                 JsonUtil.parseObject(httpResponse.body(), SnailJobOpenApiResult.class));
     }

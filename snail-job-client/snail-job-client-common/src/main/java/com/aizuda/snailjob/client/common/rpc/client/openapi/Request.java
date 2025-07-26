@@ -32,9 +32,14 @@ public class Request {
     private String body;
 
     /**
+     * 参数
+     */
+    private String data;
+
+    /**
      * 上下文
      */
-    private Map<String, Object> headers;
+    private Map<String, String> headers;
 
     /**
      * 超时时间

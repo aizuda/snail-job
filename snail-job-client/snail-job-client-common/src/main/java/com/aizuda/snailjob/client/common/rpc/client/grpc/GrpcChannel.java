@@ -224,8 +224,6 @@ public final class GrpcChannel {
             SystemConstants.DEFAULT_NAMESPACE));
         headersMap.put(HeadersEnum.TOKEN.getKey(), Optional.ofNullable(snailJobProperties.getToken()).orElse(
             SystemConstants.DEFAULT_TOKEN));
-        headersMap.put(HeadersEnum.TOKEN.getKey(), Optional.ofNullable(snailJobProperties.getToken()).orElse(
-                SystemConstants.DEFAULT_TOKEN));
         headersMap.put(HeadersEnum.SYSTEM_VERSION.getKey(), Optional.ofNullable(SnailJobVersion.getVersion()).orElse(
                 SystemConstants.DEFAULT_CLIENT_VERSION));
         headersMap.put(HeadersEnum.EXECUTOR_TYPE.getKey(), String.valueOf(ExecutorTypeEnum.JAVA.getType()));

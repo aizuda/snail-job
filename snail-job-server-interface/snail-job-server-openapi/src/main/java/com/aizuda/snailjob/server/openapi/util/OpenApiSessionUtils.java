@@ -17,12 +17,12 @@ public final class OpenApiSessionUtils {
 
     public static String getNamespaceId() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-       return (String) request.getAttribute(HeadersEnum.NAMESPACE.getKey());
+       return request.getHeader(HeadersEnum.NAMESPACE.getKey());
     }
 
     public static String getGroupName() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        return (String) request.getAttribute(HeadersEnum.GROUP_NAME.getKey());
+        return request.getHeader(HeadersEnum.GROUP_NAME.getKey());
     }
 
 }
