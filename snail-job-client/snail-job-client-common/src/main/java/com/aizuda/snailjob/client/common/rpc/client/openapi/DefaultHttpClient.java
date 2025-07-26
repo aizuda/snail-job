@@ -40,8 +40,8 @@ public class DefaultHttpClient implements SnailHttpClient {
             host = properties.getHost();
         }
 
-        String url = MessageFormat.format(this.URL, config.isHttps() ? "https" : "http", config.getHost(), config.getPort(), path);
-        HttpRequest httpRequest = HttpUtil.createRequest(Method.GET, url);
+        String url = MessageFormat.format(URL, config.isHttps() ? "https" : "http", host, config.getPort(), path);
+        HttpRequest httpRequest = HttpUtil.createRequest(Method.valueOf(request.getMethod()), url);
         return httpRequest.thenFunction(httpResponse ->
                 JsonUtil.parseObject(httpResponse.body(), SnailJobOpenApiResult.class));
     }
