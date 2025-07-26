@@ -43,4 +43,8 @@ public class RetryResponseDTO {
     private Integer bucketIndex;
 
     private Long deleted;
+
+    private LocalDateTime createDt;
+
+    private LocalDateTime updateDt;
 }
