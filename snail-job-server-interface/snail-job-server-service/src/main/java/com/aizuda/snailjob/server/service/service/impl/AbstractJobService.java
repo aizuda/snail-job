@@ -89,12 +89,12 @@ public abstract class AbstractJobService implements JobService {
     public boolean deleteJobByIds(Set<Long> ids) {
         String namespaceId = getNamespaceId();
 
-        Assert.isTrue(ids.size() == jobMapper.delete(
+        Assert.isTrue(ids.size() == jobMapper.selectList(
                 new LambdaQueryWrapper<Job>()
                         .eq(Job::getNamespaceId, namespaceId)
                         .eq(Job::getJobStatus, StatusEnum.NO.getStatus())
                         .in(Job::getId, ids)
-        ), () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task status is closed"));
+        ).size(), () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task status is closed"));
 
 
         List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
@@ -112,7 +112,7 @@ public abstract class AbstractJobService implements JobService {
                         .eq(Job::getNamespaceId, namespaceId)
                         .eq(Job::getJobStatus, StatusEnum.NO.getStatus())
                         .in(Job::getId, ids)
-        ), () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task status is closed"));
+        ), () -> new SnailJobServerException("Failed to delete scheduled task"));
 
         return true;
     }
