@@ -71,7 +71,7 @@ public interface WorkflowConverter {
             @Mapping(target = "callback", expression = "java(WorkflowConverter.parseCallbackConfig(workflowNode))"),
             @Mapping(target = "jobTask", expression = "java(WorkflowConverter.parseJobTaskConfig(workflowNode))")
     })
-    WorkflowDetailResponseVO.NodeInfo convert(WorkflowNode workflowNode);
+    WorkflowDetailResponseDTO.NodeInfo convert(WorkflowNode workflowNode);
 
     @Mappings({
             @Mapping(target = "nextTriggerAt", expression = "java(WorkflowConverter.toLocalDateTime(workflow.getNextTriggerAt()))"),
