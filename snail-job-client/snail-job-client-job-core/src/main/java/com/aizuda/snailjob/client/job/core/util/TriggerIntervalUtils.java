@@ -2,7 +2,6 @@ package com.aizuda.snailjob.client.job.core.util;
 
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.job.core.dto.PointInTimeDTO;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 
 import java.time.Duration;

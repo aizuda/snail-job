@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.web.model.request;
 
-import com.aizuda.snailjob.server.service.dto.JobRequestDTO;
+import com.aizuda.snailjob.model.base.JobRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,6 +11,6 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class JobRequestWebVO extends JobRequestDTO {
+public class JobRequestWebVO extends JobRequest {
 
 }

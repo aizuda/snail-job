@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.server.common.vo;
 
-import com.aizuda.snailjob.server.common.dto.CallbackConfig;
-import com.aizuda.snailjob.server.common.dto.DecisionConfig;
-import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
+import com.aizuda.snailjob.model.request.CallbackConfig;
+import com.aizuda.snailjob.model.request.DecisionConfig;
+import com.aizuda.snailjob.model.request.JobTaskConfig;
 import lombok.Data;
 
 import java.util.List;

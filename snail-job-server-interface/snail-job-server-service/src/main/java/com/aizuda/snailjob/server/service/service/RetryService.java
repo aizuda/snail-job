@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.service.service;
 
 import com.aizuda.snailjob.server.service.dto.RetryResponseDTO;
-import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestDTO;
+import com.aizuda.snailjob.model.base.StatusUpdateRequest;
 import com.aizuda.snailjob.server.service.dto.TriggerRetryDTO;
 
 /**
@@ -18,5 +18,5 @@ public interface RetryService {
 
     boolean triggerRetry(TriggerRetryDTO triggerRetryDTO);
 
-    boolean updateRetryStatus(StatusUpdateRequestDTO requestDTO);
+    boolean updateRetryStatus(StatusUpdateRequest requestDTO);
 }

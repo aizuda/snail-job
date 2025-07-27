@@ -13,15 +13,14 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
-import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
+import com.aizuda.snailjob.model.request.JobTaskConfig;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.*;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
 import com.aizuda.snailjob.server.service.convert.WorkflowConverter;
-import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseDTO;
+import com.aizuda.snailjob.model.base.WorkflowDetailResponse;
 import com.aizuda.snailjob.server.service.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.service.kit.WorkflowKit;
 import com.aizuda.snailjob.server.service.service.impl.AbstractWorkflowService;
@@ -317,7 +316,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
 
         Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
 
-        List<WorkflowDetailResponseDTO.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.convertList(workflowNodes);
+        List<WorkflowDetailResponse.NodeInfo> nodeInfos = WorkflowConverter.INSTANCE.convertList(workflowNodes);
 
         Map<Long, WorkflowDetailResponseWebVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
                 .peek(nodeInfo -> {
@@ -326,7 +325,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
                         jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
                         jobTask.setLabels(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getLabels());
                     }
-                }).collect(Collectors.toMap(WorkflowDetailResponseDTO.NodeInfo::getId, i -> i));
+                }).collect(Collectors.toMap(WorkflowDetailResponse.NodeInfo::getId, i -> i));
 
         String flowInfo = workflow.getFlowInfo();
         try {

@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.client.job.core.handler;
 
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.client.job.core.dto.JobTriggerDTO;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.model.request.JobTriggerApiRequest;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,12 +12,12 @@ import java.util.Map;
 
 public abstract class AbstractTriggerHandler<H, R> extends AbstractJobRequestHandler<R> {
     @Getter
-    private final JobTriggerDTO reqDTO;
+    private final JobTriggerApiRequest reqDTO;
     @Setter
     private H r;
 
     public AbstractTriggerHandler(Long jobId) {
-        this.reqDTO = new JobTriggerDTO();
+        this.reqDTO = new JobTriggerApiRequest();
        // 设置调度id
         reqDTO.setJobId(jobId);
     }

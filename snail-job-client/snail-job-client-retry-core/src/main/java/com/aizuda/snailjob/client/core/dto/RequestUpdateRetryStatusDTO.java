@@ -9,9 +9,5 @@ public class RequestUpdateRetryStatusDTO {
     private Long id;
 
     @NotNull(message = "retryStatus cannot be null")
-    @Deprecated
-    private Integer retryStatus;
-
-    @NotNull(message = "retryStatus cannot be null")
     private Integer status;
 }

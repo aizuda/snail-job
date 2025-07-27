@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.openapi.api;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.server.openapi.dto.JobBatchResponseApiDTO;
+import com.aizuda.snailjob.model.response.JobBatchApiResponse;
 import com.aizuda.snailjob.server.openapi.service.JobBatchApiService;
 import com.aizuda.snailjob.server.service.service.JobBatchService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class JobBatchApi {
     private final JobBatchApiService jobBatchApiService;
 
     @PostMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_JOB_BATCH_DETAIL_V2)
-    public JobBatchResponseApiDTO getJobBatchByIds(@RequestParam("id") Long id) {
-        return jobBatchService.getJobBatchById(id, JobBatchResponseApiDTO.class);
+    public JobBatchApiResponse getJobBatchByIds(@RequestParam("id") Long id) {
+        return jobBatchService.getJobBatchById(id, JobBatchApiResponse.class);
     }
 }

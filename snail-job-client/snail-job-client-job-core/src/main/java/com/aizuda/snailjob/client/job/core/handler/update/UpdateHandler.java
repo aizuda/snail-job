@@ -11,6 +11,8 @@ import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 
+import java.util.Objects;
+
 
 public abstract class UpdateHandler<H> extends AbstractParamsHandler<H, Boolean> {
 
@@ -27,7 +29,8 @@ public abstract class UpdateHandler<H> extends AbstractParamsHandler<H, Boolean>
 
     @Override
     protected void beforeExecute() {
-        if (getReqDTO().getTriggerType() == TriggerTypeEnum.WORK_FLOW.getType()) {
+        Integer triggerType = getReqDTO().getTriggerType();
+        if (Objects.nonNull(triggerType) && triggerType == TriggerTypeEnum.WORK_FLOW.getType()) {
             // 工作流没有调度时间
             setTriggerInterval("*");
         }

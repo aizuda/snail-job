@@ -9,7 +9,7 @@ import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.common.core.expression.ExpressionFactory;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.dto.DecisionConfig;
+import com.aizuda.snailjob.model.request.DecisionConfig;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;

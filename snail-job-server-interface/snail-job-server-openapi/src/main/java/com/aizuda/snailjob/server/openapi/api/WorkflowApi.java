@@ -1,7 +1,8 @@
 package com.aizuda.snailjob.server.openapi.api;
 
-import com.aizuda.snailjob.server.openapi.dto.StatusUpdateRequestApiDTO;
-import com.aizuda.snailjob.server.openapi.dto.JobTriggerApiDTO;
+import com.aizuda.snailjob.model.request.StatusUpdateApiRequest;
+import com.aizuda.snailjob.model.request.JobTriggerApiRequest;
+import com.aizuda.snailjob.model.request.WorkflowTriggerApiRequest;
 import com.aizuda.snailjob.server.openapi.service.WorkflowApiService;
 import com.aizuda.snailjob.server.service.service.WorkflowService;
 import jakarta.validation.constraints.NotEmpty;
@@ -9,10 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -41,12 +39,12 @@ public class WorkflowApi {
     }
 
     @PostMapping(OPENAPI_TRIGGER_WORKFLOW_V2)
-    public boolean triggerWorkFlow(@RequestBody @Validated JobTriggerApiDTO jobTriggerApiDTO) {
+    public boolean triggerWorkFlow(@RequestBody @Validated WorkflowTriggerApiRequest jobTriggerApiDTO) {
         return workflowService.triggerWorkFlow(jobTriggerApiDTO);
     }
 
-    @PostMapping(OPENAPI_UPDATE_WORKFLOW_STATUS_V2)
-    public boolean updateWorkFlowStatus(@RequestBody @Validated StatusUpdateRequestApiDTO requestDTO) {
+    @PutMapping(OPENAPI_UPDATE_WORKFLOW_STATUS_V2)
+    public boolean updateWorkFlowStatus(@RequestBody @Validated StatusUpdateApiRequest requestDTO) {
         return workflowService.updateWorkFlowStatus(requestDTO);
     }
 }

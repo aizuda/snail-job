@@ -2,12 +2,12 @@ package com.aizuda.snailjob.server.service.service.impl;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.server.common.dto.CallbackConfig;
-import com.aizuda.snailjob.server.common.dto.DecisionConfig;
+import com.aizuda.snailjob.model.base.JobBatchResponse;
+import com.aizuda.snailjob.model.request.CallbackConfig;
+import com.aizuda.snailjob.model.request.DecisionConfig;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.service.convert.JobBatchResponseConverter;
-import com.aizuda.snailjob.server.service.dto.JobBatchResponseDTO;
 import com.aizuda.snailjob.server.service.service.JobBatchService;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
@@ -36,7 +36,7 @@ public abstract class AbstractJobBatchService implements JobBatchService {
     protected WorkflowNodeMapper workflowNodeMapper;
 
     @Override
-    public <T extends JobBatchResponseDTO> T getJobBatchById(Long jobBatchId, Class<T> clazz) {
+    public <T extends JobBatchResponse> T getJobBatchById(Long jobBatchId, Class<T> clazz) {
         JobTaskBatch jobTaskBatch = jobTaskBatchMapper.selectById(jobBatchId);
         if (Objects.isNull(jobTaskBatch)) {
             return null;

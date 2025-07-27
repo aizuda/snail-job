@@ -6,6 +6,10 @@ import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.model.base.JobRequest;
+import com.aizuda.snailjob.model.base.JobResponse;
+import com.aizuda.snailjob.model.base.JobTriggerRequest;
+import com.aizuda.snailjob.model.base.StatusUpdateRequest;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
@@ -19,11 +23,9 @@ import com.aizuda.snailjob.server.service.dto.*;
 import com.aizuda.snailjob.server.service.kit.JobKit;
 import com.aizuda.snailjob.server.service.kit.TriggerIntervalKit;
 import com.aizuda.snailjob.server.service.service.JobService;
-import com.aizuda.snailjob.server.service.service.WorkflowService;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -32,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -57,7 +60,7 @@ public abstract class AbstractJobService implements JobService {
     protected WorkflowNodeMapper workflowNodeMapper;
 
     @Override
-    public Boolean trigger(JobTriggerDTO jobTrigger) {
+    public Boolean trigger(JobTriggerRequest jobTrigger) {
         Job job = jobMapper.selectById(jobTrigger.getJobId());
         Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
 
@@ -123,7 +126,7 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public boolean updateJob(JobRequestDTO jobRequest) {
+    public boolean updateJob(JobRequest jobRequest) {
         Assert.notNull(jobRequest.getId(), () -> new SnailJobServerException("ID cannot be empty"));
         Job job = jobMapper.selectById(jobRequest.getId());
         Assert.notNull(job, () -> new SnailJobServerException("Job is null, update failed"));
@@ -133,15 +136,21 @@ public abstract class AbstractJobService implements JobService {
 
         // 判断常驻任务
         Job updateJob = JobConverter.INSTANCE.convert(jobRequest);
-        updateJob.setResident(JobKit.isResident(jobRequest.getTriggerType(), jobRequest.getTriggerInterval()));
+        Integer triggerType = Optional.ofNullable(jobRequest.getTriggerType()).orElse(job.getTriggerType());
+        String triggerInterval = jobRequest.getTriggerInterval();
+        if (StrUtil.isBlank(triggerInterval)) {
+            triggerInterval = job.getTriggerInterval();
+        }
+        updateJob.setTriggerInterval(triggerInterval);
+        updateJob.setResident(JobKit.isResident(triggerType, triggerInterval));
 
         // check triggerInterval
         checkTriggerInterval(jobRequest);
 
         CalculateNextTriggerAtDTO nextTriggerAtDTO = CalculateNextTriggerAtDTO
                 .builder()
-                .triggerInterval(jobRequest.getTriggerInterval())
-                .triggerType(jobRequest.getTriggerType())
+                .triggerInterval(triggerInterval)
+                .triggerType(triggerType)
                 .newResident(updateJob.getResident())
                 .oldResident(job.getResident())
                 .id(job.getId())
@@ -158,7 +167,7 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public Long addJob(JobRequestDTO request) {
+    public Long addJob(JobRequest request) {
 
         // 前置校验
         addJobPreValidator(request);
@@ -182,7 +191,7 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public Boolean updateJobStatus(StatusUpdateRequestDTO requestDTO) {
+    public Boolean updateJobStatus(StatusUpdateRequest requestDTO) {
         Job job = jobMapper.selectById(requestDTO.getId());
         Assert.notNull(job, () -> new SnailJobServerException("update job status failed"));
         // 直接幂等
@@ -202,7 +211,7 @@ public abstract class AbstractJobService implements JobService {
     }
 
     @Override
-    public <T extends JobResponseDTO> T getJobById(Long id, Class<T> clazz) {
+    public <T extends JobResponse> T getJobById(Long id, Class<T> clazz) {
         Job job = jobMapper.selectById(id);
         try {
             T instance = clazz.getDeclaredConstructor().newInstance();
@@ -214,17 +223,17 @@ public abstract class AbstractJobService implements JobService {
         }
     }
 
-    protected abstract void getJobByIdAfter(JobResponseDTO responseBaseDTO, Job job);
+    protected abstract void getJobByIdAfter(JobResponse responseBaseDTO, Job job);
 
-    protected abstract void updateJobPreValidator(JobRequestDTO jobRequest);
+    protected abstract void updateJobPreValidator(JobRequest jobRequest);
 
     protected abstract String getNamespaceId();
 
-    protected abstract void addJobPopulate(Job job, JobRequestDTO request);
+    protected abstract void addJobPopulate(Job job, JobRequest request);
 
-    protected void checkTriggerInterval(JobRequestDTO jobRequestVO) {
+    protected void checkTriggerInterval(JobRequest jobRequestVO) {
         TriggerIntervalKit.checkTriggerInterval(jobRequestVO.getTriggerInterval(), jobRequestVO.getTriggerType());
     }
 
-    protected abstract void addJobPreValidator(JobRequestDTO request);
+    protected abstract void addJobPreValidator(JobRequest request);
 }

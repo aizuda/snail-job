@@ -38,21 +38,25 @@ public class Job extends CreateUpdateDt {
     /**
      * 名称
      */
+    @TableField(updateStrategy =  FieldStrategy.NOT_EMPTY)
     private String jobName;
 
     /**
      * 执行方法参数
      */
+    @TableField(updateStrategy =  FieldStrategy.NOT_EMPTY)
     private String argsStr;
 
     /**
      * 参数类型 text/json
      */
+    @TableField(updateStrategy =  FieldStrategy.NOT_EMPTY)
     private Integer argsType;
 
     /**
      * 扩展字段
      */
+    @TableField(updateStrategy =  FieldStrategy.NOT_EMPTY)
     private String extAttrs;
 
     /**
@@ -90,6 +94,7 @@ public class Job extends CreateUpdateDt {
     /**
      * 间隔时长
      */
+    @TableField(updateStrategy =  FieldStrategy.NOT_EMPTY)
     private String triggerInterval;
 
     /**
@@ -157,6 +162,7 @@ public class Job extends CreateUpdateDt {
      * 标签
      * json格式，如：{"key1":"value1","key2":"value2"}
      */
+    @TableField(updateStrategy =  FieldStrategy.NOT_EMPTY)
     private String labels;
 
 }

@@ -1,9 +1,9 @@
 package com.aizuda.snailjob.server.openapi.service.impl;
 
+import com.aizuda.snailjob.model.base.JobRequest;
 import com.aizuda.snailjob.server.openapi.service.JobApiService;
 import com.aizuda.snailjob.server.openapi.util.OpenApiSessionUtils;
-import com.aizuda.snailjob.server.service.dto.JobRequestDTO;
-import com.aizuda.snailjob.server.service.dto.JobResponseDTO;
+import com.aizuda.snailjob.model.base.JobResponse;
 import com.aizuda.snailjob.server.service.service.impl.AbstractJobService;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import lombok.RequiredArgsConstructor;
@@ -22,21 +22,21 @@ import org.springframework.stereotype.Service;
 public class JobApiServiceImpl extends AbstractJobService implements JobApiService {
 
     @Override
-    protected void addJobPopulate(Job job, JobRequestDTO request) {
+    protected void addJobPopulate(Job job, JobRequest request) {
     }
 
     @Override
-    protected void addJobPreValidator(JobRequestDTO request) {
-
-    }
-
-    @Override
-    protected void getJobByIdAfter(JobResponseDTO responseBaseDTO, Job job) {
+    protected void addJobPreValidator(JobRequest request) {
 
     }
 
     @Override
-    protected void updateJobPreValidator(JobRequestDTO jobRequest) {
+    protected void getJobByIdAfter(JobResponse responseBaseDTO, Job job) {
+
+    }
+
+    @Override
+    protected void updateJobPreValidator(JobRequest jobRequest) {
 
     }
 

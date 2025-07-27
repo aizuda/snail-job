@@ -8,13 +8,14 @@ import com.aizuda.snailjob.client.core.dto.RequestUpdateRetryStatusDTO;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.model.base.StatusUpdateRequest;
 
 public class UpdateRetryStatusHandler extends AbstractRetryRequestHandler<Boolean> {
 
-    private final RequestUpdateRetryStatusDTO updateRetryStatusDTO;
+    private final StatusUpdateRequest updateRetryStatusDTO;
 
     public UpdateRetryStatusHandler(Long retryId) {
-        this.updateRetryStatusDTO = new RequestUpdateRetryStatusDTO();
+        this.updateRetryStatusDTO = new StatusUpdateRequest();
         updateRetryStatusDTO.setId(retryId);
     }
 

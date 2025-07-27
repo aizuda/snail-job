@@ -1,17 +1,28 @@
-package com.aizuda.snailjob.client.job.core.dto;
+package com.aizuda.snailjob.model.base;
 
-import com.aizuda.snailjob.model.validate.group.Add;
-import com.aizuda.snailjob.model.validate.group.Update;
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
+import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.model.validate.group.Add;
+import com.aizuda.snailjob.model.validate.group.Update;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
+import java.util.Set;
+
+/**
+ * <p>
+ * openapi与web共用的基类
+ * </p>
+ *
+ * @author opensnail
+ * @date 2025-07-05
+ */
 @Data
-public class RequestAddOrUpdateJobDTO {
+public class JobRequest {
 
     @NotNull(message = "id cannot be null", groups = Update.class)
     private Long id;
@@ -79,6 +90,7 @@ public class RequestAddOrUpdateJobDTO {
 
     /**
      * 阻塞策略 1、丢弃 2、覆盖 3、并行
+     * {@link JobBlockStrategyEnum}
      */
     @NotNull(message = "blockStrategy cannot be null", groups = Add.class)
     private Integer blockStrategy;
@@ -118,6 +130,16 @@ public class RequestAddOrUpdateJobDTO {
      * 描述
      */
     private String description;
+
+    /**
+     * 通知告警场景配置id列表
+     */
+    private Set<Long> notifyIds;
+
+    /**
+     * 负责人id
+     */
+    private Long ownerId;
 
     /**
      * 标签

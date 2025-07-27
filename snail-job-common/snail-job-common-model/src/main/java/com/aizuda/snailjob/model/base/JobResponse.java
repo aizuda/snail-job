@@ -1,8 +1,9 @@
-package com.aizuda.snailjob.client.job.core.dto;
+package com.aizuda.snailjob.model.base;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /**
  * @author opensnail
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
  * @since 2.4.0
  */
 @Data
-public class JobResponseVO {
+public class JobResponse {
 
     private Long id;
 
@@ -28,6 +29,11 @@ public class JobResponseVO {
      * 执行方法参数
      */
     private String argsStr;
+
+    /**
+     * 参数类型 text/json
+     */
+    private String argsType;
 
     /**
      * 扩展字段
@@ -100,6 +106,11 @@ public class JobResponseVO {
     private Integer parallelNum;
 
     /**
+     * bucket
+     */
+    private Integer bucketIndex;
+
+    /**
      * 描述
      */
     private String description;
@@ -113,5 +124,21 @@ public class JobResponseVO {
      * 修改时间
      */
     private LocalDateTime updateDt;
+
+    /**
+     * 逻辑删除 1、删除
+     */
+    private Integer deleted;
+
+    /**
+     * 通知告警场景
+     */
+    private Set<Long> notifyIds;
+
+    /**
+     * 标签
+     * json格式，如：{"key1":"value1","key2":"value2"}
+     */
+    private String labels;
 
 }

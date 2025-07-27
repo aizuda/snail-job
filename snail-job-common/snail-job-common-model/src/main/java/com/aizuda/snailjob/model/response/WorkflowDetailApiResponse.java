@@ -1,6 +1,6 @@
-package com.aizuda.snailjob.server.openapi.dto;
+package com.aizuda.snailjob.model.response;
 
-import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseDTO;
+import com.aizuda.snailjob.model.base.WorkflowDetailResponse;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,5 +13,5 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class WorkflowDetailResponseApiDTO extends WorkflowDetailResponseDTO {
+public class WorkflowDetailApiResponse extends WorkflowDetailResponse {
 }

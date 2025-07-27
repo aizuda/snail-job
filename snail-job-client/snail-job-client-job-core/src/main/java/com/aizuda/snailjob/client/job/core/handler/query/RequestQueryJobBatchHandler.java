@@ -1,21 +1,20 @@
 package com.aizuda.snailjob.client.job.core.handler.query;
 
-
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.job.core.dto.JobBatchResponseVO;
 import com.aizuda.snailjob.client.job.core.handler.AbstractJobRequestHandler;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.model.response.JobBatchApiResponse;
 
 import java.util.Objects;
 
 /**
  * @since 1.5.0
  */
-public class RequestQueryJobBatchHandler extends AbstractJobRequestHandler<JobBatchResponseVO> {
+public class RequestQueryJobBatchHandler extends AbstractJobRequestHandler<JobBatchApiResponse> {
     private final Long queryJobBatchId;
 
     public RequestQueryJobBatchHandler(Long queryJobBatchId) {
@@ -23,7 +22,7 @@ public class RequestQueryJobBatchHandler extends AbstractJobRequestHandler<JobBa
     }
 
     @Override
-    protected void afterExecute(JobBatchResponseVO jobBatchResponseVO) {
+    protected void afterExecute(JobBatchApiResponse jobBatchResponseVO) {
 
     }
 
@@ -33,7 +32,7 @@ public class RequestQueryJobBatchHandler extends AbstractJobRequestHandler<JobBa
     }
 
     @Override
-    protected JobBatchResponseVO doExecute() {
+    protected JobBatchApiResponse doExecute() {
         Result<Object> result;
         if (isOpenApiV2()) {
             result = clientV2.getJobBatchDetail(queryJobBatchId);
@@ -44,8 +43,10 @@ public class RequestQueryJobBatchHandler extends AbstractJobRequestHandler<JobBa
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();
-        Assert.isTrue(Objects.nonNull(data), () -> new SnailJobClientException("Failed to get task batch details for [{}]", queryJobBatchId));
-        return JsonUtil.parseObject(JsonUtil.toJsonString(data), JobBatchResponseVO.class);
+        if (Objects.isNull(data)) {
+            return null;
+        }
+        return JsonUtil.parseObject(JsonUtil.toJsonString(data), JobBatchApiResponse.class);
     }
 
     @Override

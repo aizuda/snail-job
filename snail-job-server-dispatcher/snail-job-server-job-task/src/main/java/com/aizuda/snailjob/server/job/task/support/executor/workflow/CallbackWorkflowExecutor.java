@@ -6,7 +6,7 @@ import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.dto.CallbackConfig;
+import com.aizuda.snailjob.model.request.CallbackConfig;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.rpc.okhttp.RequestInterceptor;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskFailAlarmEventDTO;
@@ -37,7 +37,7 @@ import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKF
  */
 @Component
 @RequiredArgsConstructor
-@Deprecated(since = "1.8.0")
+@Deprecated(since = "1.7.0")
 public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
 
     private static final String CALLBACK_TIMEOUT = "10";

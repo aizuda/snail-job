@@ -1,6 +1,8 @@
-package com.aizuda.snailjob.client.job.core.dto;
+package com.aizuda.snailjob.model.base;
 
-
+import com.aizuda.snailjob.model.request.CallbackConfig;
+import com.aizuda.snailjob.model.request.DecisionConfig;
+import com.aizuda.snailjob.model.request.JobTaskConfig;
 import lombok.Data;
 
 import java.util.List;
@@ -12,7 +14,7 @@ import java.util.Set;
  * @since 2.6.0
  */
 @Data
-public class WorkflowDetailResponseVO {
+public class WorkflowDetailResponse {
 
     /**
      * 工作流ID
@@ -145,7 +147,7 @@ public class WorkflowDetailResponseVO {
         /**
          * 定时任务批次信息
          */
-        private List<JobBatchResponseVO> jobBatchList;
+        private List<JobBatchResponse> jobBatchList;
 
         /**
          * 子节点
@@ -158,5 +160,10 @@ public class WorkflowDetailResponseVO {
      * 通知告警场景配置id列表
      */
     private Set<Long> notifyIds;
+
+    /**
+     * 负责人id
+     */
+    private Long ownerId;
 
 }

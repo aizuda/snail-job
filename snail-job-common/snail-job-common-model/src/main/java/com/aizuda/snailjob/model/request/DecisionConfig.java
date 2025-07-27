@@ -1,8 +1,6 @@
-package com.aizuda.snailjob.server.common.dto;
+package com.aizuda.snailjob.model.request;
 
 import lombok.Data;
-
-import java.util.Map;
 
 /**
  * 决策节点配置
@@ -23,11 +21,6 @@ public class DecisionConfig {
      * 条件节点表达式
      */
     private String nodeExpression;
-
-//    /**
-//     * 判定逻辑 and 或者 or
-//     */
-//    private Integer logicalCondition;
 
     /**
      * 是否为其他情况

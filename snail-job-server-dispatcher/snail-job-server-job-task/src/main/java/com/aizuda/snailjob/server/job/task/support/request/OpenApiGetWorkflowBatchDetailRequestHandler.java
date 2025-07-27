@@ -15,7 +15,7 @@ import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.convert.JobBatchResponseVOConverter;
 import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
-import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
+import com.aizuda.snailjob.model.request.JobTaskConfig;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
 import com.aizuda.snailjob.server.common.handler.WorkflowHandler;

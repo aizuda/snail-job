@@ -1,5 +1,8 @@
-package com.aizuda.snailjob.client.job.core.dto;
+package com.aizuda.snailjob.model.base;
 
+
+import com.aizuda.snailjob.model.request.CallbackConfig;
+import com.aizuda.snailjob.model.request.DecisionConfig;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -10,7 +13,7 @@ import java.time.LocalDateTime;
  * @since : 2.4.0
  */
 @Data
-public class JobBatchResponseVO {
+public class JobBatchResponse {
 
     private Long id;
 

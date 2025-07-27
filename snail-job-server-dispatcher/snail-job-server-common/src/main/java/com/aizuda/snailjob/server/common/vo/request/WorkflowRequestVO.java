@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.server.common.vo.request;
 
-import com.aizuda.snailjob.server.common.dto.CallbackConfig;
-import com.aizuda.snailjob.server.common.dto.DecisionConfig;
-import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
+import com.aizuda.snailjob.model.request.CallbackConfig;
+import com.aizuda.snailjob.model.request.DecisionConfig;
+import com.aizuda.snailjob.model.request.JobTaskConfig;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

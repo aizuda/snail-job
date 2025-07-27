@@ -1,6 +1,6 @@
-package com.aizuda.snailjob.server.openapi.dto;
+package com.aizuda.snailjob.model.request;
 
-import com.aizuda.snailjob.server.service.dto.JobTriggerDTO;
+import com.aizuda.snailjob.model.base.JobTriggerRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,5 +13,5 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class JobTriggerApiDTO extends JobTriggerDTO {
+public class JobTriggerApiRequest extends JobTriggerRequest {
 }

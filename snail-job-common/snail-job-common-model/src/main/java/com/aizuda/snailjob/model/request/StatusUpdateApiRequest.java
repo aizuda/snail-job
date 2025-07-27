@@ -1,6 +1,6 @@
-package com.aizuda.snailjob.server.openapi.dto;
+package com.aizuda.snailjob.model.request;
 
-import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestDTO;
+import com.aizuda.snailjob.model.base.StatusUpdateRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,5 +13,5 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class StatusUpdateRequestApiDTO extends StatusUpdateRequestDTO {
+public class StatusUpdateApiRequest extends StatusUpdateRequest {
 }

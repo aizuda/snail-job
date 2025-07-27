@@ -4,13 +4,13 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.job.core.dto.RequestAddOrUpdateJobDTO;
 import com.aizuda.snailjob.client.job.core.enums.AllocationAlgorithmEnum;
 import com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum;
 import com.aizuda.snailjob.client.job.core.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.model.request.JobApiRequest;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,14 +27,12 @@ import static com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum.*;
 public abstract class AbstractParamsHandler<H, R> extends AbstractJobRequestHandler<R> {
     protected static final String SHARD_NUM = "shardNum";
     @Getter
-    private final RequestAddOrUpdateJobDTO reqDTO;
+    private final JobApiRequest reqDTO;
     @Setter
     private H r;
 
     public AbstractParamsHandler(JobTaskTypeEnum taskType) {
-        this.reqDTO = new RequestAddOrUpdateJobDTO();
-        // 默认创建就开启
-        reqDTO.setJobStatus(StatusEnum.YES.getStatus());
+        this.reqDTO = new JobApiRequest();
         // 设置任务类型
         reqDTO.setTaskType(taskType.getType());
         // 默认java
@@ -83,6 +81,19 @@ public abstract class AbstractParamsHandler<H, R> extends AbstractJobRequestHand
         }
         return r;
     }
+
+    /**
+     * 设置状态
+     *
+     * @param statusEnum {@link StatusEnum} 状态
+     * @return this
+     * @since 1.7.0-beta1
+     */
+    public H setJobStatus(StatusEnum statusEnum) {
+        reqDTO.setJobStatus(statusEnum.getStatus());
+        return r;
+    }
+
 
     /**
      * 设置任务名

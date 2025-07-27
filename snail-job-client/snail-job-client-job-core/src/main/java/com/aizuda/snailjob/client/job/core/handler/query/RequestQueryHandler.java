@@ -3,18 +3,16 @@ package com.aizuda.snailjob.client.job.core.handler.query;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
-import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.job.core.dto.JobResponseVO;
 import com.aizuda.snailjob.client.job.core.handler.AbstractJobRequestHandler;
-import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.model.response.JobApiResponse;
 
 import java.util.Objects;
 
-public class RequestQueryHandler extends AbstractJobRequestHandler<JobResponseVO> {
+public class RequestQueryHandler extends AbstractJobRequestHandler<JobApiResponse> {
     private final Long queryJobId;
 
     public RequestQueryHandler(Long queryJobId) {
@@ -22,7 +20,7 @@ public class RequestQueryHandler extends AbstractJobRequestHandler<JobResponseVO
     }
 
     @Override
-    protected void afterExecute(JobResponseVO jobResponseVO) {
+    protected void afterExecute(JobApiResponse jobResponseVO) {
 
     }
 
@@ -32,7 +30,7 @@ public class RequestQueryHandler extends AbstractJobRequestHandler<JobResponseVO
     }
 
     @Override
-    protected JobResponseVO doExecute() {
+    protected JobApiResponse doExecute() {
         Result<Object> result;
         if (isOpenApiV2()) {
              result = clientV2.getJobDetail(queryJobId);
@@ -43,8 +41,10 @@ public class RequestQueryHandler extends AbstractJobRequestHandler<JobResponseVO
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();
-        Assert.isTrue(Objects.nonNull(data), () -> new SnailJobClientException("Failed to get details of task [{}]", queryJobId));
-        return JsonUtil.parseObject(JsonUtil.toJsonString(data), JobResponseVO.class);
+        if (Objects.isNull(data)) {
+            return null;
+        }
+        return JsonUtil.parseObject(JsonUtil.toJsonString(data), JobApiResponse.class);
     }
 
     @Override

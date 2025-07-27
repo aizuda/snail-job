@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.web.controller;
 
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
-import com.aizuda.snailjob.server.service.dto.JobTriggerDTO;
+import com.aizuda.snailjob.model.base.JobTriggerRequest;
 import com.aizuda.snailjob.server.service.service.JobService;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
@@ -12,7 +12,6 @@ import com.aizuda.snailjob.server.web.util.ExportUtils;
 import com.aizuda.snailjob.server.web.util.ImportUtils;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -99,7 +98,7 @@ public class JobController {
     @PostMapping("/trigger")
     @LoginRequired
     public Boolean trigger(@RequestBody @Validated JobTriggerVO jobTrigger) {
-        JobTriggerDTO triggerDTO = new JobTriggerDTO();
+        JobTriggerRequest triggerDTO = new JobTriggerRequest();
         triggerDTO.setJobId(jobTrigger.getJobId());
         triggerDTO.setTmpArgsStr(jobTrigger.getTmpArgsStr());
         return jobService.trigger(triggerDTO);

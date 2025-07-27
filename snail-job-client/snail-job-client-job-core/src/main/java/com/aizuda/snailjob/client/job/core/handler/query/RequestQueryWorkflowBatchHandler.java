@@ -4,18 +4,18 @@ package com.aizuda.snailjob.client.job.core.handler.query;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
-import com.aizuda.snailjob.client.job.core.dto.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.client.job.core.handler.AbstractJobRequestHandler;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.model.response.WorkflowDetailApiResponse;
 
 import java.util.Objects;
 
 /**
  * @since 1.5.0
  */
-public class RequestQueryWorkflowBatchHandler extends AbstractJobRequestHandler<WorkflowDetailResponseVO> {
+public class RequestQueryWorkflowBatchHandler extends AbstractJobRequestHandler<WorkflowDetailApiResponse> {
     private final Long workflowBatchId;
 
     public RequestQueryWorkflowBatchHandler(Long workflowBatchId) {
@@ -23,7 +23,7 @@ public class RequestQueryWorkflowBatchHandler extends AbstractJobRequestHandler<
     }
 
     @Override
-    protected void afterExecute(WorkflowDetailResponseVO workflowDetailResponseVO) {
+    protected void afterExecute(WorkflowDetailApiResponse workflowDetailResponseVO) {
 
     }
 
@@ -33,7 +33,7 @@ public class RequestQueryWorkflowBatchHandler extends AbstractJobRequestHandler<
     }
 
     @Override
-    protected WorkflowDetailResponseVO doExecute() {
+    protected WorkflowDetailApiResponse doExecute() {
         Result<Object> result;
         if (isOpenApiV2()) {
             result = clientV2.getWorkflowBatchDetail(workflowBatchId);
@@ -44,8 +44,10 @@ public class RequestQueryWorkflowBatchHandler extends AbstractJobRequestHandler<
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();
-        Assert.isTrue(Objects.nonNull(data), () -> new SnailJobClientException("Failed to get workflow task batch details for [{}]", workflowBatchId));
-        return JsonUtil.parseObject(JsonUtil.toJsonString(data), WorkflowDetailResponseVO.class);
+        if (Objects.isNull(data)) {
+            return null;
+        }
+        return JsonUtil.parseObject(JsonUtil.toJsonString(data), WorkflowDetailApiResponse.class);
     }
 
     @Override

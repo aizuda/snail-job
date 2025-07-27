@@ -6,6 +6,7 @@ import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.client.core.dto.RequestTriggerRetryDTO;
 import com.aizuda.snailjob.client.core.dto.RequestUpdateRetryStatusDTO;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.model.base.StatusUpdateRequest;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.*;
 
@@ -17,5 +18,5 @@ public interface RetryOpenApiClientV2 {
     Result<Object> triggerRetryTask(RequestTriggerRetryDTO triggerRetryDTO);
 
     @Mapping(method = RequestMethod.PUT, path = OPENAPI_UPDATE_RETRY_STATUS_V2)
-    Result<Object> updateRetryTaskStatus(RequestUpdateRetryStatusDTO statusDTO);
+    Result<Object> updateRetryTaskStatus(StatusUpdateRequest statusDTO);
 }

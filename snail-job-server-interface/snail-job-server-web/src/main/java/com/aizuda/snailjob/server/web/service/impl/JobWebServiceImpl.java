@@ -6,6 +6,7 @@ import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.model.base.JobRequest;
 import com.aizuda.snailjob.server.common.WaitStrategy;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
@@ -14,8 +15,7 @@ import com.aizuda.snailjob.server.common.util.CronUtils;
 import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
 import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.server.job.task.support.JobPrepareHandler;
-import com.aizuda.snailjob.server.service.dto.JobRequestDTO;
-import com.aizuda.snailjob.server.service.dto.JobResponseDTO;
+import com.aizuda.snailjob.model.base.JobResponse;
 import com.aizuda.snailjob.server.service.service.impl.AbstractJobService;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
@@ -351,7 +351,7 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
 //    }
 
     @Override
-    protected void getJobByIdAfter(JobResponseDTO responseBaseDTO, Job job) {
+    protected void getJobByIdAfter(JobResponse responseBaseDTO, Job job) {
         JobResponseWebVO jobResponseWebVO = (JobResponseWebVO) responseBaseDTO;
         SystemUser systemUser = systemUserMapper.selectById(job.getOwnerId());
         if (Objects.nonNull(systemUser)) {
@@ -361,7 +361,7 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
     }
 
     @Override
-    protected void updateJobPreValidator(JobRequestDTO jobRequest) {
+    protected void updateJobPreValidator(JobRequest jobRequest) {
 
     }
 
@@ -371,12 +371,12 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
     }
 
     @Override
-    protected void addJobPopulate(Job job, JobRequestDTO request) {
+    protected void addJobPopulate(Job job, JobRequest request) {
 
     }
 
     @Override
-    protected void addJobPreValidator(JobRequestDTO request) {
+    protected void addJobPreValidator(JobRequest request) {
 
     }
 

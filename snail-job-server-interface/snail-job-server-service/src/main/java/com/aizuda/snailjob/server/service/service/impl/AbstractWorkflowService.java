@@ -7,6 +7,8 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.model.base.WorkflowTriggerRequest;
+import com.aizuda.snailjob.model.request.WorkflowTriggerApiRequest;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -14,8 +16,8 @@ import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.prepare.workflow.TerminalWorkflowPrepareHandler;
 import com.aizuda.snailjob.server.service.convert.WorkflowTaskConverter;
-import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestDTO;
-import com.aizuda.snailjob.server.service.dto.JobTriggerDTO;
+import com.aizuda.snailjob.model.base.StatusUpdateRequest;
+import com.aizuda.snailjob.model.base.JobTriggerRequest;
 import com.aizuda.snailjob.server.service.kit.WorkflowKit;
 import com.aizuda.snailjob.server.service.service.WorkflowService;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
@@ -48,10 +50,8 @@ public abstract class AbstractWorkflowService implements WorkflowService {
     protected JobSummaryMapper jobSummaryMapper;
 
     @Override
-    public boolean updateWorkFlowStatus(StatusUpdateRequestDTO requestDTO) {
-        Workflow workflow = workflowMapper.selectOne(new LambdaQueryWrapper<Workflow>()
-                .select(Workflow::getId)
-                .eq(Workflow::getId, requestDTO.getId()));
+    public boolean updateWorkFlowStatus(StatusUpdateRequest requestDTO) {
+        Workflow workflow = workflowMapper.selectById(requestDTO.getId());
         Assert.notNull(workflow, "workflow does not exist");
 
         // 直接幂等
@@ -62,17 +62,17 @@ public abstract class AbstractWorkflowService implements WorkflowService {
         Workflow updateWorkflow = new Workflow();
         if (Objects.equals(requestDTO.getStatus(), StatusEnum.YES.getStatus())) {
             // 开启时重新计算调度时间
-            workflow.setNextTriggerAt(WorkflowKit.calculateNextTriggerAt(workflow.getTriggerType(), workflow.getTriggerInterval(), DateUtils.toNowMilli()));
+            updateWorkflow.setNextTriggerAt(WorkflowKit.calculateNextTriggerAt(workflow.getTriggerType(), workflow.getTriggerInterval(), DateUtils.toNowMilli()));
         }
 
         updateWorkflow.setId(workflow.getId());
-        workflow.setWorkflowStatus(requestDTO.getStatus());
-        return 1 == workflowMapper.updateById(workflow);
+        updateWorkflow.setWorkflowStatus(requestDTO.getStatus());
+        return 1 == workflowMapper.updateById(updateWorkflow);
     }
 
     @Override
-    public boolean triggerWorkFlow(JobTriggerDTO jobTriggerDTO) {
-        Workflow workflow = workflowMapper.selectById(jobTriggerDTO.getJobId());
+    public boolean triggerWorkFlow(WorkflowTriggerRequest request) {
+        Workflow workflow = workflowMapper.selectById(request.getWorkflowId());
         Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
         Assert.isTrue(workflow.getNamespaceId().equals(getNamespaceId()), () -> new SnailJobServerException("namespace id not match."));
 
@@ -99,7 +99,7 @@ public abstract class AbstractWorkflowService implements WorkflowService {
         prepareDTO.setNextTriggerAt(DateUtils.toNowMilli());
         prepareDTO.setTaskExecutorScene(JobTaskExecutorSceneEnum.MANUAL_WORKFLOW.getType());
         // 设置工作流上下文
-        String tmpWfContext = jobTriggerDTO.getTmpArgsStr();
+        String tmpWfContext = request.getTmpWfContext();
         if (StrUtil.isNotBlank(tmpWfContext) && !JsonUtil.isEmptyJson(tmpWfContext)) {
             Map<String, Object> tmpWfContextMap = JsonUtil.parseHashMap(tmpWfContext);
             Map<String, Object> wfContextMap = JsonUtil.parseHashMap(workflow.getWfContext());

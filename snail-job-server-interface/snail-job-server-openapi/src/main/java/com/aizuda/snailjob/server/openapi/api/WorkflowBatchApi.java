@@ -1,11 +1,12 @@
 package com.aizuda.snailjob.server.openapi.api;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.server.openapi.dto.WorkflowDetailResponseApiDTO;
+import com.aizuda.snailjob.model.response.WorkflowDetailApiResponse;
 import com.aizuda.snailjob.server.openapi.service.WorkflowBatchApiService;
 import com.aizuda.snailjob.server.service.service.WorkflowBatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,8 +26,8 @@ public class WorkflowBatchApi {
     @Qualifier("workflowBatchApiCommonService")
     private final WorkflowBatchService workflowBatchService;
 
-    @PostMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_WORKFLOW_BATCH_DETAIL_V2)
-    public WorkflowDetailResponseApiDTO getWorkflowBatchById(@RequestParam("id") Long id) {
-        return workflowBatchService.getWorkflowBatchById(id, WorkflowDetailResponseApiDTO.class);
+    @GetMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_WORKFLOW_BATCH_DETAIL_V2)
+    public WorkflowDetailApiResponse getWorkflowBatchById(@RequestParam("id") Long id) {
+        return workflowBatchService.getWorkflowBatchById(id, WorkflowDetailApiResponse.class);
     }
 }

@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.dto;
+package com.aizuda.snailjob.model.request;
 
 import lombok.Data;
 
@@ -10,6 +10,7 @@ import lombok.Data;
  * @since 2.6.0
  */
 @Data
+@Deprecated(since = "1.7.0")
 public class CallbackConfig {
 
     /**

@@ -14,7 +14,7 @@ import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskPrepareDTO;
 import com.aizuda.snailjob.server.service.convert.RetryConverter;
 import com.aizuda.snailjob.server.service.dto.RetryResponseDTO;
-import com.aizuda.snailjob.server.service.dto.StatusUpdateRequestDTO;
+import com.aizuda.snailjob.model.base.StatusUpdateRequest;
 import com.aizuda.snailjob.server.service.dto.TriggerRetryDTO;
 import com.aizuda.snailjob.server.service.handler.RetryArgsDeserializeHandler;
 import com.aizuda.snailjob.server.service.service.RetryService;
@@ -97,7 +97,7 @@ public abstract class AbstractRetryService implements RetryService {
     }
 
     @Override
-    public boolean updateRetryStatus(StatusUpdateRequestDTO requestDTO) {
+    public boolean updateRetryStatus(StatusUpdateRequest requestDTO) {
         RetryStatusEnum retryStatusEnum = RetryStatusEnum.getByStatus(requestDTO.getStatus());
         if (Objects.isNull(retryStatusEnum)) {
             throw new SnailJobServerException("Retry status error. [{}]", requestDTO.getStatus());

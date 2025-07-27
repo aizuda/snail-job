@@ -4,18 +4,17 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.server.common.dto.CallbackConfig;
-import com.aizuda.snailjob.server.common.dto.DecisionConfig;
-import com.aizuda.snailjob.server.common.dto.JobTaskConfig;
+import com.aizuda.snailjob.model.request.CallbackConfig;
+import com.aizuda.snailjob.model.request.DecisionConfig;
+import com.aizuda.snailjob.model.request.JobTaskConfig;
 import com.aizuda.snailjob.server.common.dto.PointInTimeDTO;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
-import com.aizuda.snailjob.server.service.dto.WorkflowDetailResponseDTO;
+import com.aizuda.snailjob.model.base.WorkflowDetailResponse;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
@@ -55,23 +54,23 @@ public interface WorkflowConverter {
             @Mapping(target = "triggerInterval", expression = "java(WorkflowConverter.toTriggerInterval(workflow))"),
             @Mapping(target = "ownerId", expression = "java(WorkflowConverter.getOwnerId(workflow))")
     })
-    WorkflowDetailResponseDTO convert(Workflow workflow);
+    WorkflowDetailResponse convert(Workflow workflow);
 
     @Mappings({
             @Mapping(target = "notifyIds", expression = "java(WorkflowConverter.toNotifyIds(workflow.getNotifyIds()))"),
             @Mapping(target = "triggerInterval", expression = "java(WorkflowConverter.toTriggerInterval(workflow))"),
             @Mapping(target = "ownerId", expression = "java(WorkflowConverter.getOwnerId(workflow))")
     })
-    void fillCommonFields(Workflow workflow, @MappingTarget WorkflowDetailResponseDTO target);
+    void fillCommonFields(Workflow workflow, @MappingTarget WorkflowDetailResponse target);
 
-    List<WorkflowDetailResponseDTO.NodeInfo> convertList(List<WorkflowNode> workflowNodes);
+    List<WorkflowDetailResponse.NodeInfo> convertList(List<WorkflowNode> workflowNodes);
 
     @Mappings({
             @Mapping(target = "decision", expression = "java(WorkflowConverter.parseDecisionConfig(workflowNode))"),
             @Mapping(target = "callback", expression = "java(WorkflowConverter.parseCallbackConfig(workflowNode))"),
             @Mapping(target = "jobTask", expression = "java(WorkflowConverter.parseJobTaskConfig(workflowNode))")
     })
-    WorkflowDetailResponseDTO.NodeInfo convert(WorkflowNode workflowNode);
+    WorkflowDetailResponse.NodeInfo convert(WorkflowNode workflowNode);
 
     @Mappings({
             @Mapping(target = "nextTriggerAt", expression = "java(WorkflowConverter.toLocalDateTime(workflow.getNextTriggerAt()))"),
@@ -95,11 +94,7 @@ public interface WorkflowConverter {
     }
 
     static LocalDateTime toLocalDateTime(Long nextTriggerAt) {
-        if (Objects.isNull(nextTriggerAt) || nextTriggerAt == 0) {
-            return null;
-        }
-
-        return DateUtils.toLocalDateTime(nextTriggerAt);
+        return JobConverter.toLocalDateTime(nextTriggerAt);
     }
 
     static DecisionConfig parseDecisionConfig(WorkflowNode workflowNode) {

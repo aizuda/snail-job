@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.common.vo;
 
-import com.aizuda.snailjob.server.common.dto.CallbackConfig;
-import com.aizuda.snailjob.server.common.dto.DecisionConfig;
+import com.aizuda.snailjob.model.request.CallbackConfig;
+import com.aizuda.snailjob.model.request.DecisionConfig;
 import lombok.Data;
 
 import java.time.LocalDateTime;
