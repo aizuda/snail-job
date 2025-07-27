@@ -2,11 +2,13 @@ package com.aizuda.snailjob.client.job.core.handler;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.job.core.dto.RequestAddOrUpdateJobDTO;
 import com.aizuda.snailjob.client.job.core.enums.AllocationAlgorithmEnum;
 import com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum;
 import com.aizuda.snailjob.client.job.core.util.TriggerIntervalUtils;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import lombok.Getter;
@@ -37,6 +39,9 @@ public abstract class AbstractParamsHandler<H, R> extends AbstractJobRequestHand
         reqDTO.setTaskType(taskType.getType());
         // 默认java
         reqDTO.setExecutorType(ExecutorTypeEnum.JAVA.getType());
+        // 设置 groupName
+        SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
+        reqDTO.setGroupName(snailJobProperties.getGroup());
     }
 
     protected H setId(Long id) {
