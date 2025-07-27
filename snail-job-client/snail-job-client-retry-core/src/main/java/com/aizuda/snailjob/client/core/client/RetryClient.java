@@ -2,9 +2,10 @@ package com.aizuda.snailjob.client.core.client;
 
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
-import com.aizuda.snailjob.client.model.request.*;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.model.request.DispatchCallbackResultRequest;
+import com.aizuda.snailjob.model.request.DispatchRetryResultRequest;
 
 /**
  * netty 客户端请求类

@@ -1,14 +1,11 @@
 package com.aizuda.snailjob.server.retry.task.support;
 
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
-import com.aizuda.snailjob.client.model.request.*;
+import com.aizuda.snailjob.model.request.*;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.dto.RetryAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
-import com.aizuda.snailjob.server.model.dto.RetryLogTaskDTO;
-import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import com.aizuda.snailjob.server.retry.task.dto.*;
 import com.aizuda.snailjob.server.retry.task.support.generator.retry.TaskContext;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskGeneratorDTO;
@@ -46,7 +43,7 @@ public interface RetryTaskConverter {
     })
     Retry toRetryTask(RetryDeadLetter retryDeadLetter);
 
-    List<Retry> toRetryTaskList(List<RetryTaskDTO> retryTaskDTOList);
+    List<Retry> toRetryTaskList(List<RetryTaskRequest> retryTaskRequestList);
 
     Retry toRetryTask(TaskContext.TaskInfo taskInfo);
 
@@ -88,7 +85,7 @@ public interface RetryTaskConverter {
         return new HashSet<>(JsonUtil.parseList(notifyRecipientIdsStr, Long.class));
     }
 
-    RetryTaskLogMessageDO toRetryTaskLogMessage(RetryLogTaskDTO retryLogTaskDTO);
+    RetryTaskLogMessageDO toRetryTaskLogMessage(RetryLogTaskRequest retryLogTaskRequest);
 
     @Mapping(target = "timestamp", expression = "java(DateUtils.toNowMilli())")
     RetryLogMetaDTO toLogMetaDTO(Retry retry);

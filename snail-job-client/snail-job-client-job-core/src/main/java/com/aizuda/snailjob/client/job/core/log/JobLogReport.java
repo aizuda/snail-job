@@ -4,7 +4,7 @@ import com.aizuda.snailjob.client.common.log.report.AbstractLogReport;
 import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
 import com.aizuda.snailjob.common.log.dto.LogContentDTO;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
-import com.aizuda.snailjob.server.model.dto.JobLogTaskDTO;
+import com.aizuda.snailjob.model.request.JobLogTaskRequest;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * @since 3.2.0
  */
 @Component
-public class JobLogReport extends AbstractLogReport<JobLogTaskDTO> {
+public class JobLogReport extends AbstractLogReport<JobLogTaskRequest> {
 
     @Override
     public boolean supports() {
@@ -21,9 +21,9 @@ public class JobLogReport extends AbstractLogReport<JobLogTaskDTO> {
     }
 
     @Override
-    protected JobLogTaskDTO buildLogTaskDTO(LogContentDTO logContentDTO) {
+    protected JobLogTaskRequest buildLogTaskDTO(LogContentDTO logContentDTO) {
         JobLogMeta context = (JobLogMeta) SnailJobLogManager.getLogMeta();
-        JobLogTaskDTO logTaskDTO = new JobLogTaskDTO();
+        JobLogTaskRequest logTaskDTO = new JobLogTaskRequest();
         logTaskDTO.setJobId(context.getJobId());
         logTaskDTO.setLogType(LogTypeEnum.JOB.name());
         logTaskDTO.setTaskId(context.getTaskId());

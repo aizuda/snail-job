@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
+import com.aizuda.snailjob.model.request.RetryTaskRequest;
 import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
 import com.aizuda.snailjob.server.common.dto.InstanceSelectCondition;
 import com.aizuda.snailjob.server.common.handler.InstanceManager;
@@ -9,7 +10,7 @@ import org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.client.model.GenerateRetryIdempotentIdDTO;
+import com.aizuda.snailjob.model.request.GenerateRetryIdempotentIdRequest;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
@@ -22,7 +23,6 @@ import com.aizuda.snailjob.server.common.enums.TaskGeneratorSceneEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.server.common.util.DateUtils;
-import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import com.aizuda.snailjob.server.retry.task.client.RetryRpcClient;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskPrepareDTO;
 import com.aizuda.snailjob.server.retry.task.support.generator.retry.TaskContext;
@@ -172,12 +172,12 @@ public class RetryWebServiceImpl extends AbstractRetryService implements RetryWe
                 () -> new SnailJobServerException("Failed to generate idempotentId: No active client nodes exist"));
 
         // 委托客户端生成idempotentId
-        GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO = new GenerateRetryIdempotentIdDTO();
-        generateRetryIdempotentIdDTO.setGroup(generateRetryIdempotentIdVO.getGroupName());
-        generateRetryIdempotentIdDTO.setScene(generateRetryIdempotentIdVO.getSceneName());
-        generateRetryIdempotentIdDTO.setArgsStr(generateRetryIdempotentIdVO.getArgsStr());
-        generateRetryIdempotentIdDTO.setExecutorName(generateRetryIdempotentIdVO.getExecutorName());
-        generateRetryIdempotentIdDTO.setSerializerName(generateRetryIdempotentIdVO.getSerializerName());
+        GenerateRetryIdempotentIdRequest generateRetryIdempotentIdRequest = new GenerateRetryIdempotentIdRequest();
+        generateRetryIdempotentIdRequest.setGroup(generateRetryIdempotentIdVO.getGroupName());
+        generateRetryIdempotentIdRequest.setScene(generateRetryIdempotentIdVO.getSceneName());
+        generateRetryIdempotentIdRequest.setArgsStr(generateRetryIdempotentIdVO.getArgsStr());
+        generateRetryIdempotentIdRequest.setExecutorName(generateRetryIdempotentIdVO.getExecutorName());
+        generateRetryIdempotentIdRequest.setSerializerName(generateRetryIdempotentIdVO.getSerializerName());
 
         RetryRpcClient rpcClient = RequestBuilder.<RetryRpcClient, Result>newBuilder()
                 .nodeInfo(instance)
@@ -188,7 +188,7 @@ public class RetryWebServiceImpl extends AbstractRetryService implements RetryWe
                 .client(RetryRpcClient.class)
                 .build();
 
-        Result result = rpcClient.generateIdempotentId(generateRetryIdempotentIdDTO);
+        Result result = rpcClient.generateIdempotentId(generateRetryIdempotentIdRequest);
 
         Assert.notNull(result, () -> new SnailJobServerException("idempotentId generation failed"));
         Assert.isTrue(1 == result.getStatus(),
@@ -265,7 +265,7 @@ public class RetryWebServiceImpl extends AbstractRetryService implements RetryWe
         Pattern pattern = Pattern.compile(patternString);
         Matcher matcher = pattern.matcher(logStr);
 
-        List<RetryTaskDTO> waitInsertList = new ArrayList<>();
+        List<RetryTaskRequest> waitInsertList = new ArrayList<>();
         // 查找匹配的内容并输出
         while (matcher.find()) {
             String extractedData = matcher.group(1);
@@ -273,7 +273,7 @@ public class RetryWebServiceImpl extends AbstractRetryService implements RetryWe
                 continue;
             }
 
-            List<RetryTaskDTO> retryTaskList = JsonUtil.parseList(extractedData, RetryTaskDTO.class);
+            List<RetryTaskRequest> retryTaskList = JsonUtil.parseList(extractedData, RetryTaskRequest.class);
             if (CollUtil.isNotEmpty(retryTaskList)) {
                 waitInsertList.addAll(retryTaskList);
             }
@@ -290,7 +290,7 @@ public class RetryWebServiceImpl extends AbstractRetryService implements RetryWe
                 .allMatch(retryTaskDTO -> retryTaskDTO.getGroupName().equals(parseLogsVO.getGroupName()));
         Assert.isTrue(allMatch, () -> new SnailJobServerException("Data groupName mismatch, please check your data"));
 
-        Map<String, List<RetryTaskDTO>> map = StreamUtils.groupByKey(waitInsertList, RetryTaskDTO::getSceneName);
+        Map<String, List<RetryTaskRequest>> map = StreamUtils.groupByKey(waitInsertList, RetryTaskRequest::getSceneName);
 
         String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 

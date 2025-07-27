@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.template.datasource.access;
 
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
+import com.aizuda.snailjob.model.request.ConfigRequest;
 import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.NotifyConfig;
 import com.aizuda.snailjob.template.datasource.persistence.po.RetrySceneConfig;
@@ -102,7 +102,7 @@ public interface ConfigAccess<T> extends Access<T> {
      * @param namespaceId 命名空间id
      * @return ConfigDTO
      */
-    ConfigDTO getConfigInfo(String groupName, final String namespaceId);
+    ConfigRequest getConfigInfo(String groupName, final String namespaceId);
 
     List<T> list(LambdaQueryWrapper<T> query);
 

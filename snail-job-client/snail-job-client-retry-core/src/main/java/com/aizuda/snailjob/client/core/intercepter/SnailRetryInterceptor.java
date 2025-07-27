@@ -22,8 +22,8 @@ import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
 import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify.Recipient;
+import com.aizuda.snailjob.model.request.ConfigRequest;
+import com.aizuda.snailjob.model.request.ConfigRequest.Notify.Recipient;
 import com.google.common.base.Defaults;
 import com.google.common.collect.Lists;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -264,7 +264,7 @@ public class SnailRetryInterceptor implements MethodInterceptor, AfterAdvice, Se
     private void sendMessage(Exception e) {
 
         try {
-            ConfigDTO.Notify notify = GroupVersionCache.getRetryNotifyAttribute(
+            ConfigRequest.Notify notify = GroupVersionCache.getRetryNotifyAttribute(
                     RetryNotifySceneEnum.CLIENT_COMPONENT_ERROR.getNotifyScene());
             if (Objects.nonNull(notify)) {
                 SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);

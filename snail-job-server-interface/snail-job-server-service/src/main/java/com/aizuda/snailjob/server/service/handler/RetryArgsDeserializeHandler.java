@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.service.handler;
 
-import com.aizuda.snailjob.client.model.RetryArgsDeserializeDTO;
+import com.aizuda.snailjob.model.request.RetryArgsDeserializeRequest;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
@@ -31,7 +31,7 @@ public class RetryArgsDeserializeHandler {
     private final InstanceManager instanceManager;
     private final AccessTemplate accessTemplate;
 
-    public String deserialize(RetryArgsDeserializeDTO retryArgsDeserializeVO) {
+    public String deserialize(RetryArgsDeserializeRequest retryArgsDeserializeVO) {
 
         RetrySceneConfig retrySceneConfig = accessTemplate.getSceneConfigAccess()
                 .getSceneConfigByGroupNameAndSceneName(retryArgsDeserializeVO.getGroup(),

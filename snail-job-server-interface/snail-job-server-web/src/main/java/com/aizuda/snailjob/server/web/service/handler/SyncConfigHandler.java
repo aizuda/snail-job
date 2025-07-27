@@ -8,7 +8,7 @@ import com.aizuda.snailjob.server.common.dto.ConfigSyncTask;
 import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
 import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import com.aizuda.snailjob.server.common.rpc.client.RequestBuilder;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
+import com.aizuda.snailjob.model.request.ConfigRequest;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -59,7 +59,7 @@ public class SyncConfigHandler implements Lifecycle, Runnable {
             Set<InstanceLiveInfo> instanceALiveInfoSet = instanceManager.getInstanceALiveInfoSet(namespaceId, groupName);
             // 同步版本到每个客户端节点
             for (final InstanceLiveInfo instanceLiveInfo : instanceALiveInfoSet) {
-                ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespaceId);
+                ConfigRequest configRequest = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespaceId);
                 CommonRpcClient rpcClient = RequestBuilder.<CommonRpcClient, Result>newBuilder()
                         .failover(false)
                         .failRetry(true)
@@ -68,7 +68,7 @@ public class SyncConfigHandler implements Lifecycle, Runnable {
                         .nodeInfo(instanceLiveInfo)
                         .client(CommonRpcClient.class)
                         .build();
-                SnailJobLog.LOCAL.info("Synchronization result [{}]", rpcClient.syncConfig(configDTO));
+                SnailJobLog.LOCAL.info("Synchronization result [{}]", rpcClient.syncConfig(configRequest));
             }
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("version sync error. groupName:[{}]", groupName, e);

@@ -44,16 +44,16 @@
             <artifactId>snail-job-common-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-common-server-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-processor</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aizuda</groupId>
+            <artifactId>snail-job-common-model</artifactId>
         </dependency>
 
     </dependencies>

@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.server.job.task.support;
 
-import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
-import com.aizuda.snailjob.client.model.request.DispatchJobResultRequest;
-import com.aizuda.snailjob.client.model.request.MapTaskRequest;
+import com.aizuda.snailjob.model.request.DispatchJobRequest;
+import com.aizuda.snailjob.model.request.DispatchJobResultRequest;
+import com.aizuda.snailjob.model.request.MapTaskRequest;
 import com.aizuda.snailjob.server.common.dto.JobAlarmInfo;
 import com.aizuda.snailjob.server.common.dto.JobLogDTO;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
@@ -15,7 +15,7 @@ import com.aizuda.snailjob.server.job.task.support.generator.batch.JobTaskBatchG
 import com.aizuda.snailjob.server.job.task.support.generator.task.JobTaskGenerateContext;
 import com.aizuda.snailjob.server.job.task.support.result.job.JobExecutorResultContext;
 import com.aizuda.snailjob.server.job.task.support.stop.TaskStopJobContext;
-import com.aizuda.snailjob.server.model.dto.LogTaskDTO;
+import com.aizuda.snailjob.model.request.LogTaskRequest;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.JobLogMessageDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobLogMessage;
@@ -83,7 +83,7 @@ public interface JobTaskConverter {
 
     JobLogMessageDO toJobLogMessage(JobLogDTO jobLogDTO);
 
-    JobLogMessageDO toJobLogMessage(LogTaskDTO logTaskDTO);
+    JobLogMessageDO toJobLogMessage(LogTaskRequest logTaskRequest);
 
     JobLogMetaDTO toJobLogDTO(BaseDTO baseDTO);
 

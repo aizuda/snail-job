@@ -11,7 +11,7 @@ import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.JobLog
 import  org.apache.pekko.actor.AbstractActor;
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
-import com.aizuda.snailjob.server.model.dto.JobLogTaskDTO;
+import com.aizuda.snailjob.model.request.JobLogTaskRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -42,11 +42,11 @@ public class JobLogActor extends AbstractActor {
                             return;
                         }
 
-                        List<JobLogTaskDTO> jobLogTasks = (List<JobLogTaskDTO>) list;
-                        Map<Long, List<JobLogTaskDTO>> logTaskDTOMap = jobLogTasks.
-                                stream().collect(Collectors.groupingBy(JobLogTaskDTO::getTaskId, Collectors.toList()));
+                        List<JobLogTaskRequest> jobLogTasks = (List<JobLogTaskRequest>) list;
+                        Map<Long, List<JobLogTaskRequest>> logTaskDTOMap = jobLogTasks.
+                                stream().collect(Collectors.groupingBy(JobLogTaskRequest::getTaskId, Collectors.toList()));
                         List<JobLogMessageDO> jobLogMessageList = new ArrayList<>();
-                        for (List<JobLogTaskDTO> logTaskDTOList : logTaskDTOMap.values()) {
+                        for (List<JobLogTaskRequest> logTaskDTOList : logTaskDTOMap.values()) {
                             JobLogMessageDO jobLogMessage = JobTaskConverter.INSTANCE.toJobLogMessage(logTaskDTOList.get(0));
                             jobLogMessage.setLogNum(logTaskDTOList.size());
                             List<Map<String, String>> messageMapList = StreamUtils.toList(logTaskDTOList,

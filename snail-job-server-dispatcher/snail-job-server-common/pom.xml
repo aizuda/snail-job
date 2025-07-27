@@ -113,7 +113,7 @@
         </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>
-            <artifactId>snail-job-common-client-api</artifactId>
+            <artifactId>snail-job-common-model</artifactId>
         </dependency>
         <dependency>
             <groupId>com.aizuda</groupId>

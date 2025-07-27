@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.retry.task.support.dispatch;
 
+import com.aizuda.snailjob.model.request.RetryLogTaskRequest;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.RetryTaskLogMessageDO;
 import  org.apache.pekko.actor.AbstractActor;
@@ -8,11 +9,8 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.dto.TaskLogFieldDTO;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
-import com.aizuda.snailjob.server.model.dto.RetryLogTaskDTO;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskLogDTO;
 import com.aizuda.snailjob.server.retry.task.support.RetryTaskConverter;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.RetryTaskLogMessageMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.RetryTaskLogMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -42,7 +40,7 @@ public class RetryLogActor extends AbstractActor {
                     if (CollUtil.isEmpty(list)) {
                         return;
                     }
-                    saveRetryTaskLogMessage((List<RetryLogTaskDTO>) list);
+                    saveRetryTaskLogMessage((List<RetryLogTaskRequest>) list);
                     getContext().stop(getSelf());
                 }).match(RetryTaskLogDTO.class,
                 retryTaskLogDTO -> {
@@ -51,13 +49,13 @@ public class RetryLogActor extends AbstractActor {
                 }).build();
     }
 
-    private void saveRetryTaskLogMessage(final List<RetryLogTaskDTO> list) {
+    private void saveRetryTaskLogMessage(final List<RetryLogTaskRequest> list) {
 
-        List<RetryLogTaskDTO> jobLogTasks = list;
-        Map<Long, List<RetryLogTaskDTO>> logTaskDTOMap = jobLogTasks.
-                stream().collect(Collectors.groupingBy(RetryLogTaskDTO::getRetryTaskId, Collectors.toList()));
+        List<RetryLogTaskRequest> jobLogTasks = list;
+        Map<Long, List<RetryLogTaskRequest>> logTaskDTOMap = jobLogTasks.
+                stream().collect(Collectors.groupingBy(RetryLogTaskRequest::getRetryTaskId, Collectors.toList()));
         List<RetryTaskLogMessageDO> retryTaskLogMessages = new ArrayList<>();
-        for (List<RetryLogTaskDTO> logTaskDTOList : logTaskDTOMap.values()) {
+        for (List<RetryLogTaskRequest> logTaskDTOList : logTaskDTOMap.values()) {
             RetryTaskLogMessageDO retryTaskLogMessage = RetryTaskConverter.INSTANCE.toRetryTaskLogMessage(
                     logTaskDTOList.get(0));
             retryTaskLogMessage.setCreateDt(LocalDateTime.now());

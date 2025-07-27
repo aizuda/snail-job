@@ -8,7 +8,7 @@ import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.client.job.core.Scanner;
 import com.aizuda.snailjob.client.job.core.cache.JobExecutorInfoCache;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.server.model.dto.JobExecutorDTO;
+import com.aizuda.snailjob.model.request.JobExecutorRequest;
 import com.aizuda.snailjob.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
@@ -26,7 +26,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class JobExecutorRegistrar implements Lifecycle {
     private final List<Scanner> scanners;
-    private final List<JobExecutorDTO> contextList = new ArrayList<>();
+    private final List<JobExecutorRequest> contextList = new ArrayList<>();
     public static RpcClient CLIENT;
     // 存储需要使用 endsWith 判断的后缀
     private static final Set<String> END_WITH_SET = new HashSet<>(Arrays.asList(
@@ -61,9 +61,9 @@ public class JobExecutorRegistrar implements Lifecycle {
         if (EQUALS_SET.contains(executorName)) {
             return;
         }
-        JobExecutorDTO jobExecutorDTO = new JobExecutorDTO();
-        jobExecutorDTO.setExecutorInfo(executorName);
-        contextList.add(jobExecutorDTO);
+        JobExecutorRequest jobExecutorRequest = new JobExecutorRequest();
+        jobExecutorRequest.setExecutorInfo(executorName);
+        contextList.add(jobExecutorRequest);
     }
 
     public void registerRetryHandler(List<JobExecutorInfo> contextList) {

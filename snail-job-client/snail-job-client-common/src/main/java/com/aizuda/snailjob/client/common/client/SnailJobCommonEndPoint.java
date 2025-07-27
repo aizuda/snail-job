@@ -4,8 +4,8 @@ import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.annotation.SnailEndPoint;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
+import com.aizuda.snailjob.model.request.ConfigRequest;
 import com.aizuda.snailjob.common.core.model.Result;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.SYNC_CONFIG;
 
@@ -22,8 +22,8 @@ public class SnailJobCommonEndPoint {
      * 同步版本
      */
     @Mapping(path = SYNC_CONFIG, method = RequestMethod.POST)
-    public Result syncVersion(ConfigDTO configDTO) {
-        GroupVersionCache.setConfig(configDTO);
+    public Result syncVersion(ConfigRequest configRequest) {
+        GroupVersionCache.setConfig(configRequest);
         return new Result();
     }
 

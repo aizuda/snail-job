@@ -10,10 +10,10 @@ import com.aizuda.snailjob.client.core.exception.SnailRetryClientException;
 import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.snailjob.client.core.loader.SnailRetrySpiLoader;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
+import com.aizuda.snailjob.model.request.RetryTaskRequest;
 import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.common.core.model.IdempotentIdContext;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
@@ -56,7 +56,7 @@ public abstract class AbstractReport implements Report {
      * @param args            参数
      * @return RetryTaskDTO 上报服务端对象
      */
-    protected RetryTaskDTO buildRetryTaskDTO(final String scene, final String targetClassName, final Object[] args) {
+    protected RetryTaskRequest buildRetryTaskDTO(final String scene, final String targetClassName, final Object[] args) {
         RetryerInfo retryerInfo = RetryerInfoCache.get(scene, targetClassName);
         Method executorMethod = retryerInfo.getMethod();
 
@@ -64,7 +64,7 @@ public abstract class AbstractReport implements Report {
 
         String serialize = retryArgSerializer.serialize(args);
 
-        RetryTaskDTO retryTaskDTO = new RetryTaskDTO();
+        RetryTaskRequest retryTaskRequest = new RetryTaskRequest();
         String idempotentId;
         try {
             Class<? extends IdempotentIdGenerate> idempotentIdGenerate = retryerInfo.getIdempotentIdGenerate();
@@ -77,17 +77,17 @@ public abstract class AbstractReport implements Report {
             throw new SnailRetryClientException("idempotentId generation exception: {}, {}", scene, args);
         }
 
-        retryTaskDTO.setIdempotentId(idempotentId);
-        retryTaskDTO.setExecutorName(targetClassName);
-        retryTaskDTO.setArgsStr(serialize);
-        retryTaskDTO.setGroupName(snailJobProperties.getGroup());
-        retryTaskDTO.setSceneName(scene);
-        retryTaskDTO.setSerializerName(retryArgSerializer.name());
+        retryTaskRequest.setIdempotentId(idempotentId);
+        retryTaskRequest.setExecutorName(targetClassName);
+        retryTaskRequest.setArgsStr(serialize);
+        retryTaskRequest.setGroupName(snailJobProperties.getGroup());
+        retryTaskRequest.setSceneName(scene);
+        retryTaskRequest.setSerializerName(retryArgSerializer.name());
 
         String expression = retryerInfo.getBizNo();
         ExpressionEngine expressionEngine = SnailRetrySpiLoader.loadExpressionEngine();
-        retryTaskDTO.setBizNo((String) expressionEngine.eval(expression, args, executorMethod));
-        return retryTaskDTO;
+        retryTaskRequest.setBizNo((String) expressionEngine.eval(expression, args, executorMethod));
+        return retryTaskRequest;
     }
 
 }

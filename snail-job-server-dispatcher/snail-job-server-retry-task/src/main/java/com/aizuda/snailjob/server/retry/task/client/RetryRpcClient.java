@@ -1,10 +1,10 @@
 package com.aizuda.snailjob.server.retry.task.client;
 
-import com.aizuda.snailjob.client.model.GenerateRetryIdempotentIdDTO;
-import com.aizuda.snailjob.client.model.RetryArgsDeserializeDTO;
-import com.aizuda.snailjob.client.model.request.RetryCallbackRequest;
-import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
-import com.aizuda.snailjob.client.model.request.StopRetryRequest;
+import com.aizuda.snailjob.model.request.GenerateRetryIdempotentIdRequest;
+import com.aizuda.snailjob.model.request.RetryArgsDeserializeRequest;
+import com.aizuda.snailjob.model.request.RetryCallbackRequest;
+import com.aizuda.snailjob.model.request.DispatchRetryRequest;
+import com.aizuda.snailjob.model.request.StopRetryRequest;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.model.SnailJobHeaders;
 import com.aizuda.snailjob.server.common.rpc.client.RequestMethod;
@@ -33,9 +33,9 @@ public interface RetryRpcClient {
     Result<Boolean> callback(@Body RetryCallbackRequest retryCallbackRequest);
 
     @Mapping(path = RETRY_GENERATE_IDEM_ID, method = RequestMethod.POST)
-    Result generateIdempotentId(@Body GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO);
+    Result generateIdempotentId(@Body GenerateRetryIdempotentIdRequest generateRetryIdempotentIdRequest);
 
     @Mapping(path = RETRY_DESERIALIZE_ARGS, method = RequestMethod.POST)
-    Result deserialize(@Body RetryArgsDeserializeDTO retryArgsDeserializeDTO);
+    Result deserialize(@Body RetryArgsDeserializeRequest retryArgsDeserializeRequest);
 
 }

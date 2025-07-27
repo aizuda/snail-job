@@ -6,8 +6,7 @@ import com.aizuda.snailjob.server.common.dto.UpdateClientInfoDTO;
 import com.aizuda.snailjob.server.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Body;
 import com.aizuda.snailjob.server.common.rpc.client.annotation.Mapping;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.template.datasource.persistence.po.ServerNode;
+import com.aizuda.snailjob.model.request.ConfigRequest;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.*;
 
@@ -21,7 +20,7 @@ import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH
 public interface CommonRpcClient {
 
     @Mapping(path = SYNC_CONFIG, method = RequestMethod.POST)
-    Result syncConfig(@Body ConfigDTO configDTO);
+    Result syncConfig(@Body ConfigRequest configRequest);
 
     @Mapping(path = GET_REG_NODES_AND_REFRESH, method = RequestMethod.POST)
     Result<String> pullRemoteNodeClientRegisterInfo(@Body PullRemoteNodeClientRegisterInfoDTO registerInfo);

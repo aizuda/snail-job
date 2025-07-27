@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.retry.task.support.request;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
+import com.aizuda.snailjob.model.request.RetryTaskRequest;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
@@ -12,7 +13,6 @@ import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.enums.TaskGeneratorSceneEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
-import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import com.aizuda.snailjob.server.retry.task.support.generator.retry.TaskContext;
 import com.aizuda.snailjob.server.retry.task.support.generator.retry.TaskGenerator;
 import com.aizuda.snailjob.server.retry.task.service.TaskContextConverter;
@@ -23,7 +23,6 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
@@ -78,14 +77,14 @@ public class ReportRetryInfoHttpRequestHandler extends PostHttpRequestHandler {
                     .findFirst().orElseThrow(() -> new SnailJobServerException("No matching task generator found"));
 
             Assert.notEmpty(args, () -> new SnailJobServerException("The reported data cannot be empty. ReqId:[{}]", retryRequest.getReqId()));
-            List<RetryTaskDTO> retryTaskList = JsonUtil.parseList(JsonUtil.toJsonString(args[0]), RetryTaskDTO.class);
+            List<RetryTaskRequest> retryTaskList = JsonUtil.parseList(JsonUtil.toJsonString(args[0]), RetryTaskRequest.class);
 
             SnailJobLog.LOCAL.info("begin handler report data. <|>{}<|>", JsonUtil.toJsonString(retryTaskList));
 
-            Set<String> set = StreamUtils.toSet(retryTaskList, RetryTaskDTO::getGroupName);
+            Set<String> set = StreamUtils.toSet(retryTaskList, RetryTaskRequest::getGroupName);
             Assert.isTrue(set.size() <= 1, () -> new SnailJobServerException("Batch report data, the same batch can only be the same group. ReqId:[{}]", retryRequest.getReqId()));
 
-            Map<String, List<RetryTaskDTO>> map = StreamUtils.groupByKey(retryTaskList, RetryTaskDTO::getSceneName);
+            Map<String, List<RetryTaskRequest>> map = StreamUtils.groupByKey(retryTaskList, RetryTaskRequest::getSceneName);
 
             Retryer<Object> retryer = RetryerBuilder.newBuilder()
                     .retryIfException(throwable -> {

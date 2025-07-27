@@ -5,7 +5,7 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.client.model.RetryArgsDeserializeDTO;
+import com.aizuda.snailjob.model.request.RetryArgsDeserializeRequest;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.server.common.WaitStrategy;
@@ -83,14 +83,14 @@ public class RetryDeadLetterServiceImpl implements RetryDeadLetterService {
         }
 
         RetryDeadLetterResponseVO responseVO = RetryDeadLetterResponseVOConverter.INSTANCE.convert(retryDeadLetter);
-        RetryArgsDeserializeDTO retryArgsDeserializeDTO = new RetryArgsDeserializeDTO();
-        retryArgsDeserializeDTO.setArgsStr(responseVO.getArgsStr());
-        retryArgsDeserializeDTO.setExecutorName(responseVO.getExecutorName());
-        retryArgsDeserializeDTO.setScene(responseVO.getSceneName());
-        retryArgsDeserializeDTO.setGroup(responseVO.getGroupName());
-        retryArgsDeserializeDTO.setSerializerName(responseVO.getSerializerName());
-        retryArgsDeserializeDTO.setNamespaceId(retryDeadLetter.getNamespaceId());
-        responseVO.setArgsStr(retryArgsDeserializeHandler.deserialize(retryArgsDeserializeDTO));
+        RetryArgsDeserializeRequest retryArgsDeserializeRequest = new RetryArgsDeserializeRequest();
+        retryArgsDeserializeRequest.setArgsStr(responseVO.getArgsStr());
+        retryArgsDeserializeRequest.setExecutorName(responseVO.getExecutorName());
+        retryArgsDeserializeRequest.setScene(responseVO.getSceneName());
+        retryArgsDeserializeRequest.setGroup(responseVO.getGroupName());
+        retryArgsDeserializeRequest.setSerializerName(responseVO.getSerializerName());
+        retryArgsDeserializeRequest.setNamespaceId(retryDeadLetter.getNamespaceId());
+        responseVO.setArgsStr(retryArgsDeserializeHandler.deserialize(retryArgsDeserializeRequest));
 
         return responseVO;
     }

@@ -10,7 +10,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.handler.GetHttpRequestHandler;
 import com.aizuda.snailjob.server.job.task.support.handler.DistributedLockHandler;
-import com.aizuda.snailjob.server.model.dto.JobExecutorDTO;
+import com.aizuda.snailjob.model.request.JobExecutorRequest;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobExecutor;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -66,13 +66,13 @@ public class RegisterJobExecutorsHttpRequestHandler extends GetHttpRequestHandle
         String lockName = processLockName(MessageFormat.format(KEY, groupName, namespace));
         distributedLockHandler.lockWithDisposableAndRetry(() -> {
 
-            List<JobExecutorDTO> executors = JsonUtil.parseList(JsonUtil.toJsonString(arg), JobExecutorDTO.class);
+            List<JobExecutorRequest> executors = JsonUtil.parseList(JsonUtil.toJsonString(arg), JobExecutorRequest.class);
             LambdaQueryWrapper<JobExecutor> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(JobExecutor::getGroupName, groupName)
                     .eq(JobExecutor::getNamespaceId, namespace);
             List<JobExecutor> dbExecutors = accessTemplate.getJobExecutorAccess().list(queryWrapper);
             List<String> dbExecutorsList = dbExecutors.stream().map(JobExecutor::getExecutorInfo).toList();
-            List<JobExecutorDTO> toAddExecutors = executors.stream().filter(e -> !dbExecutorsList.contains(e.getExecutorInfo())).toList();
+            List<JobExecutorRequest> toAddExecutors = executors.stream().filter(e -> !dbExecutorsList.contains(e.getExecutorInfo())).toList();
             if (toAddExecutors.isEmpty()) {
                 SnailJobLog.LOCAL.warn("Beat register job executors toAddExecutors is empty");
                 return;

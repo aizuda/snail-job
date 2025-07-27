@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
-import com.aizuda.snailjob.client.model.RetryArgsDeserializeDTO;
+import com.aizuda.snailjob.model.request.RetryArgsDeserializeRequest;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.RetryOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
@@ -180,14 +180,14 @@ public class RetryTaskServiceImpl implements RetryTaskService {
         RetryTaskResponseVO responseVO = RetryTaskLogResponseVOConverter.INSTANCE.convert(retryTask);
 
         RetryResponseWebVO retryResponseWebVO = RetryTaskResponseVOConverter.INSTANCE.convert(retry);
-        RetryArgsDeserializeDTO retryArgsDeserializeDTO = new RetryArgsDeserializeDTO();
-        retryArgsDeserializeDTO.setArgsStr(retry.getArgsStr());
-        retryArgsDeserializeDTO.setExecutorName(retry.getExecutorName());
-        retryArgsDeserializeDTO.setScene(retry.getSceneName());
-        retryArgsDeserializeDTO.setGroup(retry.getGroupName());
-        retryArgsDeserializeDTO.setSerializerName(retry.getSerializerName());
-        retryArgsDeserializeDTO.setNamespaceId(retry.getNamespaceId());
-        retryResponseWebVO.setArgsStr(retryArgsDeserializeHandler.deserialize(retryArgsDeserializeDTO));
+        RetryArgsDeserializeRequest retryArgsDeserializeRequest = new RetryArgsDeserializeRequest();
+        retryArgsDeserializeRequest.setArgsStr(retry.getArgsStr());
+        retryArgsDeserializeRequest.setExecutorName(retry.getExecutorName());
+        retryArgsDeserializeRequest.setScene(retry.getSceneName());
+        retryArgsDeserializeRequest.setGroup(retry.getGroupName());
+        retryArgsDeserializeRequest.setSerializerName(retry.getSerializerName());
+        retryArgsDeserializeRequest.setNamespaceId(retry.getNamespaceId());
+        retryResponseWebVO.setArgsStr(retryArgsDeserializeHandler.deserialize(retryArgsDeserializeRequest));
 
         responseVO.setResponseVO(retryResponseWebVO);
         return responseVO;

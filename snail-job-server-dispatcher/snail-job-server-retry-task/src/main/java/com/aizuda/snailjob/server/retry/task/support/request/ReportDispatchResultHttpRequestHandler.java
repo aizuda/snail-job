@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.retry.task.support.request;
 import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.net.url.UrlQuery;
-import com.aizuda.snailjob.client.model.request.DispatchRetryResultRequest;
+import com.aizuda.snailjob.model.request.DispatchRetryResultRequest;
 import com.aizuda.snailjob.common.core.enums.RetryOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;

@@ -1,14 +1,12 @@
 package com.aizuda.snailjob.template.datasource.access.config;
 
 import cn.hutool.core.collection.CollUtil;
+import com.aizuda.snailjob.model.request.ConfigRequest;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.enums.RetryNotifySceneEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify.Recipient;
 import com.aizuda.snailjob.template.datasource.access.ConfigAccess;
 import com.aizuda.snailjob.template.datasource.enums.DbTypeEnum;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.GroupConfigMapper;
@@ -174,14 +172,14 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
     }
 
     @Override
-    public ConfigDTO getConfigInfo(String groupName, final String namespaceId) {
+    public ConfigRequest getConfigInfo(String groupName, final String namespaceId) {
 
-        ConfigDTO configDTO = new ConfigDTO();
-        configDTO.setVersion(getConfigVersion(groupName, namespaceId));
+        ConfigRequest configRequest = new ConfigRequest();
+        configRequest.setVersion(getConfigVersion(groupName, namespaceId));
 
         List<NotifyConfig> notifyList = getNotifyListConfigByGroupName(groupName, namespaceId);
 
-        List<ConfigDTO.Notify> notifies = new ArrayList<>();
+        List<ConfigRequest.Notify> notifies = new ArrayList<>();
         for (NotifyConfig notifyConfig : notifyList) {
 
             // 只选择客户端的通知配置即可
@@ -199,33 +197,33 @@ public abstract class AbstractConfigAccess<T> implements ConfigAccess<T> {
             notifies.add(getNotify(notifyConfig, notifyRecipients, retryNotifyScene, jobNotifyScene));
         }
 
-        configDTO.setNotifyList(notifies);
+        configRequest.setNotifyList(notifies);
 
         List<RetrySceneConfig> retrySceneConfig = getSceneConfigByGroupName(groupName);
 
-        List<ConfigDTO.Scene> sceneList = new ArrayList<>();
+        List<ConfigRequest.Scene> sceneList = new ArrayList<>();
         for (RetrySceneConfig config : retrySceneConfig) {
-            ConfigDTO.Scene scene = new ConfigDTO.Scene();
+            ConfigRequest.Scene scene = new ConfigRequest.Scene();
             scene.setSceneName(config.getSceneName());
             scene.setDdl(config.getDeadlineRequest());
             sceneList.add(scene);
         }
 
-        configDTO.setSceneList(sceneList);
-        return configDTO;
+        configRequest.setSceneList(sceneList);
+        return configRequest;
     }
 
-    private static Notify getNotify(final NotifyConfig notifyConfig, final List<NotifyRecipient> notifyRecipients,
-                                    final RetryNotifySceneEnum retryNotifyScene, final JobNotifySceneEnum jobNotifyScene) {
-        List<Recipient> recipients = new ArrayList<>();
+    private static ConfigRequest.Notify getNotify(final NotifyConfig notifyConfig, final List<NotifyRecipient> notifyRecipients,
+                                                  final RetryNotifySceneEnum retryNotifyScene, final JobNotifySceneEnum jobNotifyScene) {
+        List<ConfigRequest.Notify.Recipient> recipients = new ArrayList<>();
         for (final NotifyRecipient notifyRecipient : notifyRecipients) {
-            Recipient recipient = new Recipient();
+            ConfigRequest.Notify.Recipient recipient = new ConfigRequest.Notify.Recipient();
             recipient.setNotifyAttribute(notifyRecipient.getNotifyAttribute());
             recipient.setNotifyType(notifyRecipient.getNotifyType());
             recipients.add(recipient);
         }
 
-        Notify notify = new Notify();
+        ConfigRequest.Notify notify = new ConfigRequest.Notify();
         if (Objects.nonNull(retryNotifyScene)) {
             notify.setRetryNotifyScene(retryNotifyScene.getNotifyScene());
         }

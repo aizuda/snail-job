@@ -4,10 +4,10 @@ import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.RpcClient;
 import com.aizuda.snailjob.client.common.cache.GroupVersionCache;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
+import com.aizuda.snailjob.model.request.ConfigRequest;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -38,7 +38,7 @@ public class SyncRemoteConfig implements Lifecycle {
                     }
 
                     GroupVersionCache.setConfig(
-                            JsonUtil.parseObject(rpcResult.getData().toString(), ConfigDTO.class));
+                            JsonUtil.parseObject(rpcResult.getData().toString(), ConfigRequest.class));
                 }).build();
 
         SCHEDULE_EXECUTOR.scheduleAtFixedRate(() -> {

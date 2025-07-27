@@ -5,7 +5,7 @@ import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
 import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import lombok.RequiredArgsConstructor;
 import  org.apache.pekko.actor.AbstractActor;
-import com.aizuda.snailjob.client.model.request.StopRetryRequest;
+import com.aizuda.snailjob.model.request.StopRetryRequest;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.log.SnailJobLog;

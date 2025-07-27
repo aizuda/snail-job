@@ -4,8 +4,8 @@ import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.window.SlidingRingWindow;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
+import com.aizuda.snailjob.model.request.RetryTaskRequest;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
 import com.google.common.collect.Lists;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class AsyncReport extends AbstractReport implements Lifecycle {
-    private SlidingRingWindow<RetryTaskDTO> slidingWindow;
+    private SlidingRingWindow<RetryTaskRequest> slidingWindow;
 
     @Override
     public boolean supports(boolean async) {
@@ -42,8 +42,8 @@ public class AsyncReport extends AbstractReport implements Lifecycle {
      */
     public Boolean syncReport(String scene, String targetClassName, Object[] args, long timeout, TimeUnit unit) {
 
-        RetryTaskDTO retryTaskDTO = buildRetryTaskDTO(scene, targetClassName, args);
-        slidingWindow.add(retryTaskDTO);
+        RetryTaskRequest retryTaskRequest = buildRetryTaskDTO(scene, targetClassName, args);
+        slidingWindow.add(retryTaskRequest);
         return Boolean.TRUE;
     }
 

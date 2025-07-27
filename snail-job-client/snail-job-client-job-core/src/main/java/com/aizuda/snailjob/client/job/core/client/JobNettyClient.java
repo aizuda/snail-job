@@ -2,8 +2,8 @@ package com.aizuda.snailjob.client.job.core.client;
 
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
-import com.aizuda.snailjob.client.model.request.DispatchJobResultRequest;
-import com.aizuda.snailjob.client.model.request.MapTaskRequest;
+import com.aizuda.snailjob.model.request.DispatchJobResultRequest;
+import com.aizuda.snailjob.model.request.MapTaskRequest;
 import com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH;
 import com.aizuda.snailjob.common.core.model.Result;
 

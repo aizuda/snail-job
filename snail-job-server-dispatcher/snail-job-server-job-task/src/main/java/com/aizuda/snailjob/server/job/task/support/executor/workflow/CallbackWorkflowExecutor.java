@@ -11,7 +11,7 @@ import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.rpc.okhttp.RequestInterceptor;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskFailAlarmEventDTO;
 import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailAlarmEvent;
-import com.aizuda.snailjob.server.model.dto.CallbackParamsDTO;
+import com.aizuda.snailjob.model.request.CallbackParamsRequest;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import com.github.rholder.retry.*;
@@ -37,6 +37,7 @@ import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKF
  */
 @Component
 @RequiredArgsConstructor
+@Deprecated(since = "1.8.0")
 public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
 
     private static final String CALLBACK_TIMEOUT = "10";
@@ -87,8 +88,8 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
         // 设置回调超时时间
         requestHeaders.set(RequestInterceptor.TIMEOUT_TIME, CALLBACK_TIMEOUT);
 
-        CallbackParamsDTO callbackParamsDTO = new CallbackParamsDTO();
-        callbackParamsDTO.setWfContext(context.getWfContext());
+        CallbackParamsRequest callbackParamsRequest = new CallbackParamsRequest();
+        callbackParamsRequest.setWfContext(context.getWfContext());
 
         try {
             Map<String, String> uriVariables = new HashMap<>();
@@ -96,7 +97,7 @@ public class CallbackWorkflowExecutor extends AbstractWorkflowExecutor {
 
             ResponseEntity<String> response = buildRetryer(decisionConfig).call(
                     () -> restTemplate.exchange(decisionConfig.getWebhook(), HttpMethod.POST,
-                            new HttpEntity<>(callbackParamsDTO, requestHeaders), String.class, uriVariables));
+                            new HttpEntity<>(callbackParamsRequest, requestHeaders), String.class, uriVariables));
 
             result = response.getBody();
             SnailJobLog.LOCAL.info("Callback result. WebHook:[{}], Result: [{}]", decisionConfig.getWebhook(), result);

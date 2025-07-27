@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.client.job.core.executor;
 
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.job.core.IJobExecutor;
 import com.aizuda.snailjob.client.job.core.MapHandler;
 import com.aizuda.snailjob.client.job.core.cache.JobExecutorInfoCache;
@@ -8,21 +7,13 @@ import com.aizuda.snailjob.client.job.core.dto.JobArgs;
 import com.aizuda.snailjob.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.snailjob.client.job.core.dto.MapArgs;
 import com.aizuda.snailjob.client.model.ExecuteResult;
-import com.aizuda.snailjob.client.model.request.MapTaskRequest;
-import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
-import com.aizuda.snailjob.common.core.model.JobContext;
-import com.aizuda.snailjob.common.core.model.Result;
-import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;

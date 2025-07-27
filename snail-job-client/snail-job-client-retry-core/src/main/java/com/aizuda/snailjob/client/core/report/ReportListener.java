@@ -7,6 +7,7 @@ import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.client.core.RetryExecutor;
 import com.aizuda.snailjob.client.core.RetryExecutorParameter;
 import com.aizuda.snailjob.client.core.executor.GuavaRetryExecutor;
+import com.aizuda.snailjob.model.request.RetryTaskRequest;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
@@ -17,9 +18,8 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.core.window.Listener;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify.Recipient;
-import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
+import com.aizuda.snailjob.model.request.ConfigRequest;
+import com.aizuda.snailjob.model.request.ConfigRequest.Notify.Recipient;
 import com.github.rholder.retry.*;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ import static com.aizuda.snailjob.common.core.constant.SystemConstants.YYYY_MM_D
  * @since 1.0.0
  */
 @Slf4j
-public class ReportListener implements Listener<RetryTaskDTO> {
+public class ReportListener implements Listener<RetryTaskRequest> {
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
     private static final String reportErrorTextMessageFormatter =
             "<font face=\"微软雅黑\" color=#ff0000 size=4>{}环境 异步批量上报异常</font>  \n" +
@@ -57,7 +57,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
             .callback(nettyResult -> SnailJobLog.LOCAL.info("Data report successfully requestId:[{}]", nettyResult.getReqId())).build();
 
     @Override
-    public void handler(List<RetryTaskDTO> list) {
+    public void handler(List<RetryTaskRequest> list) {
         RetryExecutor<WaitStrategy, StopStrategy> retryExecutor =
                 new GuavaRetryExecutor();
 
@@ -110,7 +110,7 @@ public class ReportListener implements Listener<RetryTaskDTO> {
     private void sendMessage(Throwable e) {
 
         try {
-            ConfigDTO.Notify notify = GroupVersionCache.getRetryNotifyAttribute(RetryNotifySceneEnum.CLIENT_REPORT_ERROR.getNotifyScene());
+            ConfigRequest.Notify notify = GroupVersionCache.getRetryNotifyAttribute(RetryNotifySceneEnum.CLIENT_REPORT_ERROR.getNotifyScene());
             if (Objects.isNull(notify)) {
                 return;
             }

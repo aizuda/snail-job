@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.web.service.convert;
 
-import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
+import com.aizuda.snailjob.model.request.RetryTaskRequest;
 import com.aizuda.snailjob.server.retry.task.support.generator.retry.TaskContext;
 import com.aizuda.snailjob.server.web.model.request.RetrySaveRequestVO;
 import org.mapstruct.Mapper;
@@ -19,5 +19,5 @@ public interface TaskContextConverter {
 
     TaskContext.TaskInfo convert(RetrySaveRequestVO retrySaveRequestVO);
 
-    List<TaskContext.TaskInfo> convert(List<RetryTaskDTO> retryTasks);
+    List<TaskContext.TaskInfo> convert(List<RetryTaskRequest> retryTasks);
 }

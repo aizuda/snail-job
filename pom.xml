@@ -74,12 +74,7 @@
             </dependency>
             <dependency>
                 <groupId>com.aizuda</groupId>
-                <artifactId>snail-job-common-client-api</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.aizuda</groupId>
-                <artifactId>snail-job-common-server-api</artifactId>
+                <artifactId>snail-job-common-model</artifactId>
                 <version>${revision}</version>
             </dependency>
 

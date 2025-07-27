@@ -7,7 +7,7 @@ import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.handler.GetHttpRequestHandler;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
+import com.aizuda.snailjob.model.request.ConfigRequest;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -39,7 +39,7 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         String namespace = headers.get(HeadersEnum.NAMESPACE.getKey());
-        ConfigDTO configDTO = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespace);
-        return new SnailJobRpcResult(JsonUtil.toJsonString(configDTO), retryRequest.getReqId());
+        ConfigRequest configRequest = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespace);
+        return new SnailJobRpcResult(JsonUtil.toJsonString(configRequest), retryRequest.getReqId());
     }
 }

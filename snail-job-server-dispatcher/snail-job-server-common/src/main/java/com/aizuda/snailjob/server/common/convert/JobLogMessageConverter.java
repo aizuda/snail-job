@@ -1,10 +1,7 @@
 package com.aizuda.snailjob.server.common.convert;
 
-import com.aizuda.snailjob.server.common.dto.JobLogDTO;
-import com.aizuda.snailjob.server.model.dto.JobLogTaskDTO;
-import com.aizuda.snailjob.server.model.dto.LogTaskDTO;
+import com.aizuda.snailjob.model.request.JobLogTaskRequest;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.log.JobLogMessageDO;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobLogMessage;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -25,6 +22,6 @@ public interface JobLogMessageConverter {
     JobLogMessageConverter INSTANCE = Mappers.getMapper(JobLogMessageConverter.class);
 
 
-    List<JobLogMessageDO> toJobLogMessages(List<JobLogTaskDTO> jobLogDTOs);
+    List<JobLogMessageDO> toJobLogMessages(List<JobLogTaskRequest> jobLogDTOs);
 
 }

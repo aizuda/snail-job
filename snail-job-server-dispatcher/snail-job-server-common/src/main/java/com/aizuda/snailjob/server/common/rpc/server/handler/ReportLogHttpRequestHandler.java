@@ -1,5 +1,6 @@
 package com.aizuda.snailjob.server.common.rpc.server.handler;
 
+import com.aizuda.snailjob.model.request.RetryLogTaskRequest;
 import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
@@ -14,8 +15,7 @@ import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
-import com.aizuda.snailjob.server.model.dto.JobLogTaskDTO;
-import com.aizuda.snailjob.server.model.dto.RetryLogTaskDTO;
+import com.aizuda.snailjob.model.request.JobLogTaskRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -56,17 +56,17 @@ public class ReportLogHttpRequestHandler extends PostHttpRequestHandler {
         Assert.notEmpty(args, () -> new SnailJobServerException("The log data to be reported cannot be empty. ReqId:[{}]", retryRequest.getReqId()));
 
         JsonNode jsonNode = JsonUtil.toJson(args[0]);
-        List<RetryLogTaskDTO> retryTasks = Lists.newArrayList();
-        List<JobLogTaskDTO> jobTasks = Lists.newArrayList();
+        List<RetryLogTaskRequest> retryTasks = Lists.newArrayList();
+        List<JobLogTaskRequest> jobTasks = Lists.newArrayList();
         for (final JsonNode node : jsonNode) {
             JsonNode value = node.findValue(SystemConstants.JSON_FILED_LOG_TYPE);
             if (Objects.isNull(value) || value.asText().equals(LogTypeEnum.JOB.name())) {
-                jobTasks.add(JsonUtil.parseObject(node.toPrettyString(), JobLogTaskDTO.class));
+                jobTasks.add(JsonUtil.parseObject(node.toPrettyString(), JobLogTaskRequest.class));
                 continue;
             }
 
             if (value.asText().equals(LogTypeEnum.RETRY.name())) {
-                retryTasks.add(JsonUtil.parseObject(node.toPrettyString(), RetryLogTaskDTO.class));
+                retryTasks.add(JsonUtil.parseObject(node.toPrettyString(), RetryLogTaskRequest.class));
             }
         }
 

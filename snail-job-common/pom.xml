@@ -15,8 +15,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>snail-job-common-server-api</module>
-        <module>snail-job-common-client-api</module>
+        <module>snail-job-common-model</module>
         <module>snail-job-common-core</module>
         <module>snail-job-common-log</module>
     </modules>

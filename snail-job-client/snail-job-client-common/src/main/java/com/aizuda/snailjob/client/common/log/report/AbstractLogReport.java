@@ -4,10 +4,10 @@ import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.LogReport;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.window.SlidingRingWindow;
+import com.aizuda.snailjob.model.request.LogTaskRequest;
 import com.aizuda.snailjob.common.core.window.Listener;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.log.dto.LogContentDTO;
-import com.aizuda.snailjob.server.model.dto.LogTaskDTO;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +21,11 @@ import java.util.Objects;
  * @date 2024-03-20 22:56:53
  * @since 3.2.0
  */
-public abstract class AbstractLogReport<T extends LogTaskDTO> implements Lifecycle, InitializingBean, LogReport {
+public abstract class AbstractLogReport<T extends LogTaskRequest> implements Lifecycle, InitializingBean, LogReport {
 
     @Autowired
     private SnailJobProperties snailJobProperties;
-    private SlidingRingWindow<LogTaskDTO> slidingWindow;
+    private SlidingRingWindow<LogTaskRequest> slidingWindow;
 
     @Override
     public void report(LogContentDTO logContentDTO) {
@@ -42,7 +42,7 @@ public abstract class AbstractLogReport<T extends LogTaskDTO> implements Lifecyc
 
         SnailJobProperties.LogSlidingWindowConfig logSlidingWindow = snailJobProperties.getLogSlidingWindow();
 
-        Listener<LogTaskDTO> reportLogListener = new ReportLogListener();
+        Listener<LogTaskRequest> reportLogListener = new ReportLogListener();
         ChronoUnit chronoUnit = logSlidingWindow.getChronoUnit();
         Duration duration = Duration.of(logSlidingWindow.getDuration(), chronoUnit);
         slidingWindow= new SlidingRingWindow<>(duration, logSlidingWindow.getTotalThreshold(), Lists.newArrayList(reportLogListener));

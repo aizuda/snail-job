@@ -11,8 +11,8 @@ import com.aizuda.snailjob.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.snailjob.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.snailjob.client.job.core.executor.*;
 import com.aizuda.snailjob.client.job.core.log.JobLogMeta;
-import com.aizuda.snailjob.client.model.StopJobDTO;
-import com.aizuda.snailjob.client.model.request.DispatchJobRequest;
+import com.aizuda.snailjob.model.request.StopJobRequest;
+import com.aizuda.snailjob.model.request.DispatchJobRequest;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
@@ -164,7 +164,7 @@ public class JobEndPoint {
     }
 
     @Mapping(path = JOB_STOP, method = RequestMethod.POST)
-    public Result<Boolean> stopJob(@Valid StopJobDTO interruptJob) {
+    public Result<Boolean> stopJob(@Valid StopJobRequest interruptJob) {
 
         ThreadPoolExecutor threadPool = ThreadPoolCache.getThreadPool(interruptJob.getTaskBatchId());
         if (Objects.isNull(threadPool) || threadPool.isShutdown() || threadPool.isTerminated()) {

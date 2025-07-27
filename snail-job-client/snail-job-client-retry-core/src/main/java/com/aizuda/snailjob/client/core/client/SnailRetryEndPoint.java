@@ -24,12 +24,12 @@ import com.aizuda.snailjob.client.core.log.RetryLogMeta;
 import com.aizuda.snailjob.client.core.retryer.RetryerInfo;
 import com.aizuda.snailjob.client.core.timer.StopTaskTimerTask;
 import com.aizuda.snailjob.client.core.timer.TimerManager;
-import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
-import com.aizuda.snailjob.client.model.GenerateRetryIdempotentIdDTO;
-import com.aizuda.snailjob.client.model.RetryArgsDeserializeDTO;
-import com.aizuda.snailjob.client.model.request.RetryCallbackRequest;
-import com.aizuda.snailjob.client.model.request.DispatchRetryRequest;
-import com.aizuda.snailjob.client.model.request.StopRetryRequest;
+import com.aizuda.snailjob.model.dto.DispatchRetryResultDTO;
+import com.aizuda.snailjob.model.request.GenerateRetryIdempotentIdRequest;
+import com.aizuda.snailjob.model.request.RetryArgsDeserializeRequest;
+import com.aizuda.snailjob.model.request.RetryCallbackRequest;
+import com.aizuda.snailjob.model.request.DispatchRetryRequest;
+import com.aizuda.snailjob.model.request.StopRetryRequest;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.IdempotentIdContext;
 import com.aizuda.snailjob.common.core.model.Result;
@@ -200,16 +200,16 @@ public class SnailRetryEndPoint implements Lifecycle {
     /**
      * 手动新增重试数据，模拟生成idempotentId
      *
-     * @param generateRetryIdempotentIdDTO 生成idempotentId模型
+     * @param generateRetryIdempotentIdRequest 生成idempotentId模型
      * @return idempotentId
      */
     @Mapping(path = RETRY_GENERATE_IDEM_ID, method = RequestMethod.POST)
     public Result<String> idempotentIdGenerate(@Valid
-                                               GenerateRetryIdempotentIdDTO generateRetryIdempotentIdDTO) {
+                                               GenerateRetryIdempotentIdRequest generateRetryIdempotentIdRequest) {
 
-        String scene = generateRetryIdempotentIdDTO.getScene();
-        String executorName = generateRetryIdempotentIdDTO.getExecutorName();
-        String argsStr = generateRetryIdempotentIdDTO.getArgsStr();
+        String scene = generateRetryIdempotentIdRequest.getScene();
+        String executorName = generateRetryIdempotentIdRequest.getExecutorName();
+        String argsStr = generateRetryIdempotentIdRequest.getArgsStr();
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(scene, executorName);
         Assert.notNull(retryerInfo,
@@ -217,7 +217,7 @@ public class SnailRetryEndPoint implements Lifecycle {
 
         Method executorMethod = retryerInfo.getMethod();
 
-        RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer(generateRetryIdempotentIdDTO.getSerializerName());
+        RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer(generateRetryIdempotentIdRequest.getSerializerName());
 
         Object[] deSerialize = null;
         try {
@@ -244,7 +244,7 @@ public class SnailRetryEndPoint implements Lifecycle {
     }
 
     @Mapping(path = RETRY_DESERIALIZE_ARGS, method = RequestMethod.POST)
-    public Result<Object> deserialize(@Valid RetryArgsDeserializeDTO retryDeserializeRequest) {
+    public Result<Object> deserialize(@Valid RetryArgsDeserializeRequest retryDeserializeRequest) {
         String scene = retryDeserializeRequest.getScene();
         String executorName = retryDeserializeRequest.getExecutorName();
         String argsStr = retryDeserializeRequest.getArgsStr();

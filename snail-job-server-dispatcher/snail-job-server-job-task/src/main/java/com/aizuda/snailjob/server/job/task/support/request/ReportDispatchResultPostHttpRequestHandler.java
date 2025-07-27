@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.job.task.support.request;
 
 import cn.hutool.core.net.url.UrlQuery;
-import com.aizuda.snailjob.client.model.request.DispatchJobResultRequest;
+import com.aizuda.snailjob.model.request.DispatchJobResultRequest;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
@@ -16,9 +16,6 @@ import com.aizuda.snailjob.server.job.task.support.callback.ClientCallbackFactor
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
-import java.util.Optional;
 
 import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH.REPORT_JOB_DISPATCH_RESULT;
 

@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.service.service.impl;
 
 import cn.hutool.core.lang.Assert;
-import com.aizuda.snailjob.client.model.RetryArgsDeserializeDTO;
+import com.aizuda.snailjob.model.request.RetryArgsDeserializeRequest;
 import com.aizuda.snailjob.common.core.enums.RetryStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.server.common.WaitStrategy;
@@ -55,7 +55,7 @@ public abstract class AbstractRetryService implements RetryService {
             instance = clazz.getDeclaredConstructor().newInstance();
             RetryConverter.INSTANCE.toRetryResponseVO(retry, instance);
 
-            RetryArgsDeserializeDTO deserializeDTO = new RetryArgsDeserializeDTO();
+            RetryArgsDeserializeRequest deserializeDTO = new RetryArgsDeserializeRequest();
             deserializeDTO.setArgsStr(retry.getArgsStr());
             deserializeDTO.setExecutorName(retry.getExecutorName());
             deserializeDTO.setScene(retry.getSceneName());

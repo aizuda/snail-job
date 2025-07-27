@@ -4,7 +4,7 @@ import com.aizuda.snailjob.client.common.log.report.AbstractLogReport;
 import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
 import com.aizuda.snailjob.common.log.dto.LogContentDTO;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
-import com.aizuda.snailjob.server.model.dto.RetryLogTaskDTO;
+import com.aizuda.snailjob.model.request.RetryLogTaskRequest;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,11 +13,11 @@ import org.springframework.stereotype.Component;
  * @since 3.2.0
  */
 @Component
-public class RetryLogReport extends AbstractLogReport<RetryLogTaskDTO> {
+public class RetryLogReport extends AbstractLogReport<RetryLogTaskRequest> {
     @Override
-    protected RetryLogTaskDTO buildLogTaskDTO(LogContentDTO logContentDTO) {
+    protected RetryLogTaskRequest buildLogTaskDTO(LogContentDTO logContentDTO) {
         RetryLogMeta context = (RetryLogMeta) SnailJobLogManager.getLogMeta();
-        RetryLogTaskDTO logTaskDTO = new RetryLogTaskDTO();
+        RetryLogTaskRequest logTaskDTO = new RetryLogTaskRequest();
         logTaskDTO.setLogType(LogTypeEnum.RETRY.name());
         logTaskDTO.setRetryId(context.getRetryId());
         logTaskDTO.setRetryTaskId(context.getRetryTaskId());

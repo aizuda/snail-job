@@ -6,7 +6,7 @@ import com.aizuda.snailjob.client.core.intercepter.RetrySiteSnapshot;
 import com.aizuda.snailjob.client.core.log.RetryLogMeta;
 import com.aizuda.snailjob.client.core.retryer.RetryerResultContext;
 import com.aizuda.snailjob.client.core.strategy.RetryStrategy;
-import com.aizuda.snailjob.client.model.DispatchRetryResultDTO;
+import com.aizuda.snailjob.model.dto.DispatchRetryResultDTO;
 import com.aizuda.snailjob.common.core.enums.RetryResultStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;

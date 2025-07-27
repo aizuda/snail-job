@@ -3,7 +3,7 @@ package com.aizuda.snailjob.client.core.callback.future;
 import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.client.core.context.CallbackContext;
 import com.aizuda.snailjob.client.core.client.RetryClient;
-import com.aizuda.snailjob.client.model.request.DispatchCallbackResultRequest;
+import com.aizuda.snailjob.model.request.DispatchCallbackResultRequest;
 import com.aizuda.snailjob.common.core.enums.RetryTaskStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;

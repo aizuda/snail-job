@@ -10,7 +10,7 @@ import com.aizuda.snailjob.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.snailjob.client.job.core.client.JobNettyClient;
 import com.aizuda.snailjob.client.job.core.log.JobLogMeta;
 import com.aizuda.snailjob.client.model.ExecuteResult;
-import com.aizuda.snailjob.client.model.request.DispatchJobResultRequest;
+import com.aizuda.snailjob.model.request.DispatchJobResultRequest;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
@@ -25,8 +25,8 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.common.log.enums.LogTypeEnum;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify.Recipient;
+import com.aizuda.snailjob.model.request.ConfigRequest;
+import com.aizuda.snailjob.model.request.ConfigRequest.Notify.Recipient;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.FutureCallback;
 import lombok.extern.slf4j.Slf4j;
@@ -174,7 +174,7 @@ public class JobExecutorFutureCallback implements FutureCallback<ExecuteResult> 
             if (Objects.isNull(snailJobProperties)) {
                 return;
             }
-            ConfigDTO.Notify notify = GroupVersionCache.getJobNotifyAttribute(
+            ConfigRequest.Notify notify = GroupVersionCache.getJobNotifyAttribute(
                     JobNotifySceneEnum.JOB_CLIENT_ERROR.getNotifyScene());
             if (Objects.nonNull(notify)) {
                 List<Recipient> recipients = Optional.ofNullable(notify.getRecipients()).orElse(Lists.newArrayList());

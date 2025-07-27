@@ -5,7 +5,7 @@ import com.aizuda.snailjob.server.common.dto.InstanceLiveInfo;
 import com.aizuda.snailjob.server.common.handler.InstanceManager;
 import lombok.RequiredArgsConstructor;
 import  org.apache.pekko.actor.AbstractActor;
-import com.aizuda.snailjob.client.model.StopJobDTO;
+import com.aizuda.snailjob.model.request.StopJobRequest;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
@@ -65,10 +65,10 @@ public class RealStopTaskActor extends AbstractActor {
                 .client(JobRpcClient.class)
                 .build();
 
-        StopJobDTO stopJobDTO = new StopJobDTO();
-        stopJobDTO.setTaskBatchId(realStopTaskInstanceDTO.getTaskBatchId());
-        stopJobDTO.setJobId(realStopTaskInstanceDTO.getJobId());
-        stopJobDTO.setGroupName(realStopTaskInstanceDTO.getGroupName());
-        return rpcClient.stop(stopJobDTO);
+        StopJobRequest stopJobRequest = new StopJobRequest();
+        stopJobRequest.setTaskBatchId(realStopTaskInstanceDTO.getTaskBatchId());
+        stopJobRequest.setJobId(realStopTaskInstanceDTO.getJobId());
+        stopJobRequest.setGroupName(realStopTaskInstanceDTO.getGroupName());
+        return rpcClient.stop(stopJobRequest);
     }
 }

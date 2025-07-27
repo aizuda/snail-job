@@ -13,9 +13,9 @@ import com.aizuda.snailjob.common.core.util.EnvironmentUtils;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO;
-import com.aizuda.snailjob.server.model.dto.ConfigDTO.Notify.Recipient;
-import com.aizuda.snailjob.server.model.dto.RetryTaskDTO;
+import com.aizuda.snailjob.model.request.ConfigRequest;
+import com.aizuda.snailjob.model.request.ConfigRequest.Notify.Recipient;
+import com.aizuda.snailjob.model.request.RetryTaskRequest;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +71,7 @@ public class SyncReport extends AbstractReport {
      */
     public Boolean syncReport(String scene, String targetClassName, Object[] args, long timeout, TimeUnit unit) {
 
-        RetryTaskDTO retryTaskDTO = buildRetryTaskDTO(scene, targetClassName, args);
+        RetryTaskRequest retryTaskRequest = buildRetryTaskDTO(scene, targetClassName, args);
 
         RpcClient client = RequestBuilder.<RpcClient, SnailJobRpcResult>newBuilder()
                 .client(RpcClient.class)
@@ -81,7 +81,7 @@ public class SyncReport extends AbstractReport {
                 .build();
 
         try {
-            SnailJobRpcResult result = client.reportRetryInfo(Collections.singletonList(retryTaskDTO));
+            SnailJobRpcResult result = client.reportRetryInfo(Collections.singletonList(retryTaskRequest));
             SnailJobLog.LOCAL.debug("Data report result result:[{}]", JsonUtil.toJsonString(result));
             return (Boolean) result.getData();
         } catch (Exception e) {
@@ -94,7 +94,7 @@ public class SyncReport extends AbstractReport {
     private void sendMessage(Throwable e) {
 
         try {
-            ConfigDTO.Notify notify = GroupVersionCache.getRetryNotifyAttribute(RetryNotifySceneEnum.CLIENT_REPORT_ERROR.getNotifyScene());
+            ConfigRequest.Notify notify = GroupVersionCache.getRetryNotifyAttribute(RetryNotifySceneEnum.CLIENT_REPORT_ERROR.getNotifyScene());
             if (Objects.isNull(notify)) {
                 return;
             }
