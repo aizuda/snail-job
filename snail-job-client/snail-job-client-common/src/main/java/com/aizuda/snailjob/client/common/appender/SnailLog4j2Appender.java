@@ -16,7 +16,7 @@ package com.aizuda.snailjob.client.common.appender;
 
 import com.aizuda.snailjob.client.common.log.report.LogReportFactory;
 import com.aizuda.snailjob.client.common.log.support.SnailJobLogManager;
-import com.aizuda.snailjob.client.common.rpc.client.netty.NettyChannel;
+import com.aizuda.snailjob.client.common.rpc.client.grpc.GrpcChannel;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 import com.aizuda.snailjob.common.log.dto.LogContentDTO;
 import org.apache.logging.log4j.core.Filter;
@@ -59,8 +59,8 @@ public class SnailLog4j2Appender extends AbstractAppender {
         logContentDTO.addLocationField(getLocationField(event));
         logContentDTO.addThrowableField(getThrowableField(event));
         logContentDTO.addMessageField(event.getMessage().getFormattedMessage());
-        logContentDTO.addHostField(NettyChannel.getClientHost());
-        logContentDTO.addPortField(NettyChannel.getClientPort());
+        logContentDTO.addHostField(GrpcChannel.getClientHost());
+        logContentDTO.addPortField(GrpcChannel.getClientPort());
 
         // slidingWindow syncReportLog
         Optional.ofNullable(LogReportFactory.get()).ifPresent(logReport -> logReport.report(logContentDTO));

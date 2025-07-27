@@ -9,6 +9,7 @@ import com.aizuda.snailjob.common.core.model.Result;
 
 import java.util.Set;
 
+@Deprecated(since = "1.8.0")
 public interface JobOpenApiClient {
     @Mapping(method = RequestMethod.POST, path = "/api/job/add")
     Result<Object> addJob(RequestAddOrUpdateJobDTO requestAddOrUpdateJobDTO);

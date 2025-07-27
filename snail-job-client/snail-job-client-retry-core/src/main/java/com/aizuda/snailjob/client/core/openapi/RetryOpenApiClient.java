@@ -6,6 +6,7 @@ import com.aizuda.snailjob.client.core.dto.RequestTriggerRetryDTO;
 import com.aizuda.snailjob.client.core.dto.RequestUpdateRetryStatusDTO;
 import com.aizuda.snailjob.common.core.model.Result;
 
+@Deprecated(since = "1.8.0")
 public interface RetryOpenApiClient {
     @Mapping(method = RequestMethod.POST, path = "/api/retry/query")
     Result<Object> queryRetryTask(Long retryId);
