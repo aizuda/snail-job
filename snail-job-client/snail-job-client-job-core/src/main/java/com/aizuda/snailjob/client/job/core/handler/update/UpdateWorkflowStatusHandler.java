@@ -7,7 +7,7 @@ import com.aizuda.snailjob.client.job.core.handler.AbstractJobRequestHandler;
 import com.aizuda.snailjob.client.common.util.ValidatorUtils;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
-import com.aizuda.snailjob.model.base.StatusUpdateRequest;
+import com.aizuda.snailjob.model.request.base.StatusUpdateRequest;
 
 
 public class UpdateWorkflowStatusHandler extends AbstractJobRequestHandler<Boolean> {

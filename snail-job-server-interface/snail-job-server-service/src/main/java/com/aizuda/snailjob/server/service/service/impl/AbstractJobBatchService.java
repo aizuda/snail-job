@@ -2,9 +2,9 @@ package com.aizuda.snailjob.server.service.service.impl;
 
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.model.base.JobBatchResponse;
+import com.aizuda.snailjob.model.response.base.JobBatchResponse;
 import com.aizuda.snailjob.model.request.CallbackConfig;
-import com.aizuda.snailjob.model.request.DecisionConfig;
+import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.service.convert.JobBatchResponseConverter;
@@ -65,7 +65,7 @@ public abstract class AbstractJobBatchService implements JobBatchService {
 
             // 条件节点
             if (SystemConstants.DECISION_JOB_ID.equals(jobTaskBatch.getJobId())) {
-                jobBatchResponse.setDecision(JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfig.class));
+                jobBatchResponse.setDecision(JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfigRequest.class));
                 jobBatchResponse.setExecutionAt(jobTaskBatch.getCreateDt());
                 return jobBatchResponse;
             }

@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.service.convert;
 
-import com.aizuda.snailjob.model.base.RetryResponse;
+import com.aizuda.snailjob.model.response.base.RetryResponse;
 import com.aizuda.snailjob.template.datasource.persistence.po.Retry;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

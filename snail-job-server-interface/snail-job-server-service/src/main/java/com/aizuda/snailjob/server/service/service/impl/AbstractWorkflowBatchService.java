@@ -7,13 +7,13 @@ import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.model.base.JobBatchResponse;
-import com.aizuda.snailjob.model.request.JobTaskConfig;
+import com.aizuda.snailjob.model.response.base.JobBatchResponse;
+import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.job.task.support.cache.MutableGraphCache;
 import com.aizuda.snailjob.server.service.convert.JobBatchResponseConverter;
 import com.aizuda.snailjob.server.service.convert.WorkflowConverter;
-import com.aizuda.snailjob.model.base.WorkflowDetailResponse;
+import com.aizuda.snailjob.model.response.base.WorkflowDetailResponse;
 import com.aizuda.snailjob.server.service.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.service.service.WorkflowBatchService;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
@@ -110,7 +110,7 @@ public abstract class AbstractWorkflowBatchService implements WorkflowBatchServi
         Map<Long, WorkflowDetailResponse.NodeInfo> workflowNodeMap = nodeInfos.stream()
                 .peek(nodeInfo -> {
 
-                    JobTaskConfig jobTask = nodeInfo.getJobTask();
+                    JobTaskConfigRequest jobTask = nodeInfo.getJobTask();
                     if (Objects.nonNull(jobTask)) {
                         jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
                     }
@@ -164,7 +164,7 @@ public abstract class AbstractWorkflowBatchService implements WorkflowBatchServi
                         JobBatchResponseConverter.INSTANCE.convertListToJobBatchList(jobTaskBatches));
             } else {
                 JobBatchResponse jobBatchResponse = new JobBatchResponse();
-                JobTaskConfig jobTask = nodeInfo.getJobTask();
+                JobTaskConfigRequest jobTask = nodeInfo.getJobTask();
                 if (Objects.nonNull(jobTask)) {
                     jobBatchResponse.setJobId(jobTask.getJobId());
                 }

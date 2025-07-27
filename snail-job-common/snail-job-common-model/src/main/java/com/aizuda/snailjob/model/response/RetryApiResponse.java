@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.model.response;
 
-import com.aizuda.snailjob.model.base.RetryResponse;
+import com.aizuda.snailjob.model.response.base.RetryResponse;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

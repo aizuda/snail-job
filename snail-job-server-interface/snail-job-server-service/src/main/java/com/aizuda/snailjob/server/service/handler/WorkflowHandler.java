@@ -6,12 +6,12 @@ import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.model.request.CallbackConfig;
-import com.aizuda.snailjob.model.request.DecisionConfig;
+import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
-import com.aizuda.snailjob.model.request.JobTaskConfig;
+import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
-import com.aizuda.snailjob.model.base.WorkflowDetailResponse;
+import com.aizuda.snailjob.model.response.base.WorkflowDetailResponse;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
 import com.google.common.collect.Lists;
@@ -155,7 +155,7 @@ public class WorkflowHandler {
                 workflowNode.setNamespaceId(namespaceId);
                 if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
                     workflowNode.setJobId(SystemConstants.DECISION_JOB_ID);
-                    DecisionConfig decision = nodeInfo.getDecision();
+                    DecisionConfigRequest decision = nodeInfo.getDecision();
                     Assert.notNull(decision, () -> new SnailJobServerException("Configuration information for [{}] cannot be empty", nodeInfo.getNodeName()));
                     Assert.notBlank(decision.getNodeExpression(), () -> new SnailJobServerException("Expression for [{}] cannot be empty", nodeInfo.getNodeName()));
                     Assert.notNull(decision.getDefaultDecision(), () -> new SnailJobServerException("Default decision for [{}] cannot be empty", nodeInfo.getNodeName()));
@@ -174,7 +174,7 @@ public class WorkflowHandler {
                 }
 
                 if (WorkflowNodeTypeEnum.JOB_TASK.getType() == nodeConfig.getNodeType()) {
-                    JobTaskConfig jobTask = nodeInfo.getJobTask();
+                    JobTaskConfigRequest jobTask = nodeInfo.getJobTask();
                     Assert.notNull(jobTask, () -> new SnailJobServerException("Configuration information for [{}] cannot be empty", nodeInfo.getNodeName()));
                     Assert.notNull(jobTask.getJobId(), () -> new SnailJobServerException("Associated task for [{}] cannot be empty", nodeInfo.getNodeName()));
                     workflowNode.setJobId(jobTask.getJobId());

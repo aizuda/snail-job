@@ -13,14 +13,14 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
-import com.aizuda.snailjob.model.request.JobTaskConfig;
+import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.*;
 import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
 import com.aizuda.snailjob.server.service.convert.WorkflowConverter;
-import com.aizuda.snailjob.model.base.WorkflowDetailResponse;
+import com.aizuda.snailjob.model.response.base.WorkflowDetailResponse;
 import com.aizuda.snailjob.server.service.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.service.kit.WorkflowKit;
 import com.aizuda.snailjob.server.service.service.impl.AbstractWorkflowService;
@@ -320,7 +320,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
 
         Map<Long, WorkflowDetailResponseWebVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
                 .peek(nodeInfo -> {
-                    JobTaskConfig jobTask = nodeInfo.getJobTask();
+                    JobTaskConfigRequest jobTask = nodeInfo.getJobTask();
                     if (Objects.nonNull(jobTask)) {
                         jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
                         jobTask.setLabels(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getLabels());

@@ -4,9 +4,9 @@ import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.annotation.Param;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.common.core.model.Result;
-import com.aizuda.snailjob.model.base.JobRequest;
-import com.aizuda.snailjob.model.base.StatusUpdateRequest;
-import com.aizuda.snailjob.model.base.WorkflowTriggerRequest;
+import com.aizuda.snailjob.model.request.base.JobRequest;
+import com.aizuda.snailjob.model.request.base.StatusUpdateRequest;
+import com.aizuda.snailjob.model.request.base.WorkflowTriggerRequest;
 import com.aizuda.snailjob.model.request.JobTriggerApiRequest;
 
 import java.util.Set;

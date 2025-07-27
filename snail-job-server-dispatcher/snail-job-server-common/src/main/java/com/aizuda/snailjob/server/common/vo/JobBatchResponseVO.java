@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.common.vo;
 
 import com.aizuda.snailjob.model.request.CallbackConfig;
-import com.aizuda.snailjob.model.request.DecisionConfig;
+import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -84,7 +84,7 @@ public class JobBatchResponseVO {
     /**
      * 工作流的决策节点信息
      */
-    private DecisionConfig decision;
+    private DecisionConfigRequest decision;
 
     /**
      * 工作流批次id

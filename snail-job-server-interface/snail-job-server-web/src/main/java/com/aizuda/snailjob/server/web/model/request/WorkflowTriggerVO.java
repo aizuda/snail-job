@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.web.model.request;
 
-import com.aizuda.snailjob.model.base.WorkflowTriggerRequest;
+import com.aizuda.snailjob.model.request.base.WorkflowTriggerRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

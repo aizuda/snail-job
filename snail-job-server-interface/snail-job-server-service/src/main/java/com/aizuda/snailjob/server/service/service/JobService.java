@@ -1,9 +1,9 @@
 package com.aizuda.snailjob.server.service.service;
 
-import com.aizuda.snailjob.model.base.JobRequest;
-import com.aizuda.snailjob.model.base.JobResponse;
-import com.aizuda.snailjob.model.base.StatusUpdateRequest;
-import com.aizuda.snailjob.model.base.JobTriggerRequest;
+import com.aizuda.snailjob.model.request.base.JobRequest;
+import com.aizuda.snailjob.model.response.base.JobResponse;
+import com.aizuda.snailjob.model.request.base.StatusUpdateRequest;
+import com.aizuda.snailjob.model.request.base.JobTriggerRequest;
 
 import java.util.Set;
 

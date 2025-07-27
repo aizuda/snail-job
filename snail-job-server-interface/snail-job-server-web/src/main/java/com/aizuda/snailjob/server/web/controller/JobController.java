@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.web.controller;
 
 import com.aizuda.snailjob.common.core.annotation.OriginalControllerReturnValue;
-import com.aizuda.snailjob.model.base.JobTriggerRequest;
+import com.aizuda.snailjob.model.request.base.JobTriggerRequest;
 import com.aizuda.snailjob.server.service.service.JobService;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.model.base.PageResult;

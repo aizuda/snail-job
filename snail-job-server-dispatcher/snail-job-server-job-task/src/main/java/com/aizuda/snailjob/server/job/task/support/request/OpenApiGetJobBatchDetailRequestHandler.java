@@ -9,7 +9,7 @@ import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.model.request.CallbackConfig;
-import com.aizuda.snailjob.model.request.DecisionConfig;
+import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import com.aizuda.snailjob.server.common.convert.JobBatchResponseVOConverter;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -83,7 +83,7 @@ public class OpenApiGetJobBatchDetailRequestHandler extends PostHttpRequestHandl
 
             // 条件节点
             if (SystemConstants.DECISION_JOB_ID.equals(jobTaskBatch.getJobId())) {
-                jobBatchResponseVO.setDecision(JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfig.class));
+                jobBatchResponseVO.setDecision(JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfigRequest.class));
                 jobBatchResponseVO.setExecutionAt(jobTaskBatch.getCreateDt());
                 return new SnailJobRpcResult(jobBatchResponseVO, jobRequest.getReqId());
             }

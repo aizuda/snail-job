@@ -15,7 +15,7 @@ import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.convert.JobBatchResponseVOConverter;
 import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
-import com.aizuda.snailjob.model.request.JobTaskConfig;
+import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
 import com.aizuda.snailjob.server.common.handler.WorkflowHandler;
@@ -110,7 +110,7 @@ public class OpenApiGetWorkflowBatchDetailRequestHandler extends PostHttpRequest
         Map<Long, WorkflowDetailResponseVO.NodeInfo> workflowNodeMap = nodeInfos.stream()
                 .peek(nodeInfo -> {
 
-                    JobTaskConfig jobTask = nodeInfo.getJobTask();
+                    JobTaskConfigRequest jobTask = nodeInfo.getJobTask();
                     if (Objects.nonNull(jobTask)) {
                         jobTask.setJobName(jobMap.getOrDefault(jobTask.getJobId(), new Job()).getJobName());
                     }
@@ -164,7 +164,7 @@ public class OpenApiGetWorkflowBatchDetailRequestHandler extends PostHttpRequest
                         JobBatchResponseVOConverter.INSTANCE.convertListToJobBatchList(jobTaskBatches));
             } else {
                 JobBatchResponseVO jobBatchResponseVO = new JobBatchResponseVO();
-                JobTaskConfig jobTask = nodeInfo.getJobTask();
+                JobTaskConfigRequest jobTask = nodeInfo.getJobTask();
                 if (Objects.nonNull(jobTask)) {
                     jobBatchResponseVO.setJobId(jobTask.getJobId());
                 }

@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.model.base;
+package com.aizuda.snailjob.model.request.base;
 
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;

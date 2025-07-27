@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.service.service;
 
-import com.aizuda.snailjob.model.base.WorkflowDetailResponse;
+import com.aizuda.snailjob.model.response.base.WorkflowDetailResponse;
 
 /**
  * <p>

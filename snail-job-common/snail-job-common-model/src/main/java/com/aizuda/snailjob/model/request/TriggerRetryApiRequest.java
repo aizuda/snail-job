@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.model.request;
 
-import com.aizuda.snailjob.model.base.TriggerRetryRequest;
+import com.aizuda.snailjob.model.request.base.TriggerRetryRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

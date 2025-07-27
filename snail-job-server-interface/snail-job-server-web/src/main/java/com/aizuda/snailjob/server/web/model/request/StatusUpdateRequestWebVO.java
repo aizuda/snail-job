@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.web.model.request;
 
-import com.aizuda.snailjob.model.base.StatusUpdateRequest;
+import com.aizuda.snailjob.model.request.base.StatusUpdateRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

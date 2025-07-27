@@ -9,7 +9,7 @@ import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.common.core.expression.ExpressionFactory;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.model.request.DecisionConfig;
+import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -67,8 +67,8 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
             jobTaskStatus = JobTaskStatusEnum.CANCEL.getStatus();
             operationReason = JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason();
         } else {
-            DecisionConfig decisionConfig = JsonUtil.parseObject(context.getNodeInfo(), DecisionConfig.class);
-            if (StatusEnum.NO.getStatus().equals(decisionConfig.getDefaultDecision())) {
+            DecisionConfigRequest decisionConfigRequest = JsonUtil.parseObject(context.getNodeInfo(), DecisionConfigRequest.class);
+            if (StatusEnum.NO.getStatus().equals(decisionConfigRequest.getDefaultDecision())) {
 
                 try {
                     // 这里重新加载一次最新的上下文
@@ -81,18 +81,18 @@ public class DecisionWorkflowExecutor extends AbstractWorkflowExecutor {
                         operationReason = JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason();
                     } else {
                         wfContext = workflowTaskBatch.getWfContext();
-                        ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfig.getExpressionType());
+                        ExpressionEngine realExpressionEngine = ExpressionTypeEnum.valueOf(decisionConfigRequest.getExpressionType());
                         Assert.notNull(realExpressionEngine, () -> new SnailJobServerException("Expression engine does not exist"));
                         ExpressionInvocationHandler invocationHandler = new ExpressionInvocationHandler(realExpressionEngine);
                         ExpressionEngine expressionEngine = ExpressionFactory.getExpressionEngine(invocationHandler);
-                        result = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfig.getNodeExpression(), wfContext)).orElse(Boolean.FALSE);
+                        result = (Boolean) Optional.ofNullable(expressionEngine.eval(decisionConfigRequest.getNodeExpression(), wfContext)).orElse(Boolean.FALSE);
                         if (!result) {
                             operationReason = JobOperationReasonEnum.WORKFLOW_DECISION_FAILED.getReason();
                         }
                     }
 
                 } catch (Exception e) {
-                    log.error("Condition expression execution parsing exception. Expression:[{}], Parameter: [{}]", decisionConfig.getNodeExpression(), wfContext, e);
+                    log.error("Condition expression execution parsing exception. Expression:[{}], Parameter: [{}]", decisionConfigRequest.getNodeExpression(), wfContext, e);
                     taskBatchStatus = JobTaskBatchStatusEnum.FAIL.getStatus();
                     operationReason = JobOperationReasonEnum.WORKFLOW_CONDITION_NODE_EXECUTION_ERROR.getReason();
                     jobTaskStatus = JobTaskStatusEnum.FAIL.getStatus();

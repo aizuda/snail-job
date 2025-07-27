@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.openapi.api;
 
 import com.aizuda.snailjob.model.response.RetryApiResponse;
 import com.aizuda.snailjob.model.request.StatusUpdateApiRequest;
-import com.aizuda.snailjob.model.base.TriggerRetryRequest;
+import com.aizuda.snailjob.model.request.base.TriggerRetryRequest;
 import com.aizuda.snailjob.server.service.service.RetryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;

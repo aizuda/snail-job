@@ -10,7 +10,7 @@ import lombok.Data;
  * @since 2.6.0
  */
 @Data
-public class DecisionConfig {
+public class DecisionConfigRequest {
 
     /**
      * 表达式类型 1、SpEl、2、Aviator 3、QL

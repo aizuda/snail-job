@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.service.convert;
 
-import com.aizuda.snailjob.model.base.JobBatchResponse;
+import com.aizuda.snailjob.model.response.base.JobBatchResponse;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
 import org.mapstruct.Mapper;

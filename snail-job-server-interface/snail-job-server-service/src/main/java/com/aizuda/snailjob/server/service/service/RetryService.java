@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.server.service.service;
 
-import com.aizuda.snailjob.model.base.RetryResponse;
-import com.aizuda.snailjob.model.base.StatusUpdateRequest;
-import com.aizuda.snailjob.model.base.TriggerRetryRequest;
+import com.aizuda.snailjob.model.response.base.RetryResponse;
+import com.aizuda.snailjob.model.request.base.StatusUpdateRequest;
+import com.aizuda.snailjob.model.request.base.TriggerRetryRequest;
 
 /**
  * <p>

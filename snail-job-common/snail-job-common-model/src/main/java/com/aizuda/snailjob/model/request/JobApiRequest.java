@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.model.request;
 
-import com.aizuda.snailjob.model.base.JobRequest;
+import com.aizuda.snailjob.model.request.base.JobRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

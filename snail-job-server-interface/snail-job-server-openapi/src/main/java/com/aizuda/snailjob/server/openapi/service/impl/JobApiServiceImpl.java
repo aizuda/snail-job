@@ -1,9 +1,9 @@
 package com.aizuda.snailjob.server.openapi.service.impl;
 
-import com.aizuda.snailjob.model.base.JobRequest;
+import com.aizuda.snailjob.model.request.base.JobRequest;
 import com.aizuda.snailjob.server.openapi.service.JobApiService;
 import com.aizuda.snailjob.server.openapi.util.OpenApiSessionUtils;
-import com.aizuda.snailjob.model.base.JobResponse;
+import com.aizuda.snailjob.model.response.base.JobResponse;
 import com.aizuda.snailjob.server.service.service.impl.AbstractJobService;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import lombok.RequiredArgsConstructor;

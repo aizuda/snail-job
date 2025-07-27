@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.model.base;
+package com.aizuda.snailjob.model.response.base;
 
 import lombok.Data;
 

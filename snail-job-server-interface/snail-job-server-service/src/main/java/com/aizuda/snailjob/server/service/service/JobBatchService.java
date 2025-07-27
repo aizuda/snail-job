@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.service.service;
 
-import com.aizuda.snailjob.model.base.JobBatchResponse;
+import com.aizuda.snailjob.model.response.base.JobBatchResponse;
 
 /**
  * <p>

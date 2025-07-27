@@ -1,8 +1,8 @@
 package com.aizuda.snailjob.server.common.vo.request;
 
 import com.aizuda.snailjob.model.request.CallbackConfig;
-import com.aizuda.snailjob.model.request.DecisionConfig;
-import com.aizuda.snailjob.model.request.JobTaskConfig;
+import com.aizuda.snailjob.model.request.DecisionConfigRequest;
+import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -120,12 +120,12 @@ public class WorkflowRequestVO {
         /**
          * 任务节点配置
          */
-        private JobTaskConfig jobTask;
+        private JobTaskConfigRequest jobTask;
 
         /**
          * 决策节点配置
          */
-        private DecisionConfig decision;
+        private DecisionConfigRequest decision;
 
         /**
          * 回调配置

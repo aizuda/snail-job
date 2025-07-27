@@ -5,8 +5,8 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.model.request.CallbackConfig;
-import com.aizuda.snailjob.model.request.DecisionConfig;
-import com.aizuda.snailjob.model.request.JobTaskConfig;
+import com.aizuda.snailjob.model.request.DecisionConfigRequest;
+import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
 import com.aizuda.snailjob.server.common.dto.PointInTimeDTO;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
@@ -14,7 +14,7 @@ import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
 import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
 import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
-import com.aizuda.snailjob.model.base.WorkflowDetailResponse;
+import com.aizuda.snailjob.model.response.base.WorkflowDetailResponse;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
@@ -97,9 +97,9 @@ public interface WorkflowConverter {
         return JobConverter.toLocalDateTime(nextTriggerAt);
     }
 
-    static DecisionConfig parseDecisionConfig(WorkflowNode workflowNode) {
+    static DecisionConfigRequest parseDecisionConfig(WorkflowNode workflowNode) {
         if (WorkflowNodeTypeEnum.DECISION.getType() == workflowNode.getNodeType()) {
-            return JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfig.class);
+            return JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfigRequest.class);
         }
 
         return null;
@@ -113,11 +113,11 @@ public interface WorkflowConverter {
         return null;
     }
 
-    static JobTaskConfig parseJobTaskConfig(WorkflowNode workflowNode) {
+    static JobTaskConfigRequest parseJobTaskConfig(WorkflowNode workflowNode) {
         if (WorkflowNodeTypeEnum.JOB_TASK.getType() == workflowNode.getNodeType()) {
-            JobTaskConfig jobTaskConfig = new JobTaskConfig();
-            jobTaskConfig.setJobId(workflowNode.getJobId());
-            return jobTaskConfig;
+            JobTaskConfigRequest jobTaskConfigRequest = new JobTaskConfigRequest();
+            jobTaskConfigRequest.setJobId(workflowNode.getJobId());
+            return jobTaskConfigRequest;
         }
 
         return null;

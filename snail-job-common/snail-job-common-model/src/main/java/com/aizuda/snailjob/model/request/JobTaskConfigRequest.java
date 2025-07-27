@@ -8,7 +8,7 @@ import lombok.Data;
  * @since 2.6.0
  */
 @Data
-public class JobTaskConfig {
+public class JobTaskConfigRequest {
 
     /**
      * 任务ID

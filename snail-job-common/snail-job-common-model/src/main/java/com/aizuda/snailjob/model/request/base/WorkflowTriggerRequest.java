@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.model.base;
+package com.aizuda.snailjob.model.request.base;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
