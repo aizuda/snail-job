@@ -18,4 +18,13 @@ public enum StatusEnum {
 
     private final Integer status;
 
+    public static StatusEnum of(Integer status) {
+        for (StatusEnum statusEnum : StatusEnum.values()) {
+            if (statusEnum.status.equals(status)) {
+                return statusEnum;
+            }
+        }
+        return null;
+    }
+
 }

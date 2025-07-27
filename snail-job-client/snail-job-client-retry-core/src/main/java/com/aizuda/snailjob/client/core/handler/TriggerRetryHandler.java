@@ -7,13 +7,14 @@ import com.aizuda.snailjob.client.common.util.ValidatorUtils;
 import com.aizuda.snailjob.client.core.dto.RequestTriggerRetryDTO;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.model.request.TriggerRetryApiRequest;
 
 public class TriggerRetryHandler extends AbstractRetryRequestHandler<Boolean> {
 
-    private final RequestTriggerRetryDTO triggerRetryDTO;
+    private final TriggerRetryApiRequest triggerRetryDTO;
 
     public TriggerRetryHandler(Long retryId) {
-        this.triggerRetryDTO = new RequestTriggerRetryDTO();
+        this.triggerRetryDTO = new TriggerRetryApiRequest();
         triggerRetryDTO.setId(retryId);
     }
 

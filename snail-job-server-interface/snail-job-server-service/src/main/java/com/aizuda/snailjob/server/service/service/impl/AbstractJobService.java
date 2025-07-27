@@ -102,7 +102,7 @@ public abstract class AbstractJobService implements JobService {
                         .in(Job::getId, ids)
         ).size(), () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task status is closed"));
 
-        Assert.isTrue(workflowNodeMapper.selectJobUsedInNonLatestWorkflow(ids).size() == 0,
+        Assert.isTrue(workflowNodeMapper.selectJobUsedInNonLatestWorkflow(ids).isEmpty(),
                 () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task is used in the workflow"));
 
         List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
@@ -128,6 +128,7 @@ public abstract class AbstractJobService implements JobService {
     @Override
     public boolean updateJob(JobRequest jobRequest) {
         Assert.notNull(jobRequest.getId(), () -> new SnailJobServerException("ID cannot be empty"));
+        Assert.notNull(StatusEnum.of(jobRequest.getJobStatus()), () -> new SnailJobServerException("Status cannot be empty"));
         Job job = jobMapper.selectById(jobRequest.getId());
         Assert.notNull(job, () -> new SnailJobServerException("Job is null, update failed"));
 
@@ -192,6 +193,7 @@ public abstract class AbstractJobService implements JobService {
 
     @Override
     public Boolean updateJobStatus(StatusUpdateRequest requestDTO) {
+        Assert.notNull(StatusEnum.of(requestDTO.getStatus()), () -> new SnailJobServerException("Status cannot be empty"));
         Job job = jobMapper.selectById(requestDTO.getId());
         Assert.notNull(job, () -> new SnailJobServerException("update job status failed"));
         // 直接幂等

@@ -1,11 +1,12 @@
-package com.aizuda.snailjob.client.core.dto;
+package com.aizuda.snailjob.model.base;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-public class RetryDTO {
+public class RetryResponse {
+
     private Long id;
 
     private String namespaceId;
@@ -24,6 +25,8 @@ public class RetryDTO {
 
     private String executorName;
 
+    private String serializerName;
+
     /**
      * 下次触发时间
      */
@@ -40,4 +43,8 @@ public class RetryDTO {
     private Integer bucketIndex;
 
     private Long deleted;
+
+    private LocalDateTime createDt;
+
+    private LocalDateTime updateDt;
 }

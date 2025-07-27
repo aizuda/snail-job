@@ -51,6 +51,7 @@ public abstract class AbstractWorkflowService implements WorkflowService {
 
     @Override
     public boolean updateWorkFlowStatus(StatusUpdateRequest requestDTO) {
+        Assert.notNull(StatusEnum.of(requestDTO.getStatus()), () -> new SnailJobServerException("Status cannot be empty"));
         Workflow workflow = workflowMapper.selectById(requestDTO.getId());
         Assert.notNull(workflow, "workflow does not exist");
 
@@ -113,6 +114,13 @@ public abstract class AbstractWorkflowService implements WorkflowService {
 
     @Override
     public boolean deleteWorkflowByIds(Set<Long> ids) {
+
+        Assert.isTrue(ids.size() == workflowMapper.selectCount(
+                new LambdaQueryWrapper<Workflow>()
+                        .eq(Workflow::getNamespaceId, getNamespaceId())
+                        .eq(Workflow::getWorkflowStatus, StatusEnum.NO.getStatus())
+                        .in(Workflow::getId, ids)
+        ), () -> new SnailJobServerException("Failed to delete workflow task, please check if the task status is closed"));
 
         List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
                 .select(JobSummary::getId)

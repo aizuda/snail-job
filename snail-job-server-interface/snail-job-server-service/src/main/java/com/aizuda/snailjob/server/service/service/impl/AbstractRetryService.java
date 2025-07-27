@@ -13,9 +13,9 @@ import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.retry.task.dto.RetryTaskPrepareDTO;
 import com.aizuda.snailjob.server.service.convert.RetryConverter;
-import com.aizuda.snailjob.server.service.dto.RetryResponseDTO;
+import com.aizuda.snailjob.model.base.RetryResponse;
 import com.aizuda.snailjob.model.base.StatusUpdateRequest;
-import com.aizuda.snailjob.server.service.dto.TriggerRetryDTO;
+import com.aizuda.snailjob.model.base.TriggerRetryRequest;
 import com.aizuda.snailjob.server.service.handler.RetryArgsDeserializeHandler;
 import com.aizuda.snailjob.server.service.service.RetryService;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
@@ -45,7 +45,7 @@ public abstract class AbstractRetryService implements RetryService {
     private RetryArgsDeserializeHandler retryArgsDeserializeHandler;
 
     @Override
-    public <T extends RetryResponseDTO> T getRetryById(Long retryId, Class<T> clazz) {
+    public <T extends RetryResponse> T getRetryById(Long retryId, Class<T> clazz) {
         Retry retry = accessTemplate.getRetryAccess().one(new LambdaQueryWrapper<Retry>().eq(Retry::getId, retryId));
 
         Assert.notNull(retry, () -> new SnailJobServerException("Retry task not found:[{}].", retryId));
@@ -71,9 +71,9 @@ public abstract class AbstractRetryService implements RetryService {
     }
 
     @Override
-    public boolean triggerRetry(TriggerRetryDTO triggerRetryDTO) {
-        Retry retry = accessTemplate.getRetryAccess().one(new LambdaQueryWrapper<Retry>().eq(Retry::getId, triggerRetryDTO.getId()));
-        Assert.notNull(retry, () -> new SnailJobServerException("Retry task not found:[{}].", triggerRetryDTO.getId()));
+    public boolean triggerRetry(TriggerRetryRequest triggerRetryRequest) {
+        Retry retry = accessTemplate.getRetryAccess().one(new LambdaQueryWrapper<Retry>().eq(Retry::getId, triggerRetryRequest.getId()));
+        Assert.notNull(retry, () -> new SnailJobServerException("Retry task not found:[{}].", triggerRetryRequest.getId()));
         long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
                 .eq(GroupConfig::getGroupName, retry.getGroupName())
                 .eq(GroupConfig::getNamespaceId, getNamespaceId())
@@ -93,7 +93,7 @@ public abstract class AbstractRetryService implements RetryService {
         ActorRef actorRef = ActorGenerator.retryTaskPrepareActor();
         actorRef.tell(retryTaskPrepareDTO, actorRef);
 
-        return false;
+        return true;
     }
 
     @Override
