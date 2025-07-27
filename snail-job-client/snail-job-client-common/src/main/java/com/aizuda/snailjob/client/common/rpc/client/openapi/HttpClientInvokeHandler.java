@@ -1,11 +1,13 @@
 package com.aizuda.snailjob.client.common.rpc.client.openapi;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ServiceLoaderUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.annotation.Header;
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.annotation.Param;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
+import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
@@ -105,10 +107,11 @@ public class HttpClientInvokeHandler<R extends Result<Object>> implements Invoca
      */
     public static SnailHttpClient loadSnailJobHttpClient() {
         SnailJobProperties properties = SnailSpringContext.getBean(SnailJobProperties.class);
+        Assert.notNull(properties, () -> new SnailJobClientException("snail job properties is null"));
         SnailHttpClientConfig httpConfig = properties.getHttpConfig();
-        if (httpConfig.getHost() == null) {
-            httpConfig.setHost(properties.getServer().getHost());
-        }
+
+        httpConfig.setHost(Optional.ofNullable(httpConfig.getHost()).orElse(properties.getServer().getHost()));
+
         return ServiceLoaderUtil.loadList(SnailHttpClient.class)
                 .stream()
                 .findAny()

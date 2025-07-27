@@ -32,8 +32,7 @@ public class OpenApiAuthenticationInterceptor implements HandlerInterceptor {
         String token = request.getHeader(TOKEN);
         request.setAttribute(NAMESPACE_ID, namespaceId);
         request.setAttribute(GROUP_NAME, groupName);
-        request.setAttribute(GROUP_NAME, groupName);
-
+        
         if (StrUtil.isBlank(token) || !CacheToken.get(groupName, namespaceId).equals(token)) {
             throw new SnailJobServerException("Token authentication failed. [namespace:{} groupName:{} token:{}]",
                     namespaceId, groupName, token);

@@ -17,7 +17,7 @@ public interface JobOpenApiClientV2 {
     @Mapping(method = RequestMethod.POST, path = OPENAPI_ADD_JOB)
     Result<Object> addJob(RequestAddOrUpdateJobDTO requestAddOrUpdateJobDTO);
 
-    @Mapping(method = RequestMethod.POST, path = OPENAPI_UPDATE_JOB)
+    @Mapping(method = RequestMethod.PUT, path = OPENAPI_UPDATE_JOB)
     Result<Object> updateJob(RequestAddOrUpdateJobDTO requestUpdateJobDTO);
 
     @Mapping(method = RequestMethod.GET, path = OPENAPI_GET_JOB_DETAIL_V2)
@@ -35,7 +35,7 @@ public interface JobOpenApiClientV2 {
     @Mapping(method = RequestMethod.POST, path = OPENAPI_TRIGGER_WORKFLOW_V2)
     Result<Object> triggerWorkFlow(JobTriggerDTO jobTriggerDTO);
 
-    @Mapping(method = RequestMethod.POST, path = OPENAPI_UPDATE_JOB_STATUS_V2)
+    @Mapping(method = RequestMethod.PUT, path = OPENAPI_UPDATE_JOB_STATUS_V2)
     Result<Object> updateJobStatus(RequestUpdateStatusDTO statusDTO);
 
     @Mapping(method = RequestMethod.PUT, path = OPENAPI_UPDATE_WORKFLOW_STATUS_V2)

@@ -25,4 +25,6 @@ public final class SnailHttpClientConfig {
      * 是否是https协议
      */
     private boolean https;
+
+    private String prefix = "snail-job";
 }

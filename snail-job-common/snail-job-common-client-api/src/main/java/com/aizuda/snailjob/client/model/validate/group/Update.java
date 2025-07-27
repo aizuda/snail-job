@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.client.job.core.handler.update;
+package com.aizuda.snailjob.client.model.validate.group;
 
 /**
  * @author opensnail

@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.web.handler;
+package com.aizuda.snailjob.server.service.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.exception.AbstractError;
@@ -105,7 +105,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Result onMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         BindingResult result = e.getBindingResult();
-        if (result != null && result.hasErrors()) {
+        if (result.hasErrors()) {
             StringBuilder sb = new StringBuilder();
             List<FieldError> errors = result.getFieldErrors();
             if (CollUtil.isNotEmpty(errors)) {

@@ -6,6 +6,7 @@ import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum;
 import com.aizuda.snailjob.client.job.core.handler.AbstractParamsHandler;
 import com.aizuda.snailjob.client.common.util.ValidatorUtils;
+import com.aizuda.snailjob.client.model.validate.group.Update;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;

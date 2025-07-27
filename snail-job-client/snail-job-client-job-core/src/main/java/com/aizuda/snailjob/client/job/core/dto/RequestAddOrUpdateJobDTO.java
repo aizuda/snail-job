@@ -1,8 +1,7 @@
 package com.aizuda.snailjob.client.job.core.dto;
 
-import com.aizuda.snailjob.client.job.core.handler.add.Add;
-import com.aizuda.snailjob.client.job.core.handler.update.Update;
-import com.aizuda.snailjob.client.job.core.handler.update.UpdateHandler;
+import com.aizuda.snailjob.client.model.validate.group.Add;
+import com.aizuda.snailjob.client.model.validate.group.Update;
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
