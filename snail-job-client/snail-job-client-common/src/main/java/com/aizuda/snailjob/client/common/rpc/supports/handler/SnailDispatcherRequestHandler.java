@@ -9,7 +9,6 @@ import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 import com.aizuda.snailjob.client.common.rpc.supports.handler.grpc.GrpcRequest;
-import com.aizuda.snailjob.client.common.rpc.supports.handler.netty.NettyHttpRequest;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpRequest;
 import com.aizuda.snailjob.client.common.rpc.supports.http.HttpResponse;
 import com.aizuda.snailjob.client.common.rpc.supports.scan.EndPointInfo;
@@ -19,7 +18,6 @@ import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.Result;
-import com.aizuda.snailjob.common.core.model.SnailJobRequest;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -44,77 +42,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SnailDispatcherRequestHandler {
     private final SnailJobProperties snailJobProperties;
-
-    public SnailJobRpcResult dispatch(NettyHttpRequest request) {
-
-        SnailJobRpcResult snailJobRpcResult = new SnailJobRpcResult();
-
-        List<HandlerInterceptor> handlerInterceptors = handlerInterceptors();
-        SnailJobRequest retryRequest = JsonUtil.parseObject(request.getContent(), SnailJobRequest.class);
-        HttpRequest httpRequest = request.getHttpRequest();
-        HttpResponse httpResponse = request.getHttpResponse();
-        EndPointInfo endPointInfo = null;
-        Result resultObj = null;
-        Exception e = null;
-        try {
-            String snailJobAuth = request.getHeaders().getAsString(SystemConstants.SNAIL_JOB_AUTH_TOKEN);
-            String configToken = Optional.ofNullable(snailJobProperties.getToken()).orElse(SystemConstants.DEFAULT_TOKEN);
-            if (!configToken.equals(snailJobAuth)) {
-                throw new SnailJobClientException("Authentication failed. [Please check if the configured Token is correct]");
-            }
-
-            UrlBuilder builder = UrlBuilder.ofHttp(request.getUri());
-            RequestMethod requestMethod = RequestMethod.valueOf(request.getMethod().name());
-
-            endPointInfo = EndPointInfoCache.get(builder.getPathStr(), requestMethod);
-            if (Objects.isNull(endPointInfo)) {
-                throw new SnailJobClientException(" Cannot find corresponding processing, please check if the corresponding package is correctly introduced." +
-                        "path:[{}] requestMethod:[{}]", builder.getPathStr(), requestMethod);
-            }
-
-            Class<?>[] paramTypes = endPointInfo.getMethod().getParameterTypes();
-            Object[] args = retryRequest.getArgs();
-
-            Object[] deSerialize = (Object[]) deSerialize(JsonUtil.toJsonString(args), endPointInfo.getMethod(),
-                    httpRequest, httpResponse);
-
-            for (final HandlerInterceptor handlerInterceptor : handlerInterceptors) {
-                if (!handlerInterceptor.preHandle(httpRequest, httpResponse, endPointInfo)) {
-                    return snailJobRpcResult;
-                }
-            }
-
-            if (paramTypes.length > 0) {
-                resultObj = (Result) ReflectionUtils.invokeMethod(endPointInfo.getMethod(),
-                        endPointInfo.getExecutor(), deSerialize);
-            } else {
-                resultObj = (Result) ReflectionUtils.invokeMethod(endPointInfo.getMethod(),
-                        endPointInfo.getExecutor());
-            }
-
-            for (final HandlerInterceptor handlerInterceptor : handlerInterceptors) {
-                handlerInterceptor.postHandle(httpRequest, httpResponse, endPointInfo);
-            }
-        } catch (Exception ex) {
-            SnailJobLog.LOCAL.error("http request error. [{}]", request.getContent(), ex);
-            snailJobRpcResult.setMessage(ex.getMessage()).setStatus(StatusEnum.NO.getStatus());
-            e = ex;
-        } finally {
-            snailJobRpcResult.setReqId(retryRequest.getReqId());
-            if (Objects.nonNull(resultObj)) {
-                snailJobRpcResult.setData(resultObj.getData())
-                        .setMessage(resultObj.getMessage())
-                        .setStatus(resultObj.getStatus());
-            }
-
-            for (final HandlerInterceptor handlerInterceptor : handlerInterceptors) {
-                handlerInterceptor.afterCompletion(httpRequest, httpResponse, endPointInfo, e);
-            }
-        }
-
-        return snailJobRpcResult;
-    }
-
     public SnailJobRpcResult dispatch(GrpcRequest request) {
         SnailJobRpcResult snailJobRpcResult = new SnailJobRpcResult();
 
