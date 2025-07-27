@@ -21,6 +21,8 @@ import java.text.MessageFormat;
  */
 public class DefaultHttpClient implements SnailHttpClient {
     private final static String URL = "{0}://{1}:{2,number,#}/snail-job/{3}";
+    private final static String HTTPS = "https";
+    private final static String HTTP = "http";
     private final SnailHttpClientConfig config;
 
     public DefaultHttpClient(SnailHttpClientConfig config) {
@@ -40,9 +42,9 @@ public class DefaultHttpClient implements SnailHttpClient {
             host = properties.getHost();
         }
 
-        String url = MessageFormat.format(URL, config.isHttps() ? "https" : "http", host, config.getPort(), path);
-        if (StrUtil.isNotBlank(request.getData())){
-            url += request.getData();
+        String url = MessageFormat.format(URL, config.isHttps() ? HTTPS : HTTP, host, config.getPort(), path);
+        if (StrUtil.isNotBlank(request.getParams())){
+            url += request.getParams();
         }
         HttpRequest httpRequest = HttpUtil.createRequest(Method.valueOf(request.getMethod()), url);
         httpRequest.body(request.getBody());

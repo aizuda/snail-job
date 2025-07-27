@@ -4,7 +4,7 @@ import cn.hutool.core.util.ServiceLoaderUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.annotation.Header;
 import com.aizuda.snailjob.client.common.annotation.Mapping;
-import com.aizuda.snailjob.client.common.annotation.RequestParam;
+import com.aizuda.snailjob.client.common.annotation.Param;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
@@ -44,7 +44,7 @@ public class HttpClientInvokeHandler<R extends Result<Object>> implements Invoca
         Parameter[] parameters = method.getParameters();
 
         Request request = new Request();
-        request.setData(getData(args, parameters));
+        request.setParams(getParams(args, parameters));
         request.setMethod(mapping.method().name());
         request.setPath(mapping.path());
         request.setHeaders(getHeaderInfo(method, args));
@@ -53,13 +53,13 @@ public class HttpClientInvokeHandler<R extends Result<Object>> implements Invoca
         return snailHttpClient.execute(request);
     }
 
-    private String getData(Object[] args, Parameter[] parameters) {
+    private String getParams(Object[] args, Parameter[] parameters) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
-            if (parameter.isAnnotationPresent(RequestParam.class)) {
-                RequestParam requestParam = parameter.getAnnotation(RequestParam.class);
-                sb.append(requestParam.value()).append("=").append(args[i]);
+            if (parameter.isAnnotationPresent(Param.class)) {
+                Param param = parameter.getAnnotation(Param.class);
+                sb.append(param.value()).append("=").append(args[i]);
             }
         }
         String data = sb.toString();

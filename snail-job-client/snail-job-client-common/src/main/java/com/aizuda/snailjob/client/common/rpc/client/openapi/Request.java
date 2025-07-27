@@ -32,9 +32,9 @@ public class Request {
     private String body;
 
     /**
-     * 参数
+     * url参数
      */
-    private String data;
+    private String params;
 
     /**
      * 上下文
