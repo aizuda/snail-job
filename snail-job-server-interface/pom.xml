@@ -11,8 +11,10 @@
     </parent>
 
     <artifactId>snail-job-server-interface</artifactId>
+    <name>snail-job-server-interface</name>
+    <description>snail-job-server-interface</description>
     <packaging>pom</packaging>
-
+=
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
