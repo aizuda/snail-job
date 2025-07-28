@@ -10,8 +10,8 @@
     </parent>
 
     <artifactId>snail-job-common-model</artifactId>
-    <name>snail-job-common-client-api</name>
-    <description>snail-job-common-client-api</description>
+    <name>snail-job-common-model</name>
+    <description>snail-job-common-model</description>
     <packaging>jar</packaging>
 
     <dependencies>
