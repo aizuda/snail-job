@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.client.common.config;
 
-import com.aizuda.snailjob.client.common.rpc.client.openapi.SnailHttpClientConfig;
 import com.aizuda.snailjob.common.core.alarm.email.SnailJobMailProperties;
 import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import lombok.AllArgsConstructor;
@@ -100,9 +99,9 @@ public class SnailJobProperties {
     private SnailJobMailProperties mail = new SnailJobMailProperties();
 
     /**
-     * http客户端配置(openapi使用)
+     * openapi配置
      */
-    public SnailHttpClientConfig httpConfig = new SnailHttpClientConfig();
+    public SnailOpenApiConfig openapi = new SnailOpenApiConfig();
 
     /**
      * 客户端脚本存储位置
@@ -275,4 +274,25 @@ public class SnailJobProperties {
          */
         private int queueCapacity = 10000;
     }
+
+    @Data
+    public static final class SnailOpenApiConfig {
+        /**
+         * 默认可以不配置，不配置则取{@link SnailJobProperties.ServerConfig#getHost()}
+         */
+        private String host;
+        /**
+         * 默认是8080
+         */
+        private int port = 8080;
+        /**
+         * 是否是https协议
+         */
+        private boolean https;
+        /**
+         * 公共前缀
+         */
+        private String prefix = "snail-job";
+    }
+
 }

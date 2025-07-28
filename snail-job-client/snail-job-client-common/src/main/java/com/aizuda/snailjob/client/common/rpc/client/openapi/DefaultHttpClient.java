@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
+import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.common.core.model.SnailJobOpenApiResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 
@@ -21,9 +22,9 @@ public class DefaultHttpClient implements SnailHttpClient {
     private final static String URL = "{0}://{1}:{2,number,#}/{3}/{4}";
     private final static String HTTPS = "https";
     private final static String HTTP = "http";
-    private final SnailHttpClientConfig config;
+    private final SnailJobProperties.SnailOpenApiConfig config;
 
-    public DefaultHttpClient(SnailHttpClientConfig config) {
+    public DefaultHttpClient(SnailJobProperties.SnailOpenApiConfig config) {
         this.config = config;
     }
 

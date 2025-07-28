@@ -108,14 +108,14 @@ public class HttpClientInvokeHandler<R extends Result<Object>> implements Invoca
     public static SnailHttpClient loadSnailJobHttpClient() {
         SnailJobProperties properties = SnailSpringContext.getBean(SnailJobProperties.class);
         Assert.notNull(properties, () -> new SnailJobClientException("snail job properties is null"));
-        SnailHttpClientConfig httpConfig = properties.getHttpConfig();
+        SnailJobProperties.SnailOpenApiConfig openApiConfig = properties.getOpenapi();
 
-        httpConfig.setHost(Optional.ofNullable(httpConfig.getHost()).orElse(properties.getServer().getHost()));
+        openApiConfig.setHost(Optional.ofNullable(openApiConfig.getHost()).orElse(properties.getServer().getHost()));
 
         return ServiceLoaderUtil.loadList(SnailHttpClient.class)
                 .stream()
                 .findAny()
-                .orElse(new DefaultHttpClient(httpConfig));
+                .orElse(new DefaultHttpClient(openApiConfig));
     }
 
 }
