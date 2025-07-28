@@ -50,7 +50,7 @@ jobs:
           DOCKER_NAMESPACE: ${{ secrets.DOCKER_NAMESPACE }}
           VERSION: ${{ steps.version.outputs.version }}
         with:
-          context: snail-job-server/snail-job-server-starter/
+          context: snail-job-server-starter/
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
