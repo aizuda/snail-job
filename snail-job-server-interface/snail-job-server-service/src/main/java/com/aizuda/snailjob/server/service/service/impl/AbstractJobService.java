@@ -128,7 +128,9 @@ public abstract class AbstractJobService implements JobService {
     @Override
     public boolean updateJob(JobRequest jobRequest) {
         Assert.notNull(jobRequest.getId(), () -> new SnailJobServerException("ID cannot be empty"));
-        Assert.notNull(StatusEnum.of(jobRequest.getJobStatus()), () -> new SnailJobServerException("Status cannot be empty"));
+        if (Objects.nonNull(jobRequest.getJobStatus())){
+            Assert.notNull(StatusEnum.of(jobRequest.getJobStatus()), () -> new SnailJobServerException("Invalid status parameter"));
+        }
         Job job = jobMapper.selectById(jobRequest.getId());
         Assert.notNull(job, () -> new SnailJobServerException("Job is null, update failed"));
 

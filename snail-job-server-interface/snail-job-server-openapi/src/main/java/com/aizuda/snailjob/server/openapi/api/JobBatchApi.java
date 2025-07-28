@@ -6,7 +6,7 @@ import com.aizuda.snailjob.server.openapi.service.JobBatchApiService;
 import com.aizuda.snailjob.server.service.service.JobBatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,7 +25,7 @@ public class JobBatchApi {
     private final JobBatchService jobBatchService;
     private final JobBatchApiService jobBatchApiService;
 
-    @PostMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_JOB_BATCH_DETAIL_V2)
+    @GetMapping(SystemConstants.HTTP_PATH.OPENAPI_GET_JOB_BATCH_DETAIL_V2)
     public JobBatchApiResponse getJobBatchByIds(@RequestParam("id") Long id) {
         return jobBatchService.getJobBatchById(id, JobBatchApiResponse.class);
     }
