@@ -13,7 +13,7 @@ import com.google.common.collect.Maps;
 import lombok.RequiredArgsConstructor;
 import org.apache.pekko.actor.AbstractActor;
 import org.apache.pekko.actor.ActorRef;
-import com.aizuda.snailjob.client.model.ExecuteResult;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.aizuda.snailjob.model.request.DispatchJobRequest;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;

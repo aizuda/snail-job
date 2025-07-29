@@ -3,7 +3,7 @@ package com.aizuda.snailjob.server.web.service.handler;
 import  org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
-import com.aizuda.snailjob.client.model.ExecuteResult;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;

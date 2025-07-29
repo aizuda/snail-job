@@ -3,8 +3,7 @@ package com.aizuda.snailjob.client.job.core.executor.builtin;
 
 import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
 import com.aizuda.snailjob.client.job.core.dto.JobArgs;
-import com.aizuda.snailjob.client.model.ExecuteResult;
-import com.aizuda.snailjob.common.core.constant.SystemConstants;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import org.springframework.stereotype.Component;
 

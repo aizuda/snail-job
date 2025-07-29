@@ -4,7 +4,7 @@ import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.client.job.core.dto.JobArgs;
 import com.aizuda.snailjob.client.job.core.dto.MergeReduceArgs;
 import com.aizuda.snailjob.client.job.core.dto.ReduceArgs;
-import com.aizuda.snailjob.client.model.ExecuteResult;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
 import com.aizuda.snailjob.common.core.model.JobContext;

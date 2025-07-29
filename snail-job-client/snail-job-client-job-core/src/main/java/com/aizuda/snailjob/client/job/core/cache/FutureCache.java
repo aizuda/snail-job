@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.client.job.core.cache;
 
-import com.aizuda.snailjob.client.model.ExecuteResult;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.Optional;

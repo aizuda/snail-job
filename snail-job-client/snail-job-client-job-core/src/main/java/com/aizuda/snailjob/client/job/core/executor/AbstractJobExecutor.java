@@ -8,7 +8,7 @@ import com.aizuda.snailjob.client.job.core.dto.*;
 import com.aizuda.snailjob.client.job.core.log.JobLogMeta;
 import com.aizuda.snailjob.client.job.core.timer.StopTaskTimerTask;
 import com.aizuda.snailjob.client.job.core.timer.TimerManager;
-import com.aizuda.snailjob.client.model.ExecuteResult;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.MapReduceStageEnum;
 import com.aizuda.snailjob.common.core.model.JobArgsHolder;

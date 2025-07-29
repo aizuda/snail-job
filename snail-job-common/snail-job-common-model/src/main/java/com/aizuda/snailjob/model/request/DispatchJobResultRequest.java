@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.model.request;
 
-import com.aizuda.snailjob.client.model.ExecuteResult;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import lombok.Data;
 
 /**

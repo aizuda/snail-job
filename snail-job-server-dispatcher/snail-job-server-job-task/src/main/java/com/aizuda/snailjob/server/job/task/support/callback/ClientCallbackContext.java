@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.callback;
 
-import com.aizuda.snailjob.client.model.ExecuteResult;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.aizuda.snailjob.template.datasource.persistence.po.Job;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import lombok.Data;

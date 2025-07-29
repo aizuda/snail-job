@@ -3,7 +3,7 @@ package com.aizuda.snailjob.client.job.core.executor.builtin;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
-import com.aizuda.snailjob.client.model.ExecuteResult;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.exception.SnailJobInnerExecutorException;
 import com.aizuda.snailjob.common.core.util.JsonUtil;

@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.client.job.core;
 
-import com.aizuda.snailjob.client.model.ExecuteResult;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 
 import java.util.List;
 

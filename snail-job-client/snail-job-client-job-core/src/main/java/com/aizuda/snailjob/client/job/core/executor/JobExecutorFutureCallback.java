@@ -9,7 +9,7 @@ import com.aizuda.snailjob.client.common.rpc.client.RequestBuilder;
 import com.aizuda.snailjob.client.job.core.cache.ThreadPoolCache;
 import com.aizuda.snailjob.client.job.core.client.JobNettyClient;
 import com.aizuda.snailjob.client.job.core.log.JobLogMeta;
-import com.aizuda.snailjob.client.model.ExecuteResult;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.aizuda.snailjob.model.request.DispatchJobResultRequest;
 import com.aizuda.snailjob.common.core.alarm.AlarmContext;
 import com.aizuda.snailjob.common.core.alarm.SnailJobAlarmFactory;

@@ -6,16 +6,13 @@ import com.aizuda.snailjob.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.snailjob.client.job.core.dto.MapArgs;
 import com.aizuda.snailjob.client.job.core.dto.MergeReduceArgs;
 import com.aizuda.snailjob.client.job.core.dto.ReduceArgs;
-import com.aizuda.snailjob.client.model.ExecuteResult;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * 基于注解的MapReduce执行器

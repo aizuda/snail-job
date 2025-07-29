@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.client.model;
+package com.aizuda.snailjob.model.dto;
 
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 
@@ -8,7 +8,6 @@ import com.aizuda.snailjob.common.core.enums.StatusEnum;
  * @since 2.4.0
  * @see: com.aizuda.snailjob.client.job.core.dto.ExecuteResult
  */
-@Deprecated(since = "1.9.0")
 public class ExecuteResult {
     private int status;
     private Object result;

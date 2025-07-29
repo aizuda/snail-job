@@ -1,19 +1,9 @@
 package com.aizuda.snailjob.client.job.core.executor;
 
 import com.aizuda.snailjob.client.job.core.MapHandler;
-import com.aizuda.snailjob.client.job.core.cache.JobExecutorInfoCache;
-import com.aizuda.snailjob.client.job.core.dto.JobExecutorInfo;
 import com.aizuda.snailjob.client.job.core.dto.MapArgs;
-import com.aizuda.snailjob.client.model.ExecuteResult;
-import com.aizuda.snailjob.common.core.exception.SnailJobMapReduceException;
+import com.aizuda.snailjob.model.dto.ExecuteResult;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
-
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * 基于注解的Map任务执行器
