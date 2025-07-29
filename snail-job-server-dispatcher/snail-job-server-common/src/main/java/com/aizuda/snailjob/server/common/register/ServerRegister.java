@@ -68,7 +68,7 @@ public class ServerRegister extends AbstractRegister {
 
         context.setGroupName(GROUP_NAME);
         context.setHostId(CURRENT_CID);
-        context.setHostIp(systemProperties.getServerHost());
+        context.setHostIp(Optional.ofNullable(systemProperties.getServerHost()).filter(StrUtil::isNotBlank).orElse(NetUtil.getLocalIpStr()));
         context.setHostPort(systemProperties.getServerPort());
         context.setContextPath(Optional.ofNullable(serverProperties.getServlet().getContextPath()).orElse(StrUtil.EMPTY));
         context.setNamespaceId(NAMESPACE_ID);
