@@ -38,6 +38,8 @@ public class RealStopTaskActor extends AbstractActor {
                 doStop(realStopTaskInstanceDTO);
             } catch (Exception e) {
                 log.error("Stopping task execution failed. [{}]", JsonUtil.toJsonString(realStopTaskInstanceDTO), e);
+            } finally {
+                getContext().stop(getSelf());
             }
         }).build();
     }

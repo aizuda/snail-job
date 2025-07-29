@@ -71,6 +71,8 @@ public class ReduceActor extends AbstractActor {
                 }, key, Duration.ofSeconds(1), Duration.ofSeconds(2), 6);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("Reduce processing exception. [{}]", reduceTask, e);
+            } finally {
+                getContext().stop(getSelf());
             }
 
         }).build();

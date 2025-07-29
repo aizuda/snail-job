@@ -59,6 +59,8 @@ public class RequestCallbackClientActor extends AbstractActor {
                 doCallback(executorDTO);
             } catch (Exception e) {
                 log.error("Client request exception occurred", e);
+            } finally {
+                getContext().stop(getSelf());
             }
         }).build();
     }

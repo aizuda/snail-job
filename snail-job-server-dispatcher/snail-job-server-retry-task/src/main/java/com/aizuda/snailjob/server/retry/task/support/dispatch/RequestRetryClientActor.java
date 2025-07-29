@@ -59,6 +59,8 @@ public class RequestRetryClientActor extends AbstractActor {
                 doExecute(realRetryExecutorDTO);
             } catch (Exception e) {
                 log.error("Client request exception occurred", e);
+            } finally {
+                getContext().stop(getSelf());
             }
         }).build();
     }

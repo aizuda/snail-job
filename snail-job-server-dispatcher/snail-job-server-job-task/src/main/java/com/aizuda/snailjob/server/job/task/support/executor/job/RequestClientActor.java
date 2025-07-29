@@ -65,6 +65,8 @@ public class RequestClientActor extends AbstractActor {
                 doExecute(realJobExecutorDTO);
             } catch (Exception e) {
                 log.error("Client request exception occurred", e);
+            } finally {
+                getContext().stop(getSelf());
             }
         }).build();
     }

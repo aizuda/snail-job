@@ -65,6 +65,8 @@ public class ScanJobTaskActor extends AbstractActor {
                 doScan(config);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("Data scanner processing exception. [{}]", config, e);
+            } finally {
+                getContext().stop(getSelf());
             }
 
         }).build();

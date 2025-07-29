@@ -71,6 +71,8 @@ public class RetryExecutor extends AbstractActor {
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("Data scanner processing exception. [{}]", execute, e);
                 updateRetryTaskStatus(execute.getRetryTaskId(), RetryTaskStatusEnum.FAIL.getStatus(), RetryOperationReasonEnum.TASK_EXECUTION_ERROR);
+            } finally {
+                getContext().stop(getSelf());
             }
 
         }).build();

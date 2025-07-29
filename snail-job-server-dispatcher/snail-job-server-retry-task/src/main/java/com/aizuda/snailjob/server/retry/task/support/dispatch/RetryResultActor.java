@@ -37,6 +37,8 @@ public class RetryResultActor extends AbstractActor {
                 doResult(result);
             } catch (Exception e) {
                 SnailJobLog.LOCAL.error("Result processing exception. [{}]", result, e);
+            } finally {
+                getContext().stop(getSelf());
             }
         }).build();
     }

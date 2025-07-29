@@ -71,6 +71,7 @@ public class ScanRetryActor extends AbstractActor {
                 SnailJobLog.LOCAL.error("Data scanner processing exception. [{}]", config, e);
             } finally {
                 REPEATED_PULL.remove(config.getBucketStr());
+                getContext().stop(getSelf());
             }
 
         }).build();

@@ -6,7 +6,6 @@ import com.aizuda.snailjob.common.core.enums.StatusEnum;
  * @author: opensnail
  * @date : 2023-09-27 09:43
  * @since 2.4.0
- * @see: com.aizuda.snailjob.client.job.core.dto.ExecuteResult
  */
 public class ExecuteResult {
     private int status;

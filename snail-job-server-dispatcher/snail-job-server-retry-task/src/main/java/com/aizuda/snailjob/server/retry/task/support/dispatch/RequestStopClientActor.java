@@ -40,6 +40,8 @@ public class RequestStopClientActor extends AbstractActor {
                 doStop(taskExecutorDTO);
             } catch (Exception e) {
                 log.error("Client request exception occurred", e);
+            } finally {
+                getContext().stop(getSelf());
             }
         }).build();
     }
