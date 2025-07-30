@@ -162,10 +162,11 @@ public abstract class AbstractJobService implements JobService {
         // 禁止更新组
         updateJob.setGroupName(null);
         updateJob.setNamespaceId(null);
+        updateJob.setOwnerId(Optional.ofNullable(jobRequest.getOwnerId()).orElse(0L));
 
         LambdaUpdateWrapper<Job> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Job::getId, jobRequest.getId());
-        updateWrapper.set(Job::getOwnerId, jobRequest.getOwnerId());
+
         return 1 == jobMapper.update(updateJob, updateWrapper);
     }
 
