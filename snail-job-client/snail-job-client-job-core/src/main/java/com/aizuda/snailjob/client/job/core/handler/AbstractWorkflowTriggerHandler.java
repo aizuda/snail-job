@@ -20,6 +20,7 @@ public abstract class AbstractWorkflowTriggerHandler<H, R> extends AbstractJobRe
         this.reqDTO = new WorkflowTriggerApiRequest();
        // 设置调度id
         reqDTO.setWorkflowId(workflowId);
+        reqDTO.setJobId(workflowId);
     }
 
     /**
@@ -36,6 +37,7 @@ public abstract class AbstractWorkflowTriggerHandler<H, R> extends AbstractJobRe
         }
         map.put(argsKey, argsValue);
         reqDTO.setTmpWfContext(JsonUtil.toJsonString(map));
+        reqDTO.setTmpArgsStr(JsonUtil.toJsonString(map));
         return r;
     }
 
