@@ -14,6 +14,10 @@
  */
 package com.aizuda.snailjob.server;
 
+import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.common.core.util.SnailJobNetworkUtils;
+import com.aizuda.snailjob.common.log.SnailJobLog;
+import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.rpc.server.grpc.GrpcServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
@@ -34,6 +38,18 @@ public class SnailJobServerApplication {
     public static void main(String[] args) {
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
         SpringApplication.run(SnailJobServerApplication.class, args);
+    }
+
+    @Bean
+    public Object configureSnailJobHost(SnailJobNetworkUtils networkUtils, SystemProperties systemProperties) {
+        String host = systemProperties.getServerHost();
+        if (StrUtil.isBlank(host)) {
+            // 获取首选IP地址
+            String serverIp = networkUtils.findPreferredHostAddress();
+            systemProperties.setServerHost(serverIp);
+            SnailJobLog.LOCAL.info("自动配置 Snail-Job 服务端IP为: {}" , serverIp);
+        }
+        return null;
     }
 
     @Bean

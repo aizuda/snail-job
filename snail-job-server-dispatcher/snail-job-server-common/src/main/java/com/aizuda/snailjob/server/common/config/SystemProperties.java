@@ -50,7 +50,7 @@ public class SystemProperties {
     /**
      * 服务端地址
      */
-    private String serverHost = NetUtil.getLocalIpStr();
+    private String serverHost;
 
     /**
      * server token
