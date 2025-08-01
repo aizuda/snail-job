@@ -14,7 +14,6 @@ import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
 import com.aizuda.snailjob.common.core.grpc.auto.SnailJobGrpcRequest;
 import com.aizuda.snailjob.common.core.grpc.auto.Metadata;
-import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.core.util.SnailJobVersion;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -56,10 +55,6 @@ public final class GrpcChannel {
      * 客户端端口
      */
     private static final String SNAIL_JOB_CLIENT_PORT = "snail-job.port";
-    /**
-     * 客户端host
-     */
-    private static final String SNAIL_JOB_CLIENT_HOST = "snail-job.host";
 
     private static final Integer MIN_PORT = 15000;
     private static final Integer MAX_PORT = 50000;
@@ -68,11 +63,9 @@ public final class GrpcChannel {
 
     private static final String HOST_ID = IdUtil.getSnowflake().nextIdStr();
     private static final int PORT;
-    private static final String HOST;
 
     static {
         PORT = Integer.parseInt(System.getProperty(SNAIL_JOB_CLIENT_PORT, String.valueOf(1789)));
-        HOST = System.getProperty(SNAIL_JOB_CLIENT_HOST, NetUtil.getLocalIpStr());
     }
 
     /**
@@ -116,14 +109,7 @@ public final class GrpcChannel {
      */
     public static String getClientHost() {
         SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
-
-        String host = snailJobProperties.getHost();
-        // 获取客户端指定的IP地址
-        if (StrUtil.isBlank(host)) {
-            host = HOST;
-        }
-
-        return host;
+        return snailJobProperties.getHost();
     }
 
     /**

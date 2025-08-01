@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.common.core.util;
 
 import com.aizuda.snailjob.common.core.network.SnailJobNetworkProperties;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -41,7 +42,7 @@ public class SnailJobNetworkUtils {
                     Enumeration<InetAddress> addresses = ni.getInetAddresses();
                     while (addresses.hasMoreElements()) {
                         InetAddress address = addresses.nextElement();
-                        if (isValidAddress(address)) {
+                        if (isValidAddress(address) && !ignoreInterface(ni.getDisplayName())) {
                             result.add(address);
                         }
                     }
@@ -71,6 +72,17 @@ public class SnailJobNetworkUtils {
         return true;
     }
 
+    // For testing
+    boolean ignoreInterface(String interfaceName) {
+        for (String regex : this.properties.getIgnoredInterfaces()) {
+            if (interfaceName.matches(regex)) {
+                SnailJobLog.LOCAL.trace("Ignoring interface: " + interfaceName);
+                return true;
+            }
+        }
+        return false;
+    }
+
     private String selectPreferredAddress(List<InetAddress> addresses) {
         // 首先尝试按优先网络段匹配
         if (properties.getPreferredNetworks() != null && !properties.getPreferredNetworks().isEmpty()) {
@@ -87,17 +99,8 @@ public class SnailJobNetworkUtils {
             }
         }
 
-        // 如果没有匹配的网络段，返回第一个有效的地址
-        if (!addresses.isEmpty()) {
-            return addresses.get(0).getHostAddress();
-        }
-
-        // 最后尝试使用回环地址
-        try {
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            return "127.0.0.1";
-        }
+        // 返回默认的地址信息
+        return NetUtil.getLocalIpStr();
     }
 
     private boolean matchesNetwork(InetAddress address, String baseIp, int prefixLength) {

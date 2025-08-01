@@ -5,7 +5,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.common.core.util.NetUtil;
+import com.aizuda.snailjob.common.core.util.SnailJobNetworkUtils;
 import com.aizuda.snailjob.common.core.util.SnailJobVersion;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -49,6 +49,7 @@ public class ServerRegister extends AbstractRegister {
     private final InstanceManager instanceManager;
     private final SystemProperties systemProperties;
     private final ServerProperties serverProperties;
+    private final SnailJobNetworkUtils snailJobNetworkUtils;
 
     static {
         CURRENT_CID = IdUtil.getSnowflakeNextIdStr();
@@ -68,7 +69,8 @@ public class ServerRegister extends AbstractRegister {
 
         context.setGroupName(GROUP_NAME);
         context.setHostId(CURRENT_CID);
-        context.setHostIp(Optional.ofNullable(systemProperties.getServerHost()).filter(StrUtil::isNotBlank).orElse(NetUtil.getLocalIpStr()));
+
+        context.setHostIp(Optional.ofNullable(systemProperties.getServerHost()).filter(StrUtil::isNotBlank).orElse(snailJobNetworkUtils.findPreferredHostAddress()));
         context.setHostPort(systemProperties.getServerPort());
         context.setContextPath(Optional.ofNullable(serverProperties.getServlet().getContextPath()).orElse(StrUtil.EMPTY));
         context.setNamespaceId(NAMESPACE_ID);

@@ -19,16 +19,26 @@ import org.springframework.context.annotation.Role;
 @ConditionalOnClass(JobExecutor.class)
 @ConditionalOnProperty(prefix = "snail-job", name = "enabled", havingValue = "true")
 public class SnailJobClientJobCoreAutoConfiguration {
+    private static final String SNAIL_JOB_CLIENT_HOST = "snail-job.host";
 
     @Bean
     public Object configureSnailJobHost(SnailJobNetworkUtils networkUtils, SnailJobProperties snailJobProperties) {
         String host = snailJobProperties.getHost();
         if (StrUtil.isBlank(host)) {
-            // 获取首选IP地址
-            String clientIp = networkUtils.findPreferredHostAddress();
-            snailJobProperties.setHost(clientIp);
-            SnailJobLog.LOCAL.info("自动配置 Snail-Job 客户端IP为: {}" , clientIp);
+            host = System.getProperty(SNAIL_JOB_CLIENT_HOST);
+            if (StrUtil.isNotBlank(host)) {
+                snailJobProperties.setHost(host);
+            }
         }
+
+        if (StrUtil.isBlank(host)) {
+            // 获取首选IP地址
+            host = networkUtils.findPreferredHostAddress();
+            snailJobProperties.setHost(host);
+            System.setProperty(SNAIL_JOB_CLIENT_HOST, host);
+        }
+
+        SnailJobLog.LOCAL.info("Snail-Job 客户端IP为: {}" , host);
         return null; // 不需要实际的bean实例，只是触发配置
     }
 }
