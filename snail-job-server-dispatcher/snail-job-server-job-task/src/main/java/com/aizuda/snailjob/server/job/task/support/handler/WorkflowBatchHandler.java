@@ -65,10 +65,10 @@ public class WorkflowBatchHandler {
     private final WorkflowNodeMapper workflowNodeMapper;
 
     private boolean checkLeafCompleted(MutableGraph<Long> graph, Long leaf, Map<Long,
-            List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds, Long workflowId) {
+            List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds) {
 
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
-                .eq(WorkflowNode::getWorkflowId, workflowId));
+                .in(WorkflowNode::getId, graph.nodes()));
 
         Map<Long, WorkflowNode> workflowNodeMap = StreamUtils.toIdentityMap(workflowNodes, WorkflowNode::getId);
         Map<Long, Boolean> leafCompletedMap = Maps.newHashMap();
@@ -174,7 +174,7 @@ public class WorkflowBatchHandler {
         for (Long leaf : leaves) {
             List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.getOrDefault(leaf, Lists.newArrayList());
             if (CollUtil.isEmpty(jobTaskBatchList)) {
-                boolean isNeedProcess = checkLeafCompleted(graph, leaf, currentWorkflowNodeMap, graph.predecessors(leaf), workflowTaskBatch.getWorkflowId());
+                boolean isNeedProcess = checkLeafCompleted(graph, leaf, currentWorkflowNodeMap, graph.predecessors(leaf));
                 // 说明当前叶子节点需要处理，但是未处理返回false
                 if (isNeedProcess) {
                     return false;
