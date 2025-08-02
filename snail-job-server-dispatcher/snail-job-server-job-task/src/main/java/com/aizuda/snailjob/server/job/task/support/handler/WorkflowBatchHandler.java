@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.job.task.support.handler;
 
-import  org.apache.pekko.actor.ActorRef;
+import org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
@@ -54,6 +54,7 @@ import java.util.stream.Collectors;
 
 import static com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum.WORKFLOW_SUCCESSOR_SKIP_EXECUTION;
 import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.NOT_COMPLETE;
+import static com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum.NOT_SUCCESS;
 
 /**
  * @author xiaowoniu
@@ -71,32 +72,70 @@ public class WorkflowBatchHandler {
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final JobTaskMapper jobTaskMapper;
 
-    private static boolean checkLeafCompleted(MutableGraph<Long> graph, Map<Long,
+    private static boolean checkLeafCompleted(MutableGraph<Long> graph, Long leaf, Map<Long,
             List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds) {
 
-        // 判定子节点是否需要处理
+        Map<Long, Boolean> leafCompletedMap = Maps.newHashMap();
+        checkNeedProcess(graph, currentWorkflowNodeMap, parentIds, leafCompletedMap);
+
+        // 说明他都是无需处理的情况
+        if (leafCompletedMap.isEmpty()) {
+            return false;
+        }
+
+        // 主要有一个需要执行后续节点就需要执行
         boolean isNeedProcess = true;
-        for (Long nodeId : parentIds) {
-            List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.get(nodeId);
-            if (CollUtil.isEmpty(jobTaskBatchList)) {
-                // 递归查询有执行过的任务批次
-                isNeedProcess = isNeedProcess || checkLeafCompleted(graph, currentWorkflowNodeMap, graph.predecessors(nodeId));
-                continue;
-            }
+        for (Boolean value : leafCompletedMap.values()) {
+            isNeedProcess = isNeedProcess &&  value;
+        }
 
-            for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
-                // 只要是无需处理的说明后面的子节点都不需要处理了，isNeedProcess为false
-                if (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason())) {
-                    isNeedProcess = false;
-                    continue;
-                }
-
-                isNeedProcess = true;
-            }
-
+        // 如果是兄弟节点是多个任务且不是挂在条件节点下面的的情况,说需要加一个虚拟节点
+        if (!isNeedProcess) {
+            // 加一个虚拟节点
+            JobTaskBatch virtualJobTaskBatch = new JobTaskBatch();
+            virtualJobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
+            virtualJobTaskBatch.setOperationReason(JobOperationReasonEnum.NONE.getReason());
+            currentWorkflowNodeMap.get(leaf).add(virtualJobTaskBatch);
         }
 
         return isNeedProcess;
+    }
+
+    private static void checkNeedProcess(MutableGraph<Long> graph, Map<Long,
+            List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds, Map<Long, Boolean> leafCompletedMap) {
+
+        // 判定子节点是否需要处理
+//        boolean isNeedProcess = false;
+        for (Long nodeId : parentIds) {
+
+            List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.get(nodeId);
+            if (CollUtil.isEmpty(jobTaskBatchList)) {
+                // 递归查询有执行过的任务批次
+                checkNeedProcess(graph, currentWorkflowNodeMap, graph.predecessors(nodeId), leafCompletedMap);
+                continue;
+            }
+
+//            boolean isNeedProcess = false;
+            for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
+                // 只要是无需处理的说明后面的子节点都不需要处理了，isNeedProcess为false
+                if (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason())) {
+//                    isNeedProcess = false;
+                    continue;
+                }
+
+                // 如果节点是失败了且是阻塞的那么后续节点无需处理
+                if (NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())) {
+                    leafCompletedMap.put(nodeId, false);
+                    continue;
+                }
+
+                leafCompletedMap.put(nodeId, true);
+//                isNeedProcess = true;
+            }
+
+
+        }
+
     }
 
     public boolean complete(Long workflowTaskBatchId) {
@@ -138,11 +177,13 @@ public class WorkflowBatchHandler {
         for (Long leaf : leaves) {
             List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.getOrDefault(leaf, Lists.newArrayList());
             if (CollUtil.isEmpty(jobTaskBatchList)) {
-                boolean isNeedProcess = checkLeafCompleted(graph, currentWorkflowNodeMap, graph.predecessors(leaf));
+                boolean isNeedProcess = checkLeafCompleted(graph, leaf, currentWorkflowNodeMap, graph.predecessors(leaf));
                 // 说明当前叶子节点需要处理，但是未处理返回false
                 if (isNeedProcess) {
                     return false;
                 }
+
+                jobTaskBatchList = currentWorkflowNodeMap.getOrDefault(leaf, Lists.newArrayList());
             }
 
             boolean isMatchSuccess = jobTaskBatchList.stream()
@@ -152,7 +193,7 @@ public class WorkflowBatchHandler {
                 for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
                     if (jobTaskBatch.getTaskBatchStatus() == JobTaskBatchStatusEnum.SUCCESS.getStatus()) {
                         break;
-                    } else if (JobTaskBatchStatusEnum.NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())) {
+                    } else if (NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())) {
                         // 只要叶子节点不是无需处理的都是失败
                         if (JobOperationReasonEnum.WORKFLOW_NODE_NO_REQUIRED.getReason() != jobTaskBatch.getOperationReason()
                                 && JobOperationReasonEnum.WORKFLOW_NODE_CLOSED_SKIP_EXECUTION.getReason() != jobTaskBatch.getOperationReason()) {
