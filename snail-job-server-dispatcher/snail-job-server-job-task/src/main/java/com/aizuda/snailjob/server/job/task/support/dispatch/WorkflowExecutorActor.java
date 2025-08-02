@@ -192,7 +192,7 @@ public class WorkflowExecutorActor extends AbstractActor {
             // 决策当前节点要不要执行
             Set<Long> predecessors = graph.predecessors(workflowNode.getId());
             boolean predecessorsComplete = arePredecessorsComplete(taskExecute, predecessors, jobTaskBatchMap,
-                    workflowNode, workflowNodeMap);
+                    workflowNode, workflowNodeMap, workflowTaskBatch);
             if (!SystemConstants.ROOT.equals(taskExecute.getParentId()) && !predecessorsComplete) {
                 continue;
             }
@@ -247,7 +247,7 @@ public class WorkflowExecutorActor extends AbstractActor {
 
     private boolean arePredecessorsComplete(final WorkflowNodeTaskExecuteDTO taskExecute, Set<Long> predecessors,
                                             Map<Long, List<JobTaskBatch>> jobTaskBatchMap, WorkflowNode waitExecWorkflowNode,
-                                            Map<Long, WorkflowNode> workflowNodeMap) {
+                                            Map<Long, WorkflowNode> workflowNodeMap, WorkflowTaskBatch workflowTaskBatch) {
 
         // 判断所有节点是否都完成
         for (final Long nodeId : predecessors) {
@@ -285,6 +285,7 @@ public class WorkflowExecutorActor extends AbstractActor {
                     SnailJobLog.LOCAL.info("This node execution failed and the failure strategy is set to [Block], interrupting execution [{}] Nodes to be executed:[{}] Parent ID:[{}]", nodeId,
                             taskExecute.getParentId(),
                             waitExecWorkflowNode.getId());
+                    workflowBatchHandler.complete(taskExecute.getWorkflowTaskBatchId(), workflowTaskBatch);
                     return Boolean.FALSE;
                 }
             }
