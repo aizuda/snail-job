@@ -1,15 +1,14 @@
 package com.aizuda.snailjob.server.job.task.support.handler;
 
+import com.aizuda.snailjob.common.core.enums.*;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
+import com.aizuda.snailjob.template.datasource.persistence.po.*;
 import org.apache.pekko.actor.ActorRef;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
-import com.aizuda.snailjob.common.core.enums.JobNotifySceneEnum;
-import com.aizuda.snailjob.common.core.enums.JobOperationReasonEnum;
-import com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum;
-import com.aizuda.snailjob.common.core.enums.JobTaskStatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -26,14 +25,6 @@ import com.aizuda.snailjob.server.job.task.support.alarm.event.WorkflowTaskFailA
 import com.aizuda.snailjob.server.job.task.support.cache.MutableGraphCache;
 import com.aizuda.snailjob.server.job.task.support.stop.JobTaskStopFactory;
 import com.aizuda.snailjob.server.job.task.support.stop.TaskStopJobContext;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskBatchMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowTaskBatchMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.Job;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
-import com.aizuda.snailjob.template.datasource.persistence.po.JobTaskBatch;
-import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowTaskBatch;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.rholder.retry.*;
 import com.google.common.collect.Lists;
@@ -71,12 +62,17 @@ public class WorkflowBatchHandler {
     private final JobMapper jobMapper;
     private final JobTaskBatchMapper jobTaskBatchMapper;
     private final JobTaskMapper jobTaskMapper;
+    private final WorkflowNodeMapper workflowNodeMapper;
 
-    private static boolean checkLeafCompleted(MutableGraph<Long> graph, Long leaf, Map<Long,
+    private boolean checkLeafCompleted(MutableGraph<Long> graph, Long leaf, Map<Long,
             List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds) {
 
+        List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
+                .in(WorkflowNode::getId, parentIds));
+
+        Map<Long, WorkflowNode> workflowNodeMap = StreamUtils.toIdentityMap(workflowNodes, WorkflowNode::getId);
         Map<Long, Boolean> leafCompletedMap = Maps.newHashMap();
-        checkNeedProcess(graph, currentWorkflowNodeMap, parentIds, leafCompletedMap);
+        checkNeedProcess(graph, currentWorkflowNodeMap, parentIds, leafCompletedMap, workflowNodeMap);
 
         // 说明他都是无需处理的情况
         if (leafCompletedMap.isEmpty()) {
@@ -86,7 +82,7 @@ public class WorkflowBatchHandler {
         // 主要有一个需要执行后续节点就需要执行
         boolean isNeedProcess = true;
         for (Boolean value : leafCompletedMap.values()) {
-            isNeedProcess = isNeedProcess &&  value;
+            isNeedProcess = isNeedProcess && value;
         }
 
         // 如果是兄弟节点是多个任务且不是挂在条件节点下面的的情况,说需要加一个虚拟节点
@@ -101,36 +97,36 @@ public class WorkflowBatchHandler {
         return isNeedProcess;
     }
 
-    private static void checkNeedProcess(MutableGraph<Long> graph, Map<Long,
-            List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds, Map<Long, Boolean> leafCompletedMap) {
+    private static void checkNeedProcess(MutableGraph<Long> graph, Map<Long, List<JobTaskBatch>> currentWorkflowNodeMap,
+                                         Set<Long> parentIds,
+                                         Map<Long, Boolean> leafCompletedMap,
+                                         Map<Long, WorkflowNode> workflowNodeMap) {
 
         // 判定子节点是否需要处理
-//        boolean isNeedProcess = false;
         for (Long nodeId : parentIds) {
 
             List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.get(nodeId);
             if (CollUtil.isEmpty(jobTaskBatchList)) {
                 // 递归查询有执行过的任务批次
-                checkNeedProcess(graph, currentWorkflowNodeMap, graph.predecessors(nodeId), leafCompletedMap);
+                checkNeedProcess(graph, currentWorkflowNodeMap, graph.predecessors(nodeId), leafCompletedMap, workflowNodeMap);
                 continue;
             }
 
-//            boolean isNeedProcess = false;
             for (JobTaskBatch jobTaskBatch : jobTaskBatchList) {
                 // 只要是无需处理的说明后面的子节点都不需要处理了，isNeedProcess为false
                 if (WORKFLOW_SUCCESSOR_SKIP_EXECUTION.contains(jobTaskBatch.getOperationReason())) {
-//                    isNeedProcess = false;
                     continue;
                 }
 
                 // 如果节点是失败了且是阻塞的那么后续节点无需处理
-                if (NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())) {
+                WorkflowNode workflowNode = workflowNodeMap.get(nodeId);
+                if (NOT_SUCCESS.contains(jobTaskBatch.getTaskBatchStatus())
+                        && Objects.equals(workflowNode.getFailStrategy(), FailStrategyEnum.BLOCK.getCode())) {
                     leafCompletedMap.put(nodeId, false);
                     continue;
                 }
 
                 leafCompletedMap.put(nodeId, true);
-//                isNeedProcess = true;
             }
 
 
