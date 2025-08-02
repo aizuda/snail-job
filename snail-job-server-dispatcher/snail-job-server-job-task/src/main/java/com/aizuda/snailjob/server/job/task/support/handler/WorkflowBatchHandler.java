@@ -65,10 +65,10 @@ public class WorkflowBatchHandler {
     private final WorkflowNodeMapper workflowNodeMapper;
 
     private boolean checkLeafCompleted(MutableGraph<Long> graph, Long leaf, Map<Long,
-            List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds) {
+            List<JobTaskBatch>> currentWorkflowNodeMap, Set<Long> parentIds, Long workflowId) {
 
         List<WorkflowNode> workflowNodes = workflowNodeMapper.selectList(new LambdaQueryWrapper<WorkflowNode>()
-                .in(WorkflowNode::getId, parentIds));
+                .eq(WorkflowNode::getWorkflowId, workflowId));
 
         Map<Long, WorkflowNode> workflowNodeMap = StreamUtils.toIdentityMap(workflowNodes, WorkflowNode::getId);
         Map<Long, Boolean> leafCompletedMap = Maps.newHashMap();
@@ -91,7 +91,8 @@ public class WorkflowBatchHandler {
             JobTaskBatch virtualJobTaskBatch = new JobTaskBatch();
             virtualJobTaskBatch.setTaskBatchStatus(JobTaskBatchStatusEnum.CANCEL.getStatus());
             virtualJobTaskBatch.setOperationReason(JobOperationReasonEnum.NONE.getReason());
-            currentWorkflowNodeMap.get(leaf).add(virtualJobTaskBatch);
+            List<JobTaskBatch> jobTaskBatches = currentWorkflowNodeMap.computeIfAbsent(leaf, k -> new ArrayList<>());
+            jobTaskBatches.add(virtualJobTaskBatch);
         }
 
         return isNeedProcess;
@@ -173,7 +174,7 @@ public class WorkflowBatchHandler {
         for (Long leaf : leaves) {
             List<JobTaskBatch> jobTaskBatchList = currentWorkflowNodeMap.getOrDefault(leaf, Lists.newArrayList());
             if (CollUtil.isEmpty(jobTaskBatchList)) {
-                boolean isNeedProcess = checkLeafCompleted(graph, leaf, currentWorkflowNodeMap, graph.predecessors(leaf));
+                boolean isNeedProcess = checkLeafCompleted(graph, leaf, currentWorkflowNodeMap, graph.predecessors(leaf), workflowTaskBatch.getWorkflowId());
                 // 说明当前叶子节点需要处理，但是未处理返回false
                 if (isNeedProcess) {
                     return false;
