@@ -1,15 +1,11 @@
 package com.aizuda.snailjob.common.core.util;
 
+import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.network.SnailJobNetworkProperties;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.net.*;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -28,30 +24,49 @@ public class SnailJobNetworkUtils {
      * 获取符合条件的首选IP地址
      */
     public String findPreferredHostAddress() {
-        List<InetAddress> validAddresses = findAllValidAddresses();
-        return selectPreferredAddress(validAddresses);
+        InetAddress address = findFirstNonLoopbackAddress();
+        if (address != null) {
+            return address.getHostAddress();
+        }
+
+        return NetUtil.getLocalIpStr();
     }
 
-    private List<InetAddress> findAllValidAddresses() {
-        List<InetAddress> result = new ArrayList<>();
+
+    public InetAddress findFirstNonLoopbackAddress() {
+        InetAddress result = null;
         try {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                NetworkInterface ni = interfaces.nextElement();
-                if (ni.isUp()) {
-                    Enumeration<InetAddress> addresses = ni.getInetAddresses();
-                    while (addresses.hasMoreElements()) {
-                        InetAddress address = addresses.nextElement();
-                        if (isValidAddress(address) && !ignoreInterface(ni.getDisplayName())) {
-                            result.add(address);
+            int lowest = Integer.MAX_VALUE;
+            for (Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces(); nics.hasMoreElements(); ) {
+                NetworkInterface ifc = nics.nextElement();
+                if (ifc.isUp()) {
+                    SnailJobLog.LOCAL.trace("Testing interface: " + ifc.getDisplayName());
+                    if (ifc.getIndex() < lowest || result == null) {
+                        lowest = ifc.getIndex();
+                    } else if (result != null) {
+                        continue;
+                    }
+
+                    if (!ignoreInterface(ifc.getDisplayName())) {
+                        for (Enumeration<InetAddress> addrs = ifc.getInetAddresses(); addrs.hasMoreElements(); ) {
+                            InetAddress address = addrs.nextElement();
+                            if (isValidAddress(address) && isPreferredAddress(address)) {
+                                SnailJobLog.LOCAL.trace("Found non-loopback interface: " + ifc.getDisplayName());
+                                result = address;
+                            }
                         }
                     }
                 }
             }
-        } catch (SocketException e) {
-            throw new RuntimeException("Failed to retrieve network interfaces", e);
+        } catch (IOException ex) {
+            SnailJobLog.LOCAL.error("Cannot get first non-loopback address", ex);
         }
-        return result;
+
+        if (result != null) {
+            return result;
+        }
+
+        return NetUtil.getLocalAddress();
     }
 
     private boolean isValidAddress(InetAddress address) {
@@ -72,6 +87,26 @@ public class SnailJobNetworkUtils {
         return true;
     }
 
+    // For testing.
+    private boolean isPreferredAddress(InetAddress address) {
+
+        final List<String> preferredNetworks = this.properties.getPreferredNetworks();
+        if (CollUtil.isEmpty(preferredNetworks)) {
+            return true;
+        }
+
+        for (String regex : preferredNetworks) {
+
+            final String hostAddress = address.getHostAddress();
+            if (hostAddress.matches(regex) || hostAddress.startsWith(regex) || matchesCIDR(address, regex)) {
+                return true;
+            }
+        }
+        SnailJobLog.LOCAL.info("Ignoring address: " + address.getHostAddress());
+        return false;
+    }
+
+
     // For testing
     boolean ignoreInterface(String interfaceName) {
         for (String regex : this.properties.getIgnoredInterfaces()) {
@@ -83,27 +118,14 @@ public class SnailJobNetworkUtils {
         return false;
     }
 
-    private String selectPreferredAddress(List<InetAddress> addresses) {
-        // 首先尝试按优先网络段匹配
-        if (properties.getPreferredNetworks() != null && !properties.getPreferredNetworks().isEmpty()) {
-            for (String network : properties.getPreferredNetworks()) {
-                String[] parts = network.split("/");
-                String baseIp = parts[0];
-                int prefixLength = Integer.parseInt(parts[1]);
-
-                for (InetAddress address : addresses) {
-                    if (matchesNetwork(address, baseIp, prefixLength)) {
-                        return address.getHostAddress();
-                    }
-                }
-            }
+    private boolean matchesCIDR(InetAddress address, String regex) {
+        String[] parts = regex.split("/");
+        if (parts.length != 2) {
+            return false;
         }
 
-        // 返回默认的地址信息
-        return NetUtil.getLocalIpStr();
-    }
-
-    private boolean matchesNetwork(InetAddress address, String baseIp, int prefixLength) {
+        String baseIp = parts[0];
+        int prefixLength = Integer.parseInt(parts[1]);
         if (address instanceof Inet6Address && !IPV4_PATTERN.matcher(baseIp).matches()) {
             // IPv6匹配逻辑
             byte[] addrBytes = address.getAddress();

@@ -17,10 +17,16 @@ import java.util.List;
  */
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "snail-job.network")
+@ConfigurationProperties(prefix = SnailJobNetworkProperties.PREFIX)
 public class SnailJobNetworkProperties {
+    public static final String PREFIX = "snail-job.network";
+
     /**
-     * 优先使用的网络段列表，支持CIDR表示法，如：192.168.1.0/24
+     * 优先使用的网络段列表，
+     * 支持CIDR表示法，如：192.168.1.0/16
+     * 支持前缀匹配: 192、192.168 等
+     * 支持正则匹配: 192.168.*.* 等价于 192.168.1.0/16
+     *
      */
     private List<String> preferredNetworks;
 
