@@ -174,8 +174,43 @@ public class InstanceManager implements Lifecycle {
             return getInstanceALiveInfoSet(namespaceId, groupName);
         }
 
-        return allPods.stream().filter(InstanceLiveInfo::isAlive).collect(Collectors.toSet());
+        return allPods.stream().filter(InstanceLiveInfo::isAlive).collect(Collectors.toCollection(TreeSet::new));
     }
+
+    /**
+     * 获取所有缓存实例信息
+     *
+     * @param namespaceId 空间id
+     * @param groupName   组信息
+     * @return Set<InstanceLiveInfo>
+     */
+    public Set<String> getAllCacheInstanceHostIdSet(String namespaceId, String groupName) {
+        return getAllCacheInstanceInfoSet(namespaceId, groupName)
+                .stream()
+                .filter(Objects::nonNull)
+                .map(InstanceLiveInfo::getNodeInfo)
+                .filter(Objects::nonNull)
+                .map(RegisterNodeInfo::getHostId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    /**
+     * 获取所有缓存实例信息
+     *
+     * @param namespaceId 空间id
+     * @param groupName   组信息
+     * @return Set<InstanceLiveInfo>
+     */
+    public Set<InstanceLiveInfo> getAllCacheInstanceInfoSet(String namespaceId, String groupName) {
+        return getAllInstances().stream()
+                .filter(instanceLiveInfo -> {
+                    RegisterNodeInfo nodeInfo = instanceLiveInfo.getNodeInfo();
+                    return nodeInfo.getGroupName().equals(groupName)
+                            && nodeInfo.getNamespaceId().equals(namespaceId);
+                }).collect(Collectors.toCollection(TreeSet::new));
+    }
+
 
     /**
      * 获取所有实例包括不存活的
@@ -254,6 +289,12 @@ public class InstanceManager implements Lifecycle {
                 long now = DateUtils.toNowMilli();
                 for (Map.Entry<InstanceKey, InstanceLiveInfo> entry : INSTANCE_MAP.entrySet()) {
                     InstanceLiveInfo info = entry.getValue();
+                    RegisterNodeInfo nodeInfo = info.getNodeInfo();
+                    // 此处只对客户端进行下线处理
+                    if (ServerRegister.GROUP_NAME.equals(nodeInfo.getGroupName()) && ServerRegister.NAMESPACE_ID.equals(nodeInfo.getNamespaceId())) {
+                        continue;
+                    }
+
                     ManagedChannel channel = info.getChannel();
                     ConnectivityState channelState = channel.getState(!info.isAlive());
                     if (STATES.contains(channelState)) {

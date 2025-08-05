@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.common.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import com.aizuda.snailjob.common.core.enums.NodeTypeEnum;
+import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.Lifecycle;
@@ -45,29 +46,23 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
     private Thread thread = null;
     private List<Integer> bucketList;
 
-    public void doBalance() {
-        SnailJobLog.LOCAL.info("rebalance start");
+    public void doBalance(Set<String> remoteHostIds) {
+        SnailJobLog.LOCAL.info("rebalance start remoteHostIds:{}", JsonUtil.toJsonString(remoteHostIds));
         DistributeInstance.RE_BALANCE_ING.set(Boolean.TRUE);
 
         try {
-
-            Set<InstanceLiveInfo> instanceALiveInfoSet = instanceManager.getInstanceALiveInfoSet(ServerRegister.NAMESPACE_ID, ServerRegister.GROUP_NAME);
-            Set<RegisterNodeInfo> registerNodeInfoSet = StreamUtils.toSet(instanceALiveInfoSet, InstanceLiveInfo::getNodeInfo);
-            // 为了保证客户端分配算法的一致性,serverNodes 从数据库从数据获取
-            Set<String> podIpSet = StreamUtils.toSet(registerNodeInfoSet, RegisterNodeInfo::getHostId);
-
-            if (CollUtil.isEmpty(podIpSet)) {
+            if (CollUtil.isEmpty(remoteHostIds)) {
                 SnailJobLog.LOCAL.error("server node is empty");
             }
 
             // 删除本地缓存的消费桶的信息
             DistributeInstance.INSTANCE.clearConsumerBucket();
-            if (CollUtil.isEmpty(podIpSet)) {
+            if (CollUtil.isEmpty(remoteHostIds)) {
                 return;
             }
 
             List<Integer> allocate = new AllocateMessageQueueAveragely()
-                    .allocate(ServerRegister.CURRENT_CID, bucketList, new ArrayList<>(podIpSet));
+                    .allocate(ServerRegister.CURRENT_CID, bucketList, new ArrayList<>(remoteHostIds));
 
             // 重新覆盖本地分配的bucket
             DistributeInstance.INSTANCE.setConsumerBucket(allocate);
@@ -156,24 +151,26 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                         .eq(ServerNode::getNodeType, NodeTypeEnum.SERVER.getType()));
 
                 // 获取缓存中的节点
-                Set<InstanceLiveInfo> instanceALiveInfoSet = instanceManager
-                        .getInstanceALiveInfoSet(ServerRegister.NAMESPACE_ID, ServerRegister.GROUP_NAME);
+                Set<String> localHostIds = instanceManager
+                        .getAllCacheInstanceHostIdSet(ServerRegister.NAMESPACE_ID, ServerRegister.GROUP_NAME);
 
-                Set<String> remoteHostIds = StreamUtils.toSet(remotePods, ServerNode::getHostId);
-
-                Set<String> localHostIds = StreamUtils.toSet(
-                        StreamUtils.toSet(instanceALiveInfoSet, InstanceLiveInfo::getNodeInfo),
-                        RegisterNodeInfo::getHostId);
+                Set<String> remoteHostIds = new TreeSet<>(StreamUtils.toSet(remotePods, ServerNode::getHostId));
 
                 // 无缓存的节点触发refreshCache
-                if (CollUtil.isEmpty(instanceALiveInfoSet)
+                if (CollUtil.isEmpty(localHostIds)
                         // 节点数量不一致触发
-                        || isNodeSizeNotEqual(instanceALiveInfoSet.size(), remotePods.size())
+                        || isNodeSizeNotEqual(localHostIds.size(), remotePods.size())
                         // 判断远程节点是不是和本地节点一致的，如果不一致则重新分配
                         || isNodeNotMatch(remoteHostIds, localHostIds)
                         // 检查当前节点的消费桶是否为空，为空则重新负载
                         || checkConsumerBucket(remoteHostIds)
                 ) {
+
+                    SnailJobLog.LOCAL.info(
+                            "Node change detected, starting load balancing. localHostIds:{} remoteHostIds:{}",
+                            JsonUtil.toJson(localHostIds),
+                            JsonUtil.toJson(remoteHostIds)
+                    );
 
                     // 删除本地缓存以下线的节点信息
                     removeNode(remoteHostIds, localHostIds);
@@ -182,30 +179,15 @@ public class ServerNodeBalance implements Lifecycle, Runnable {
                     refreshCache(remotePods);
 
                     // 触发rebalance
-                    doBalance();
+                    doBalance(remoteHostIds);
 
                     // 每次rebalance之后给10秒作为空闲时间，等待其他的节点也完成rebalance
                     TimeUnit.SECONDS.sleep(INITIAL_DELAY);
 
                 } else {
 
-                    // 刷新过期时间
+                    // 刷新节点过期时间
                     refreshExpireAtCache(remotePods);
-
-                    // todo 已经有过期节点监控
-                    // 再次获取最新的节点信息
-//                    instanceALiveInfoSet = instanceManager.getInstanceALiveInfoSet(ServerRegister.NAMESPACE_ID, ServerRegister.GROUP_NAME);
-
-//                    // 找出过期的节点
-//                    Set<RegisterNodeInfo> expireNodeSet = instanceALiveInfoSet.stream()
-//                            .map(InstanceLiveInfo::getNodeInfo)
-//                            .filter(registerNodeInfo -> registerNodeInfo.getExpireAt().isBefore(LocalDateTime.now()))
-//                            .collect(Collectors.toSet());
-//                    for (final RegisterNodeInfo registerNodeInfo : expireNodeSet) {
-//                        // 删除过期的节点信息
-//                        CacheRegisterTable.remove(registerNodeInfo.getGroupName(), registerNodeInfo.getNamespaceId(), registerNodeInfo.getHostId());
-//                    }
-
                 }
 
             } catch (InterruptedException e) {
