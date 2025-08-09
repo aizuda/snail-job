@@ -12,7 +12,7 @@ import com.aizuda.snailjob.server.service.service.impl.AbstractWorkflowBatchServ
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.request.WorkflowBatchQueryVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowBatchResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowWebBatchService;
 import com.aizuda.snailjob.server.web.service.convert.WorkflowWebConverter;
 import com.aizuda.snailjob.server.web.service.handler.JobHandler;

@@ -1,19 +1,9 @@
 package com.aizuda.snailjob.server.service.handler;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
-import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
-import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.model.request.CallbackConfig;
-import com.aizuda.snailjob.model.request.DecisionConfigRequest;
-import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
-import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
-import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
 import com.aizuda.snailjob.model.response.base.WorkflowDetailResponse;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
@@ -22,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.stream.Collectors;
 
 /**
  * @author xiaowoniu
@@ -115,113 +103,5 @@ public class WorkflowHandler {
 
         findCommonAncestor(new ArrayList<>(predecessors).get(0), set, graph);
     }
-
-    /**
-     * 根据给定的父节点ID、队列、工作流组名、工作流ID、节点配置、图构建图
-     *
-     * @param parentIds   父节点ID列表
-     * @param deque       队列
-     * @param groupName   工作流组名
-     * @param workflowId  工作流ID
-     * @param nodeConfig  节点配置
-     * @param graph       图
-     * @param version     版本号
-     * @param namespaceId
-     */
-    public void buildGraph(List<Long> parentIds, LinkedBlockingDeque<Long> deque, String groupName, Long workflowId,
-                           WorkflowRequestVO.NodeConfig nodeConfig, MutableGraph<Long> graph, Integer version, String namespaceId) {
-
-        if (Objects.isNull(nodeConfig)) {
-            return;
-        }
-
-        LinkedBlockingDeque<Long> tempDeque = null;
-        // 获取节点信息
-        List<WorkflowRequestVO.NodeInfo> conditionNodes = nodeConfig.getConditionNodes();
-        if (CollUtil.isNotEmpty(conditionNodes)) {
-            // 一定存在汇合的子节点
-            if (Objects.nonNull(nodeConfig.getChildNode())) {
-                tempDeque = new LinkedBlockingDeque<>();
-            }
-            conditionNodes = conditionNodes.stream()
-                    .sorted(Comparator.comparing(WorkflowRequestVO.NodeInfo::getPriorityLevel))
-                    .collect(Collectors.toList());
-            for (final WorkflowRequestVO.NodeInfo nodeInfo : conditionNodes) {
-                WorkflowNode workflowNode = WorkflowConverter.INSTANCE.convert(nodeInfo);
-                workflowNode.setWorkflowId(workflowId);
-                workflowNode.setGroupName(groupName);
-                workflowNode.setNodeType(nodeConfig.getNodeType());
-                workflowNode.setVersion(version);
-                workflowNode.setNamespaceId(namespaceId);
-                if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
-                    workflowNode.setJobId(SystemConstants.DECISION_JOB_ID);
-                    DecisionConfigRequest decision = nodeInfo.getDecision();
-                    Assert.notNull(decision, () -> new SnailJobServerException("Configuration information for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    Assert.notBlank(decision.getNodeExpression(), () -> new SnailJobServerException("Expression for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    Assert.notNull(decision.getDefaultDecision(), () -> new SnailJobServerException("Default decision for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    Assert.notNull(decision.getExpressionType(), () -> new SnailJobServerException("Expression type for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    workflowNode.setNodeInfo(JsonUtil.toJsonString(decision));
-                }
-
-                if (WorkflowNodeTypeEnum.CALLBACK.getType() == nodeConfig.getNodeType()) {
-                    workflowNode.setJobId(SystemConstants.CALLBACK_JOB_ID);
-                    CallbackConfig callback = nodeInfo.getCallback();
-                    Assert.notNull(callback, () -> new SnailJobServerException("Configuration information for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    Assert.notBlank(callback.getWebhook(), () -> new SnailJobServerException("Webhook for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    Assert.notNull(callback.getContentType(), () -> new SnailJobServerException("Request type for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    Assert.notBlank(callback.getSecret(), () -> new SnailJobServerException("Secret key for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    workflowNode.setNodeInfo(JsonUtil.toJsonString(callback));
-                }
-
-                if (WorkflowNodeTypeEnum.JOB_TASK.getType() == nodeConfig.getNodeType()) {
-                    JobTaskConfigRequest jobTask = nodeInfo.getJobTask();
-                    Assert.notNull(jobTask, () -> new SnailJobServerException("Configuration information for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    Assert.notNull(jobTask.getJobId(), () -> new SnailJobServerException("Associated task for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    workflowNode.setJobId(jobTask.getJobId());
-                }
-
-                Assert.isTrue(1 == workflowNodeMapper.insert(workflowNode),
-                        () -> new SnailJobServerException("Adding new workflow node failed"));
-                // 添加节点
-                graph.addNode(workflowNode.getId());
-                for (final Long parentId : parentIds) {
-                    // 添加边
-                    graph.putEdge(parentId, workflowNode.getId());
-                }
-                WorkflowRequestVO.NodeConfig childNode = nodeInfo.getChildNode();
-                if (Objects.nonNull(childNode) && CollUtil.isNotEmpty(childNode.getConditionNodes())) {
-                    buildGraph(Lists.newArrayList(workflowNode.getId()),
-                            Objects.isNull(tempDeque) ? deque : tempDeque,
-                            groupName, workflowId, childNode, graph, version, namespaceId);
-                } else {
-                    if (WorkflowNodeTypeEnum.DECISION.getType() == nodeConfig.getNodeType()) {
-                        throw new SnailJobServerException("Decision nodes or successor nodes of decision nodes cannot be leaf nodes");
-                    }
-
-                    // 若当前节点无子任何子节点记录一下, 后续存在公共子节点时需要用到
-                    if (Objects.nonNull(tempDeque)) {
-                        tempDeque.add(workflowNode.getId());
-                    } else {
-                        // 当前节点无汇合的子节点放到公共的队列
-                        deque.add(workflowNode.getId());
-                    }
-
-                }
-            }
-        }
-
-        WorkflowRequestVO.NodeConfig childNode = nodeConfig.getChildNode();
-        // 如果存在公共子节点则在这里处理
-        if (Objects.nonNull(childNode) && CollUtil.isNotEmpty(childNode.getConditionNodes())) {
-            //  是conditionNodes里面叶子节点的
-            List<Long> list = Lists.newArrayList();
-            if (Objects.nonNull(tempDeque)) {
-                tempDeque.drainTo(list);
-            }
-
-            buildGraph(list, deque, groupName, workflowId, childNode, graph, version, namespaceId);
-        }
-    }
-
 
 }

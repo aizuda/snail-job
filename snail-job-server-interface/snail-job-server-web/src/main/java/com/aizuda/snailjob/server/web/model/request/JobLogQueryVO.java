@@ -1,6 +1,6 @@
-package com.aizuda.snailjob.server.common.vo;
+package com.aizuda.snailjob.server.web.model.request;
 
-import com.aizuda.snailjob.server.common.vo.base.BaseQueryVO;
+import com.aizuda.snailjob.server.service.dto.base.BaseQueryDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,8 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Deprecated
-public class JobLogQueryVO extends BaseQueryVO {
+public class JobLogQueryVO extends BaseQueryDTO {
     private Long jobId;
     private Long taskBatchId;
     private Long taskId;

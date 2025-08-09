@@ -244,11 +244,6 @@ public interface SystemConstants {
     Long DECISION_JOB_ID = -1000L;
 
     /**
-     * 系统内置的回调任务ID
-     */
-    Long CALLBACK_JOB_ID = -2000L;
-
-    /**
      * 客户端返回的非json对象，单值比如 "aa", 123等
      */
     String SINGLE_PARAM = "SINGLE_PARAM";

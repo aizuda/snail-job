@@ -47,10 +47,8 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -211,7 +209,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public DashboardRetryLineResponseVO jobLineList(JobLineQueryVo queryVO) {
+    public DashboardRetryLineResponseVO jobLineList(JobLineQueryVO queryVO) {
         // 查询登录用户权限
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         String namespaceId = userSessionVO.getNamespaceId();

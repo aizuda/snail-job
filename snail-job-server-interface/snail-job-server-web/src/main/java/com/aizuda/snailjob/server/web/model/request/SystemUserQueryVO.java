@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.web.model.request;
 
-import com.aizuda.snailjob.server.common.vo.base.BaseQueryVO;
+import com.aizuda.snailjob.server.service.dto.base.BaseQueryDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SystemUserQueryVO extends BaseQueryVO {
+public class SystemUserQueryVO extends BaseQueryDTO {
 
     private String username;
 

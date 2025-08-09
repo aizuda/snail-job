@@ -1,12 +1,12 @@
 package com.aizuda.snailjob.server.web.model.request;
 
-import com.aizuda.snailjob.server.common.vo.base.BaseQueryVO;
+import com.aizuda.snailjob.server.service.dto.base.BaseQueryDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class LineQueryVO extends BaseQueryVO {
+public class LineQueryVO extends BaseQueryDTO {
     /**
      * 组名称
      */

@@ -2,7 +2,7 @@ package com.aizuda.snailjob.server.web.listener;
 
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.server.common.enums.WebSocketSceneEnum;
-import com.aizuda.snailjob.server.common.vo.JobLogQueryVO;
+import com.aizuda.snailjob.server.web.model.request.JobLogQueryVO;
 import com.aizuda.snailjob.server.web.model.event.WsRequestEvent;
 import com.aizuda.snailjob.server.web.model.request.RetryTaskLogMessageQueryVO;
 import com.aizuda.snailjob.server.web.service.JobLogService;

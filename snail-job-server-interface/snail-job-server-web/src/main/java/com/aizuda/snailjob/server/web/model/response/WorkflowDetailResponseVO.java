@@ -1,6 +1,5 @@
-package com.aizuda.snailjob.server.common.vo;
+package com.aizuda.snailjob.server.web.model.response;
 
-import com.aizuda.snailjob.model.request.CallbackConfig;
 import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
 import lombok.Data;
@@ -14,7 +13,6 @@ import java.util.Set;
  * @since 2.6.0
  */
 @Data
-@Deprecated
 public class WorkflowDetailResponseVO {
 
     /**
@@ -134,11 +132,6 @@ public class WorkflowDetailResponseVO {
          * 判定配置
          */
         private DecisionConfigRequest decision;
-
-        /**
-         * 回调配置
-         */
-        private CallbackConfig callback;
 
         /**
          * 任务配置

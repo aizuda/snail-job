@@ -8,7 +8,6 @@ import com.aizuda.snailjob.server.web.model.request.RetryDeadLetterQueryVO;
 import com.aizuda.snailjob.server.web.model.response.RetryDeadLetterResponseVO;
 import com.aizuda.snailjob.server.web.service.RetryDeadLetterService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

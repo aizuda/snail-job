@@ -1,7 +1,5 @@
 package com.aizuda.snailjob.model.response.base;
 
-
-import com.aizuda.snailjob.model.request.CallbackConfig;
 import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import lombok.Data;
 
@@ -75,11 +73,6 @@ public class JobBatchResponse {
      * 执行器名称
      */
     private String executorInfo;
-
-    /**
-     * 工作流的回调节点信息
-     */
-    private CallbackConfig callback;
 
     /**
      * 工作流的决策节点信息

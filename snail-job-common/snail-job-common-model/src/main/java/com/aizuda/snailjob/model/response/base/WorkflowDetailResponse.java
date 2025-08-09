@@ -1,6 +1,5 @@
 package com.aizuda.snailjob.model.response.base;
 
-import com.aizuda.snailjob.model.request.CallbackConfig;
 import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
 import lombok.Data;
@@ -133,11 +132,6 @@ public class WorkflowDetailResponse {
          * 判定配置
          */
         private DecisionConfigRequest decision;
-
-        /**
-         * 回调配置
-         */
-        private CallbackConfig callback;
 
         /**
          * 任务配置

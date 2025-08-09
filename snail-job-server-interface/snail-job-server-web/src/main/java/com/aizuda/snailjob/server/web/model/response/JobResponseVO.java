@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.vo;
+package com.aizuda.snailjob.server.web.model.response;
 
 import lombok.Data;
 
@@ -11,7 +11,6 @@ import java.util.Set;
  * @since 2.4.0
  */
 @Data
-@Deprecated
 public class JobResponseVO {
 
     private Long id;

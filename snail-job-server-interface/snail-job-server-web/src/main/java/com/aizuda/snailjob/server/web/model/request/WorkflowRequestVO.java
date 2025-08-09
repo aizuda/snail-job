@@ -1,6 +1,5 @@
-package com.aizuda.snailjob.server.common.vo.request;
+package com.aizuda.snailjob.server.web.model.request;
 
-import com.aizuda.snailjob.model.request.CallbackConfig;
 import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
 import jakarta.validation.constraints.NotBlank;
@@ -18,7 +17,6 @@ import java.util.Set;
  * @since 2.6.0
  */
 @Data
-@Deprecated
 public class WorkflowRequestVO {
 
     private Long id;
@@ -127,10 +125,6 @@ public class WorkflowRequestVO {
          */
         private DecisionConfigRequest decision;
 
-        /**
-         * 回调配置
-         */
-        private CallbackConfig callback;
     }
 
     /**

@@ -5,7 +5,7 @@ import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.constant.LogFieldConstants;
 import com.aizuda.snailjob.server.web.timer.JobTaskLogTimerTask;
 import com.aizuda.snailjob.server.web.timer.LogTimerWheel;
-import com.aizuda.snailjob.server.common.vo.JobLogQueryVO;
+import com.aizuda.snailjob.server.web.model.request.JobLogQueryVO;
 import com.aizuda.snailjob.server.web.model.event.WsSendEvent;
 import com.aizuda.snailjob.server.web.service.JobLogService;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;

@@ -1,18 +1,15 @@
 package com.aizuda.snailjob.server.web.service;
 
 import cn.hutool.core.lang.Pair;
-import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
+import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseWebVO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author xiaowoniu

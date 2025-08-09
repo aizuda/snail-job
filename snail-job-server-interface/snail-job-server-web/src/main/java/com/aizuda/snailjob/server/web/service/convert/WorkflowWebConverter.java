@@ -4,17 +4,16 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.model.request.CallbackConfig;
 import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
 import com.aizuda.snailjob.server.common.dto.PointInTimeDTO;
 import com.aizuda.snailjob.server.common.strategy.WaitStrategies;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
-import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
-import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowBatchResponseVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
+import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseVO;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseWebVO;
 import com.aizuda.snailjob.template.datasource.persistence.dataobject.WorkflowBatchResponseDO;
 import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
@@ -66,7 +65,6 @@ public interface WorkflowWebConverter {
 
     @Mappings({
             @Mapping(target = "decision", expression = "java(WorkflowWebConverter.parseDecisionConfig(workflowNode))"),
-            @Mapping(target = "callback", expression = "java(WorkflowWebConverter.parseCallbackConfig(workflowNode))"),
             @Mapping(target = "jobTask", expression = "java(WorkflowWebConverter.parseJobTaskConfig(workflowNode))")
     })
     WorkflowDetailResponseVO.NodeInfo convert(WorkflowNode workflowNode);
@@ -105,14 +103,6 @@ public interface WorkflowWebConverter {
     static DecisionConfigRequest parseDecisionConfig(WorkflowNode workflowNode) {
         if (WorkflowNodeTypeEnum.DECISION.getType() == workflowNode.getNodeType()) {
             return JsonUtil.parseObject(workflowNode.getNodeInfo(), DecisionConfigRequest.class);
-        }
-
-        return null;
-    }
-
-    static CallbackConfig parseCallbackConfig(WorkflowNode workflowNode) {
-        if (WorkflowNodeTypeEnum.CALLBACK.getType() == workflowNode.getNodeType()) {
-            return JsonUtil.parseObject(workflowNode.getNodeInfo(), CallbackConfig.class);
         }
 
         return null;

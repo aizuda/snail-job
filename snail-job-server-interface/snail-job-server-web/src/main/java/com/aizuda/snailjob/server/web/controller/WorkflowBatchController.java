@@ -1,6 +1,6 @@
 package com.aizuda.snailjob.server.web.controller;
 
-import com.aizuda.snailjob.server.common.vo.WorkflowBatchResponseVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowBatchResponseVO;
 import com.aizuda.snailjob.server.service.service.WorkflowBatchService;
 import com.aizuda.snailjob.server.web.annotation.LoginRequired;
 import com.aizuda.snailjob.server.web.annotation.RoleEnum;

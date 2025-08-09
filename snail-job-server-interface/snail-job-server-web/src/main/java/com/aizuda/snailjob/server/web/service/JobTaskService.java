@@ -1,12 +1,10 @@
 package com.aizuda.snailjob.server.web.service;
 
-import cn.hutool.core.lang.tree.Tree;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.JobTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobTaskResponseVO;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author: opensnail

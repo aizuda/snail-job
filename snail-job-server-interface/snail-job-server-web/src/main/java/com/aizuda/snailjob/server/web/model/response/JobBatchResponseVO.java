@@ -1,6 +1,5 @@
-package com.aizuda.snailjob.server.common.vo;
+package com.aizuda.snailjob.server.web.model.response;
 
-import com.aizuda.snailjob.model.request.CallbackConfig;
 import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import lombok.Data;
 
@@ -12,7 +11,6 @@ import java.time.LocalDateTime;
  * @since : 2.4.0
  */
 @Data
-@Deprecated
 public class JobBatchResponseVO {
 
     private Long id;
@@ -75,11 +73,6 @@ public class JobBatchResponseVO {
      * 执行器名称
      */
     private String executorInfo;
-
-    /**
-     * 工作流的回调节点信息
-     */
-    private CallbackConfig callback;
 
     /**
      * 工作流的决策节点信息

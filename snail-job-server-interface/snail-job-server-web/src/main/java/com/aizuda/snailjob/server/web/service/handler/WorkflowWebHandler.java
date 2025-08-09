@@ -1,19 +1,16 @@
-package com.aizuda.snailjob.server.common.handler;
+package com.aizuda.snailjob.server.web.service.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.aizuda.snailjob.model.request.CallbackConfig;
 import com.aizuda.snailjob.model.request.DecisionConfigRequest;
-import com.aizuda.snailjob.server.common.convert.WorkflowConverter;
 import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
+import com.aizuda.snailjob.model.response.base.WorkflowDetailResponse;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO.NodeConfig;
-import com.aizuda.snailjob.server.common.vo.WorkflowDetailResponseVO.NodeInfo;
+import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
+import com.aizuda.snailjob.server.web.service.convert.WorkflowWebConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
 import com.google.common.collect.Lists;
@@ -32,11 +29,10 @@ import java.util.stream.Collectors;
  * @date 2023-12-30 23:26:43
  * @since 2.6.0
  */
-@Component("webWorkflowHandlerOpenApi")
+@Component
 @Slf4j
 @RequiredArgsConstructor
-@Deprecated
-public class WorkflowHandler {
+public class WorkflowWebHandler {
 
     private final WorkflowNodeMapper workflowNodeMapper;
 
@@ -49,18 +45,18 @@ public class WorkflowHandler {
      * @param workflowNodeMap 工作流节点Map
      * @return 构建的节点配置
      */
-    public NodeConfig buildNodeConfig(MutableGraph<Long> graph,
-                                      Long parentId,
-                                      Map<Long, NodeConfig> nodeConfigMap,
-                                      Map<Long, NodeInfo> workflowNodeMap) {
+    public WorkflowDetailResponse.NodeConfig buildNodeConfig(MutableGraph<Long> graph,
+                                                             Long parentId,
+                                                             Map<Long, WorkflowDetailResponse.NodeConfig> nodeConfigMap,
+                                                             Map<Long, WorkflowDetailResponse.NodeInfo> workflowNodeMap) {
 
         Set<Long> successors = graph.successors(parentId);
         if (CollUtil.isEmpty(successors)) {
             return null;
         }
 
-        NodeInfo previousNodeInfo = workflowNodeMap.get(parentId);
-        NodeConfig currentConfig = new NodeConfig();
+        WorkflowDetailResponse.NodeInfo previousNodeInfo = workflowNodeMap.get(parentId);
+        WorkflowDetailResponse.NodeConfig currentConfig = new WorkflowDetailResponse.NodeConfig();
         currentConfig.setConditionNodes(Lists.newArrayList());
 
         // 是否挂载子节点
@@ -68,7 +64,7 @@ public class WorkflowHandler {
 
         for (Long successor : Sets.newTreeSet(successors)) {
             Set<Long> predecessors = graph.predecessors(successor);
-            NodeInfo nodeInfo = workflowNodeMap.get(successor);
+            WorkflowDetailResponse.NodeInfo nodeInfo = workflowNodeMap.get(successor);
             currentConfig.setNodeType(nodeInfo.getNodeType());
             currentConfig.getConditionNodes().add(nodeInfo);
             nodeConfigMap.put(successor, currentConfig);
@@ -88,7 +84,7 @@ public class WorkflowHandler {
                 }
 
                 Long commonAncestor = intersection.stream().toList().get(intersection.size() - 1);
-                NodeConfig parentNodeConfig = nodeConfigMap.get(
+                WorkflowDetailResponse.NodeConfig parentNodeConfig = nodeConfigMap.get(
                         Sets.newTreeSet(graph.successors(commonAncestor)).stream().findFirst().get());
                 parentNodeConfig.setChildNode(currentConfig);
                 mount = false;
@@ -103,7 +99,7 @@ public class WorkflowHandler {
             previousNodeInfo.setChildNode(currentConfig);
         }
 
-        currentConfig.getConditionNodes().sort(Comparator.comparing(WorkflowDetailResponseVO.NodeInfo::getPriorityLevel));
+        currentConfig.getConditionNodes().sort(Comparator.comparing(WorkflowDetailResponse.NodeInfo::getPriorityLevel));
         return currentConfig;
     }
 
@@ -150,7 +146,7 @@ public class WorkflowHandler {
                     .sorted(Comparator.comparing(WorkflowRequestVO.NodeInfo::getPriorityLevel))
                     .collect(Collectors.toList());
             for (final WorkflowRequestVO.NodeInfo nodeInfo : conditionNodes) {
-                WorkflowNode workflowNode = WorkflowConverter.INSTANCE.convert(nodeInfo);
+                WorkflowNode workflowNode = WorkflowWebConverter.INSTANCE.convert(nodeInfo);
                 workflowNode.setWorkflowId(workflowId);
                 workflowNode.setGroupName(groupName);
                 workflowNode.setNodeType(nodeConfig.getNodeType());
@@ -164,16 +160,6 @@ public class WorkflowHandler {
                     Assert.notNull(decision.getDefaultDecision(), () -> new SnailJobServerException("Default decision for [{}] cannot be empty", nodeInfo.getNodeName()));
                     Assert.notNull(decision.getExpressionType(), () -> new SnailJobServerException("Expression type for [{}] cannot be empty", nodeInfo.getNodeName()));
                     workflowNode.setNodeInfo(JsonUtil.toJsonString(decision));
-                }
-
-                if (WorkflowNodeTypeEnum.CALLBACK.getType() == nodeConfig.getNodeType()) {
-                    workflowNode.setJobId(SystemConstants.CALLBACK_JOB_ID);
-                    CallbackConfig callback = nodeInfo.getCallback();
-                    Assert.notNull(callback, () -> new SnailJobServerException("Configuration information for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    Assert.notBlank(callback.getWebhook(), () -> new SnailJobServerException("Webhook for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    Assert.notNull(callback.getContentType(), () -> new SnailJobServerException("Request type for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    Assert.notBlank(callback.getSecret(), () -> new SnailJobServerException("Secret key for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    workflowNode.setNodeInfo(JsonUtil.toJsonString(callback));
                 }
 
                 if (WorkflowNodeTypeEnum.JOB_TASK.getType() == nodeConfig.getNodeType()) {

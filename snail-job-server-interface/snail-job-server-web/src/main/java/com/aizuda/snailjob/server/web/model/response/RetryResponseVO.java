@@ -1,11 +1,10 @@
-package com.aizuda.snailjob.server.common.vo;
+package com.aizuda.snailjob.server.web.model.response;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-@Deprecated
 public class RetryResponseVO {
     private Long id;
 

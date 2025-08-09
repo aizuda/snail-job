@@ -1,4 +1,4 @@
-package com.aizuda.snailjob.server.common.vo.base;
+package com.aizuda.snailjob.server.service.dto.base;
 
 import cn.hutool.core.util.ObjUtil;
 import lombok.Data;
@@ -11,8 +11,7 @@ import java.time.LocalDateTime;
  * @since 2.0
  */
 @Data
-@Deprecated
-public class BaseQueryVO {
+public class BaseQueryDTO {
 
     /**
      * 当前页码

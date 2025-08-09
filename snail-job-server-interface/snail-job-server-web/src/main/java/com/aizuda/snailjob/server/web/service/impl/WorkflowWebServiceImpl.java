@@ -18,14 +18,13 @@ import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.*;
-import com.aizuda.snailjob.server.common.vo.WorkflowResponseVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
 import com.aizuda.snailjob.server.service.convert.WorkflowConverter;
 import com.aizuda.snailjob.model.response.base.WorkflowDetailResponse;
-import com.aizuda.snailjob.server.service.handler.WorkflowHandler;
 import com.aizuda.snailjob.server.service.kit.WorkflowKit;
 import com.aizuda.snailjob.server.service.service.impl.AbstractWorkflowService;
 import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
-import com.aizuda.snailjob.server.common.vo.request.WorkflowRequestVO;
+import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.snailjob.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
@@ -33,6 +32,7 @@ import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseWebVO
 import com.aizuda.snailjob.server.web.service.WorkflowWebService;
 import com.aizuda.snailjob.server.web.service.convert.WorkflowWebConverter;
 import com.aizuda.snailjob.server.web.service.handler.GroupHandler;
+import com.aizuda.snailjob.server.web.service.handler.WorkflowWebHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
 import com.aizuda.snailjob.template.datasource.persistence.po.*;
@@ -70,7 +70,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
     private final WorkflowMapper workflowMapper;
     private final WorkflowNodeMapper workflowNodeMapper;
     private final SystemProperties systemProperties;
-    private final WorkflowHandler workflowHandler;
+    private final WorkflowWebHandler workflowWebHandler;
     private final JobMapper jobMapper;
     private final GroupHandler groupHandler;
     private final SystemUserMapper systemUserMapper;
@@ -85,7 +85,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
         graph.addNode(SystemConstants.ROOT);
 
         // 组装工作流信息
-        Workflow workflow = WorkflowConverter.INSTANCE.convert(workflowRequestVO);
+        Workflow workflow = WorkflowWebConverter.INSTANCE.convert(workflowRequestVO);
 
         checkTriggerInterval(workflowRequestVO);
 
@@ -105,7 +105,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
         WorkflowRequestVO.NodeConfig nodeConfig = workflowRequestVO.getNodeConfig();
 
         // 递归构建图
-        workflowHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT),
+        workflowWebHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT),
                 new LinkedBlockingDeque<>(),
                 workflowRequestVO.getGroupName(),
                 workflow.getId(), nodeConfig, graph,
@@ -193,13 +193,13 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
 
         int version = workflow.getVersion();
         // 递归构建图
-        workflowHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT), new LinkedBlockingDeque<>(),
+        workflowWebHandler.buildGraph(Lists.newArrayList(SystemConstants.ROOT), new LinkedBlockingDeque<>(),
                 workflowRequestVO.getGroupName(), workflowRequestVO.getId(), nodeConfig, graph, version + 1, workflow.getNamespaceId());
 
         log.info("Graph construction complete. graph:[{}]", graph);
 
         // 保存图信息
-        workflow = WorkflowConverter.INSTANCE.convert(workflowRequestVO);
+        workflow = WorkflowWebConverter.INSTANCE.convert(workflowRequestVO);
 
         checkTriggerInterval(workflowRequestVO);
 
@@ -331,7 +331,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
         try {
             MutableGraph<Long> graph = GraphUtils.deserializeJsonToGraph(flowInfo);
             // 反序列化构建图
-            WorkflowDetailResponseWebVO.NodeConfig config = workflowHandler.buildNodeConfig(graph, SystemConstants.ROOT,
+            WorkflowDetailResponseWebVO.NodeConfig config = workflowWebHandler.buildNodeConfig(graph, SystemConstants.ROOT,
                     new HashMap<>(),
                     workflowNodeMap);
             responseVO.setNodeConfig(config);

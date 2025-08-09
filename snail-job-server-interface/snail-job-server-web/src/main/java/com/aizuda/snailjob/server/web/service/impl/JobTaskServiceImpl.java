@@ -7,7 +7,6 @@ import com.aizuda.snailjob.server.web.model.request.JobTaskQueryVO;
 import com.aizuda.snailjob.server.web.model.response.JobTaskResponseVO;
 import com.aizuda.snailjob.server.web.service.JobTaskService;
 import com.aizuda.snailjob.server.web.service.convert.JobTaskResponseVOConverter;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.JobLogMessageMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobTaskMapper;
 import com.aizuda.snailjob.template.datasource.persistence.po.JobTask;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;

@@ -42,7 +42,7 @@ public class DashboardController {
 
     @LoginRequired
     @GetMapping("/job/line")
-    public DashboardRetryLineResponseVO jobLineList(JobLineQueryVo queryVO) {
+    public DashboardRetryLineResponseVO jobLineList(JobLineQueryVO queryVO) {
         return dashBoardService.jobLineList(queryVO);
     }
 

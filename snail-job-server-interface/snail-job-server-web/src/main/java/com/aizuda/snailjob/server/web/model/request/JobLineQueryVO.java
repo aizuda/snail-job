@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class JobLineQueryVo extends LineQueryVO {
+public class JobLineQueryVO extends LineQueryVO {
     /**
      * 系统模式
      *

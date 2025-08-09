@@ -16,13 +16,4 @@ public enum WebSocketSceneEnum {
     private final Integer type;
     private final String scene;
 
-//    public static WebSocketSceneEnum valueOf(String scene) {
-//        for (WebSocketSceneEnum expressionTypeEnum : WebSocketSceneEnum.values()) {
-//            if (expressionTypeEnum.getScene().equals(scene)) {
-//                return expressionTypeEnum;
-//            }
-//        }
-//
-//        return null;
-//    }
 }

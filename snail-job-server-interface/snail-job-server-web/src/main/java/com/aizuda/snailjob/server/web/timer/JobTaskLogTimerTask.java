@@ -4,7 +4,7 @@ import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.aizuda.snailjob.server.common.TimerTask;
 import com.aizuda.snailjob.server.common.enums.WebSocketSceneEnum;
-import com.aizuda.snailjob.server.common.vo.JobLogQueryVO;
+import com.aizuda.snailjob.server.web.model.request.JobLogQueryVO;
 import com.aizuda.snailjob.server.web.service.JobLogService;
 import io.netty.util.Timeout;
 import lombok.AllArgsConstructor;

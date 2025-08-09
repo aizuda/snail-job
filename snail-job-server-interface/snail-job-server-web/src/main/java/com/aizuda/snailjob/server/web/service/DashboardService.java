@@ -18,7 +18,7 @@ public interface DashboardService {
 
     DashboardRetryLineResponseVO retryLineList(LineQueryVO queryVO);
 
-    DashboardRetryLineResponseVO jobLineList(JobLineQueryVo queryVO);
+    DashboardRetryLineResponseVO jobLineList(JobLineQueryVO queryVO);
 
     PageResult<List<ServerNodeResponseVO>> pods(ServerNodeQueryVO serverNodeQueryVO);
 
