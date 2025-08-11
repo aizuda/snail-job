@@ -15,6 +15,7 @@ import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.prepare.job.TerminalJobPrepareHandler;
@@ -144,7 +145,9 @@ public abstract class AbstractJobService implements JobService {
         if (StrUtil.isBlank(triggerInterval)) {
             triggerInterval = job.getTriggerInterval();
         }
-        updateJob.setTriggerInterval(triggerInterval);
+        // 封装 pointInTime
+        String pointInTimeStr = TriggerIntervalUtils.getPointInTimeStr(triggerInterval, triggerType);
+        updateJob.setTriggerInterval(pointInTimeStr);
         updateJob.setResident(JobKit.isResident(triggerType, triggerInterval));
 
         // check triggerInterval
@@ -152,7 +155,7 @@ public abstract class AbstractJobService implements JobService {
 
         CalculateNextTriggerAtDTO nextTriggerAtDTO = CalculateNextTriggerAtDTO
                 .builder()
-                .triggerInterval(triggerInterval)
+                .triggerInterval(updateJob.getTriggerInterval())
                 .triggerType(triggerType)
                 .newResident(updateJob.getResident())
                 .oldResident(job.getResident())
