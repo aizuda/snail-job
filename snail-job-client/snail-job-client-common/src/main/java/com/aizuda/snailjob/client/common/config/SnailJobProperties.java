@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.client.common.config;
 
 import com.aizuda.snailjob.common.core.alarm.email.SnailJobMailProperties;
+import com.aizuda.snailjob.common.core.config.ForyProperties;
 import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -97,6 +98,12 @@ public class SnailJobProperties {
      */
     @NestedConfigurationProperty
     private SnailJobMailProperties mail = new SnailJobMailProperties();
+
+    /**
+     * Fory 配置
+     */
+    @NestedConfigurationProperty
+    private ForyProperties fory = new ForyProperties();
 
     /**
      * openapi配置

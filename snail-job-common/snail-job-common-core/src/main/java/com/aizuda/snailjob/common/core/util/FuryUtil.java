@@ -1,5 +1,7 @@
 package com.aizuda.snailjob.common.core.util;
 
+import com.aizuda.snailjob.common.core.config.ForyProperties;
+import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.github.luben.zstd.Zstd;
 import org.apache.fury.Fury;
 import org.apache.fury.ThreadSafeFury;
@@ -7,9 +9,15 @@ import org.apache.fury.config.CompatibleMode;
 import org.apache.fury.config.Language;
 
 import java.util.Base64;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class FuryUtil {
+    /**
+     * 默认最大解压缩大小
+     */
+    private static final int DEFAULT_MAX_DECOMPRESSED_SIZE = 16384;
+
     private static final ThreadSafeFury SERIALIZER = Fury.builder()
             .withLanguage(Language.JAVA)
             .requireClassRegistration(false)
@@ -36,7 +44,15 @@ public class FuryUtil {
         if (content == null || content.isEmpty()) {
             return null;
         }
+
+        ForyProperties properties = SnailSpringContext.getBean(ForyProperties.class);
+        int decompressedSize = Objects.nonNull(properties) ? properties.getDecompressedSize() : DEFAULT_MAX_DECOMPRESSED_SIZE;
+
         byte[] bytes = Base64.getDecoder().decode(content);
+        int size = (int) Zstd.decompressedSize(bytes);
+        if (size > decompressedSize){
+            throw new IllegalArgumentException("Decompressed size exceeds the allowed limit.");
+        }
         bytes = Zstd.decompress(bytes, (int) Zstd.decompressedSize(bytes));
         //noinspection unchecked
         return (T) SERIALIZER.deserialize(bytes);
