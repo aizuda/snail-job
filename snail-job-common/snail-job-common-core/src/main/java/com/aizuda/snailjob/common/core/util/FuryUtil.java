@@ -2,6 +2,8 @@ package com.aizuda.snailjob.common.core.util;
 
 import com.aizuda.snailjob.common.core.config.ForyProperties;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
+import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
+import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.github.luben.zstd.Zstd;
 import org.apache.fury.Fury;
 import org.apache.fury.ThreadSafeFury;
@@ -45,13 +47,18 @@ public class FuryUtil {
             return null;
         }
 
-        ForyProperties properties = SnailSpringContext.getBean(ForyProperties.class);
+        ForyProperties properties = null;
+        try {
+            properties = SnailSpringContext.getBean(ForyProperties.class);
+        }catch (Exception e){
+            SnailJobLog.LOCAL.warn("Get ForyProperties failed.", e);
+        }
         int decompressedSize = Objects.nonNull(properties) ? properties.getDecompressedSize() : DEFAULT_MAX_DECOMPRESSED_SIZE;
 
         byte[] bytes = Base64.getDecoder().decode(content);
         int size = (int) Zstd.decompressedSize(bytes);
         if (size > decompressedSize){
-            throw new IllegalArgumentException("Decompressed size exceeds the allowed limit.");
+            throw new SnailJobCommonException("Decompressed size exceeds the allowed limit.");
         }
         bytes = Zstd.decompress(bytes, (int) Zstd.decompressedSize(bytes));
         //noinspection unchecked
