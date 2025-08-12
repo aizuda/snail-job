@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class FuryUtil {
+public class ForyUtil {
     /**
      * 默认最大解压缩大小
      */
@@ -53,11 +53,11 @@ public class FuryUtil {
         SERIALIZER = fory;
     }
 
-    private static final Set<String> getDisallowClasses (){
+    private static Set<String> getDisallowClasses() {
         // 读取黑名单配置
         Set<String> disallowClasses = new HashSet<>();
         // 使用类加载器读取resources目录下的配置文件
-        try (InputStream is = FuryUtil.class.getClassLoader().getResourceAsStream(FORY_BLACK_LIST);
+        try (InputStream is = ForyUtil.class.getClassLoader().getResourceAsStream(FORY_BLACK_LIST);
              BufferedReader br = new BufferedReader(new InputStreamReader(Objects.requireNonNull(is)))) {
 
             String line;
@@ -96,14 +96,14 @@ public class FuryUtil {
         ForyProperties properties = null;
         try {
             properties = SnailSpringContext.getBean(ForyProperties.class);
-        }catch (Exception e){
+        } catch (Exception e) {
             SnailJobLog.LOCAL.warn("Get ForyProperties failed.", e);
         }
         int decompressedSize = Objects.nonNull(properties) ? properties.getDecompressedSize() : DEFAULT_MAX_DECOMPRESSED_SIZE;
 
         byte[] bytes = Base64.getDecoder().decode(content);
         int size = (int) Zstd.decompressedSize(bytes);
-        if (size > decompressedSize){
+        if (size > decompressedSize) {
             throw new SnailJobCommonException("Decompressed size exceeds the allowed limit.");
         }
         bytes = Zstd.decompress(bytes, size);

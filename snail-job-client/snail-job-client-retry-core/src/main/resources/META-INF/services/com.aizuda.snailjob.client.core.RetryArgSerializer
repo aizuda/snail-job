@@ -1,2 +1,3 @@
 com.aizuda.snailjob.client.core.serializer.FurySerializer
+com.aizuda.snailjob.client.core.serializer.ForySerializer
 com.aizuda.snailjob.client.core.serializer.JacksonSerializer

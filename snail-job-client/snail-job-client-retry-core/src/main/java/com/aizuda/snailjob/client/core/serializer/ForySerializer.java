@@ -6,15 +6,11 @@ import com.aizuda.snailjob.common.core.util.ForyUtil;
 
 import java.lang.reflect.Method;
 
-/**
- * @sse: com.aizuda.snailjob.client.core.serializer.ForySerializer
- */
-@Deprecated
-public class FurySerializer implements RetryArgSerializer {
+public class ForySerializer implements RetryArgSerializer {
 
     @Override
     public String name() {
-        return "fury";
+        return "fory";
     }
 
     @Override
