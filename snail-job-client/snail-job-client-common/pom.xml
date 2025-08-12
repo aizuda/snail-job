@@ -94,8 +94,8 @@
             <artifactId>snail-job-common-log</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.fury</groupId>
-            <artifactId>fury-core</artifactId>
+            <groupId>org.apache.fory</groupId>
+            <artifactId>fory-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.luben</groupId>

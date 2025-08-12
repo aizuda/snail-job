@@ -20,7 +20,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <revision>1.7.1</revision>
+        <revision>1.7.2</revision>
         <skipTests>true</skipTests>
 
         <hutool.version>5.8.32</hutool.version>
@@ -36,7 +36,7 @@
         <aviator.version>5.3.3</aviator.version>
         <hessian.version>4.0.66</hessian.version>
         <QLExpress.version>3.3.4</QLExpress.version>
-        <fury.version>0.10.2</fury.version>
+        <fory.version>0.11.2</fory.version>
         <zstd.version>1.5.5-5</zstd.version>
 
         <!--    grpc & protobuf    -->
@@ -295,9 +295,9 @@
                 <version>${protobuf-java.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.fury</groupId>
-                <artifactId>fury-core</artifactId>
-                <version>${fury.version}</version>
+                <groupId>org.apache.fory</groupId>
+                <artifactId>fory-core</artifactId>
+                <version>${fory.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.luben</groupId>
