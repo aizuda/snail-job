@@ -38,7 +38,7 @@ public class ForyUtil {
         Set<String> disableClasses = getDisallowClasses();
         checker.disallowClasses(disableClasses);
 
-        ThreadPoolFory threadPoolFory = new ThreadPoolFory(classLoader -> {
+        SERIALIZER = new ThreadPoolFory(classLoader -> {
             Fory f = Fory.builder()
                     .withLanguage(Language.JAVA)
                     .requireClassRegistration(false)
@@ -52,9 +52,6 @@ public class ForyUtil {
                 Runtime.getRuntime().availableProcessors() * 2,
                 30,
                 TimeUnit.MINUTES);
-
-
-        SERIALIZER = threadPoolFory;
     }
 
     private static Set<String> getDisallowClasses() {
