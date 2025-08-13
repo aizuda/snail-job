@@ -228,6 +228,7 @@ org.springframework.aop.framework.AdvisedSupport
 org.springframework.aop.framework.JdkDynamicAopProxy
 org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor
 org.springframework.aop.target.SingletonTargetSource
+org.springframework.aop.target.HotSwappableTargetSource
 org.springframework.beans.BeanWrapperImpl
 org.springframework.beans.factory.BeanFactory
 org.springframework.beans.factory.config.MethodInvokingFactoryBean

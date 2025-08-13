@@ -9,6 +9,7 @@ import org.apache.fory.Fory;
 import org.apache.fory.ThreadSafeFory;
 import org.apache.fory.config.CompatibleMode;
 import org.apache.fory.config.Language;
+import org.apache.fory.pool.ThreadPoolFory;
 import org.apache.fory.resolver.AllowListChecker;
 
 import java.io.BufferedReader;
@@ -33,24 +34,27 @@ public class ForyUtil {
 
     static {
         // fix => https://gitee.com/aizuda/snail-job/issues/ICQV61
-        AllowListChecker checker = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
-
-        ThreadSafeFory fory = Fory.builder()
-                .withLanguage(Language.JAVA)
-                .requireClassRegistration(true)
-                .withCompatibleMode(CompatibleMode.COMPATIBLE)
-                .buildThreadSafeForyPool(
-                        Runtime.getRuntime().availableProcessors(),
-                        Runtime.getRuntime().availableProcessors() * 2,
-                        30,
-                        TimeUnit.MINUTES
-                );
-        fory.setClassChecker(checker);
-
+        AllowListChecker checker = new AllowListChecker(AllowListChecker.CheckLevel.WARN);
         Set<String> disableClasses = getDisallowClasses();
         checker.disallowClasses(disableClasses);
 
-        SERIALIZER = fory;
+        ThreadPoolFory threadPoolFory = new ThreadPoolFory(classLoader -> {
+            Fory f = Fory.builder()
+                    .withLanguage(Language.JAVA)
+                    .requireClassRegistration(false)
+                    .withCompatibleMode(CompatibleMode.COMPATIBLE)
+                    .withClassLoader(classLoader)
+                    .build();
+            f.getClassResolver().setClassChecker(checker);
+            checker.addListener(f.getClassResolver());
+            return f;
+        }, Runtime.getRuntime().availableProcessors(),
+                Runtime.getRuntime().availableProcessors() * 2,
+                30,
+                TimeUnit.MINUTES);
+
+
+        SERIALIZER = threadPoolFory;
     }
 
     private static Set<String> getDisallowClasses() {
