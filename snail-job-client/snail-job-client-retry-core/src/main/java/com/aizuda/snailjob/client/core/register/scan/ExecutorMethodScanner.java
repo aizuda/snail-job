@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.client.core.register.scan;
 
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.core.IdempotentIdGenerate;
+import com.aizuda.snailjob.client.core.RetryCondition;
 import com.aizuda.snailjob.client.core.Scanner;
 import com.aizuda.snailjob.client.core.annotation.ExecutorMethodRegister;
 import com.aizuda.snailjob.client.core.callback.complete.RetryCompleteCallback;
@@ -80,7 +80,7 @@ public class ExecutorMethodScanner implements Scanner, ApplicationContextAware {
                     forceReport,
                     timeout,
                     unit,
-                    null
+                    RetryCondition.NoRetry.class
             );
         } catch (Exception e) {
             SnailJobLog.LOCAL.error("Error loading retry information for {}: {}", executor.getClass().getName(), e);

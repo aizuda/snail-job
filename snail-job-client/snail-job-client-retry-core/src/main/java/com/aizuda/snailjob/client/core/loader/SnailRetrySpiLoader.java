@@ -35,10 +35,10 @@ public class SnailRetrySpiLoader {
      * 加载参数序列化SPI类
      * 若配置多个则只加载第一个
      *
-     * @return {@link JacksonSerializer} 默认序列化类为FurySerializer
+     * @return {@link ForySerializer} 默认序列化类为ForySerializer
      */
     public static RetryArgSerializer loadRetryArgSerializer() {
-        return Optional.ofNullable(ServiceLoaderUtil.loadFirst(RetryArgSerializer.class)).orElse(new FurySerializer());
+        return Optional.ofNullable(ServiceLoaderUtil.loadFirst(RetryArgSerializer.class)).orElse(new ForySerializer());
     }
 
     /**
