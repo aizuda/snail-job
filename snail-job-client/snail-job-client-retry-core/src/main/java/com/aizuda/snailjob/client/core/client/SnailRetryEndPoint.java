@@ -200,16 +200,16 @@ public class SnailRetryEndPoint implements Lifecycle {
     /**
      * 手动新增重试数据，模拟生成idempotentId
      *
-     * @param generateRetryIdempotentIdRequest 生成idempotentId模型
+     * @param request 生成idempotentId模型
      * @return idempotentId
      */
     @Mapping(path = RETRY_GENERATE_IDEM_ID, method = RequestMethod.POST)
     public Result<String> idempotentIdGenerate(@Valid
-                                               GenerateRetryIdempotentIdRequest generateRetryIdempotentIdRequest) {
+                                               GenerateRetryIdempotentIdRequest request) {
 
-        String scene = generateRetryIdempotentIdRequest.getScene();
-        String executorName = generateRetryIdempotentIdRequest.getExecutorName();
-        String argsStr = generateRetryIdempotentIdRequest.getArgsStr();
+        String scene = request.getScene();
+        String executorName = request.getExecutorName();
+        String argsStr = request.getArgsStr();
 
         RetryerInfo retryerInfo = RetryerInfoCache.get(scene, executorName);
         Assert.notNull(retryerInfo,
@@ -217,9 +217,9 @@ public class SnailRetryEndPoint implements Lifecycle {
 
         Method executorMethod = retryerInfo.getMethod();
 
-        RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer(generateRetryIdempotentIdRequest.getSerializerName());
+        RetryArgSerializer retryArgSerializer = SnailRetrySpiLoader.loadRetryArgSerializer(request.getSerializerName());
 
-        Object[] deSerialize = null;
+        Object[] deSerialize;
         try {
             deSerialize = (Object[]) retryArgSerializer.deSerialize(argsStr, retryerInfo.getExecutor().getClass(),
                     retryerInfo.getMethod());

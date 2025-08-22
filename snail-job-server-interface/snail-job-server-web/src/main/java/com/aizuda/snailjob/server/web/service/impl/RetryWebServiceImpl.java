@@ -128,16 +128,26 @@ public class RetryWebServiceImpl extends AbstractRetryService implements RetryWe
             throw new SnailJobServerException("Retry status error");
         }
 
+        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
+
+        GroupConfig groupConfig = accessTemplate.getGroupConfigAccess()
+                .getGroupConfigByGroupName(retryTaskRequestVO.getGroupName(), namespaceId);
+        if (Objects.isNull(groupConfig)) {
+            throw new SnailJobServerException(
+                    "failed to report data, no group configuration found. groupName:[{}]", retryTaskRequestVO.getGroupName());
+        }
+
         TaskGenerator taskGenerator = taskGenerators.stream()
                 .filter(t -> t.supports(TaskGeneratorSceneEnum.MANA_SINGLE.getScene()))
                 .findFirst().orElseThrow(() -> new SnailJobServerException("No matching task generator found"));
-        String namespaceId = UserSessionUtils.currentUserSession().getNamespaceId();
 
         TaskContext taskContext = new TaskContext();
         taskContext.setSceneName(retryTaskRequestVO.getSceneName());
         taskContext.setGroupName(retryTaskRequestVO.getGroupName());
         taskContext.setInitStatus(retryTaskRequestVO.getRetryStatus());
         taskContext.setNamespaceId(namespaceId);
+        taskContext.setGroupId(groupConfig.getId());
+
         taskContext.setTaskInfos(
                 Collections.singletonList(TaskContextConverter.INSTANCE.convert(retryTaskRequestVO)));
 

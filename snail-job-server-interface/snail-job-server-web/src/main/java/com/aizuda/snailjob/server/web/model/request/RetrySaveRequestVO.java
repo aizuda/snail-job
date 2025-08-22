@@ -32,6 +32,9 @@ public class RetrySaveRequestVO {
     @NotBlank(message = "Idempotent ID cannot be empty")
     private String idempotentId;
 
+    @NotBlank(message = "serializerName cannot be empty")
+    private String serializerName;
+
     /**
      * 业务编号
      */
