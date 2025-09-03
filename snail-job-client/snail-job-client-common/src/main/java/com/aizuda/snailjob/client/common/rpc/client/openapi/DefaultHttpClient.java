@@ -49,7 +49,12 @@ public class DefaultHttpClient implements SnailHttpClient {
         HttpRequest httpRequest = HttpUtil.createRequest(Method.valueOf(request.getMethod()), url);
         httpRequest.body(request.getBody());
         httpRequest.addHeaders(request.getHeaders());
-        return httpRequest.thenFunction(httpResponse ->
-                JsonUtil.parseObject(httpResponse.body(), SnailJobOpenApiResult.class));
+        return httpRequest.thenFunction(httpResponse -> {
+            SnailJobOpenApiResult result = JsonUtil.parseObject(httpResponse.body(), SnailJobOpenApiResult.class);
+            if (result != null && result.getData() != null) {
+                result.setData(JsonUtil.parseObject(JsonUtil.toJsonString(result.getData()), request.getReturnType()));
+            }
+            return result;
+        });
     }
 }

@@ -37,6 +37,11 @@ public class Request {
     private String params;
 
     /**
+     * 返回值类型
+     */
+    private Class<?> returnType;
+
+    /**
      * 上下文
      */
     private Map<String, String> headers;

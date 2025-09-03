@@ -13,13 +13,12 @@ import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
 import com.aizuda.snailjob.common.core.enums.HeadersEnum;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.core.util.ClassUtils;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.SnailJobVersion;
 import lombok.AllArgsConstructor;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -44,7 +43,6 @@ public class HttpClientInvokeHandler<R extends Result<Object>> implements Invoca
         SnailHttpClient snailHttpClient = loadSnailJobHttpClient();
         Mapping mapping = method.getAnnotation(Mapping.class);
         Parameter[] parameters = method.getParameters();
-
         Request request = new Request();
         request.setParams(getParams(args, parameters));
         request.setMethod(mapping.method().name());
@@ -52,6 +50,7 @@ public class HttpClientInvokeHandler<R extends Result<Object>> implements Invoca
         request.setHeaders(getHeaderInfo(method, args));
         request.setTimeout(unit.toMillis(timeout));
         request.setBody(JsonUtil.toJsonString(args[0]));
+        request.setReturnType(ClassUtils.getReturnType(method));
         return snailHttpClient.execute(request);
     }
 

@@ -34,14 +34,10 @@ public class RequestQueryWorkflowBatchHandler extends AbstractJobRequestHandler<
 
     @Override
     protected WorkflowDetailApiResponse doExecute() {
-        Result<Object> result = clientV2.getWorkflowBatchDetail(workflowBatchId);
+        Result<WorkflowDetailApiResponse> result = clientV2.getWorkflowBatchDetail(workflowBatchId);
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
-        Object data = result.getData();
-        if (Objects.isNull(data)) {
-            return null;
-        }
-        return JsonUtil.parseObject(JsonUtil.toJsonString(data), WorkflowDetailApiResponse.class);
+        return result.getData();
     }
 
     @Override

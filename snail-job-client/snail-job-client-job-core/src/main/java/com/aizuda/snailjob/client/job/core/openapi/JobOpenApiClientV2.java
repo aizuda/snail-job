@@ -8,6 +8,9 @@ import com.aizuda.snailjob.model.request.base.JobRequest;
 import com.aizuda.snailjob.model.request.base.StatusUpdateRequest;
 import com.aizuda.snailjob.model.request.base.WorkflowTriggerRequest;
 import com.aizuda.snailjob.model.request.JobTriggerApiRequest;
+import com.aizuda.snailjob.model.response.JobApiResponse;
+import com.aizuda.snailjob.model.response.JobBatchApiResponse;
+import com.aizuda.snailjob.model.response.WorkflowDetailApiResponse;
 
 import java.util.Set;
 
@@ -22,16 +25,16 @@ public interface JobOpenApiClientV2 {
     Result<Object> updateJob(JobRequest jobRequest);
 
     @Mapping(method = RequestMethod.GET, path = OPENAPI_GET_JOB_DETAIL_V2)
-    Result<Object> getJobDetail(@Param("id") Long jobId);
+    Result<JobApiResponse> getJobDetail(@Param("id") Long jobId);
 
     @Mapping(method = RequestMethod.GET, path = OPENAPI_GET_JOB_BATCH_DETAIL_V2)
-    Result<Object> getJobBatchDetail(@Param("id") Long jobBatchId);
+    Result<JobBatchApiResponse> getJobBatchDetail(@Param("id") Long jobBatchId);
 
     @Mapping(method = RequestMethod.GET, path = OPENAPI_GET_WORKFLOW_BATCH_DETAIL_V2)
-    Result<Object> getWorkflowBatchDetail(@Param("id") Long jobBatchId);
+    Result<WorkflowDetailApiResponse> getWorkflowBatchDetail(@Param("id") Long jobBatchId);
 
     @Mapping(method = RequestMethod.POST, path = OPENAPI_TRIGGER_JOB_V2)
-    Result<Object> triggerJob(JobTriggerApiRequest request);
+    Result<Boolean> triggerJob(JobTriggerApiRequest request);
 
     @Mapping(method = RequestMethod.POST, path = OPENAPI_TRIGGER_WORKFLOW_V2)
     Result<Object> triggerWorkFlow(WorkflowTriggerRequest jobTriggerDTO);
@@ -43,7 +46,7 @@ public interface JobOpenApiClientV2 {
     Result<Object> updateWorkFlowStatus(StatusUpdateRequest statusDTO);
 
     @Mapping(method = RequestMethod.DELETE, path = OPENAPI_DELETE_JOB_V2)
-    Result<Object> deleteJob(Set<Long> toDeleteIds);
+    Result<Boolean> deleteJob(Set<Long> toDeleteIds);
 
     @Mapping(method = RequestMethod.DELETE, path = OPENAPI_DELETE_WORKFLOW_V2)
     Result<Object> deleteWorkflow(Set<Long> toDeleteIds);

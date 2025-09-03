@@ -35,10 +35,10 @@ public class DeleteJobHandler extends AbstractJobRequestHandler<Boolean> {
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result = clientV2.deleteJob(toDeleteIds);
+        Result<Boolean> result = clientV2.deleteJob(toDeleteIds);
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
-        return (Boolean)result.getData();
+        return result.getData();
     }
 
     @Override

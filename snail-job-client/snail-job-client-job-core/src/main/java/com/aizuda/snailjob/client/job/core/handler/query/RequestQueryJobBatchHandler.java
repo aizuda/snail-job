@@ -33,14 +33,14 @@ public class RequestQueryJobBatchHandler extends AbstractJobRequestHandler<JobBa
 
     @Override
     protected JobBatchApiResponse doExecute() {
-        Result<Object> result = clientV2.getJobBatchDetail(queryJobBatchId);
+        Result<JobBatchApiResponse> result = clientV2.getJobBatchDetail(queryJobBatchId);
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
-        Object data = result.getData();
+        JobBatchApiResponse data = result.getData();
         if (Objects.isNull(data)) {
             return null;
         }
-        return JsonUtil.parseObject(JsonUtil.toJsonString(data), JobBatchApiResponse.class);
+        return data;
     }
 
     @Override
