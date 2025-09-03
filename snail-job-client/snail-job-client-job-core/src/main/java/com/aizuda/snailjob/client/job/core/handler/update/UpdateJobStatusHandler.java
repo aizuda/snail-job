@@ -30,13 +30,7 @@ public class UpdateJobStatusHandler extends AbstractJobRequestHandler<Boolean> {
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result;
-        if (isOpenApiV2()) {
-            result = clientV2.updateJobStatus(statusDTO);
-        } else {
-            result = client.updateJobStatus(statusDTO);
-        }
-
+        Result<Object> result = clientV2.updateJobStatus(statusDTO);
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         return (Boolean) result.getData();

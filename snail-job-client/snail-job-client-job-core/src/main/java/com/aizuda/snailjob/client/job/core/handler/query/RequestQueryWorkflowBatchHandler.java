@@ -34,13 +34,7 @@ public class RequestQueryWorkflowBatchHandler extends AbstractJobRequestHandler<
 
     @Override
     protected WorkflowDetailApiResponse doExecute() {
-        Result<Object> result;
-        if (isOpenApiV2()) {
-            result = clientV2.getWorkflowBatchDetail(workflowBatchId);
-        } else {
-            result = client.getWorkflowBatchDetail(workflowBatchId);
-        }
-
+        Result<Object> result = clientV2.getWorkflowBatchDetail(workflowBatchId);
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();

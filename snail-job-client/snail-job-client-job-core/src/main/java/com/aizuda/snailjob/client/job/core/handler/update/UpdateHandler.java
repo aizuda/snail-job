@@ -38,13 +38,7 @@ public abstract class UpdateHandler<H> extends AbstractParamsHandler<H, Boolean>
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result;
-        if (isOpenApiV2()) {
-            result = clientV2.updateJob(getReqDTO());
-        } else {
-            result = client.updateJob(getReqDTO());
-        }
-
+        Result<Object> result = clientV2.updateJob(getReqDTO());
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         return (Boolean) result.getData();

@@ -31,13 +31,7 @@ public class RequestQueryHandler extends AbstractJobRequestHandler<JobApiRespons
 
     @Override
     protected JobApiResponse doExecute() {
-        Result<Object> result;
-        if (isOpenApiV2()) {
-             result = clientV2.getJobDetail(queryJobId);
-        } else {
-            result = client.getJobDetail(queryJobId);
-        }
-
+        Result<Object> result = clientV2.getJobDetail(queryJobId);
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();

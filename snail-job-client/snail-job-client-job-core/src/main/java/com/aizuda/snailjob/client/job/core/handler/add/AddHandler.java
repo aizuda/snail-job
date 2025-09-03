@@ -21,12 +21,7 @@ public abstract class AddHandler<H> extends AbstractParamsHandler<H, Long> {
 
     @Override
     protected Long doExecute() {
-        Result<Object> result;
-        if (isOpenApiV2()) {
-            result = clientV2.addJob(getReqDTO());
-        } else {
-            result = client.addJob(getReqDTO());
-        }
+        Result<Object> result = clientV2.addJob(getReqDTO());
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         String data = JsonUtil.toJsonString(result.getData());

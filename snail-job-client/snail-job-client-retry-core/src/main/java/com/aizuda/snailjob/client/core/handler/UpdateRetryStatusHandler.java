@@ -26,12 +26,7 @@ public class UpdateRetryStatusHandler extends AbstractRetryRequestHandler<Boolea
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result;
-        if (isOpenApiV2()) {
-            result = clientV2.updateRetryTaskStatus(updateRetryStatusDTO);
-        } else {
-            result = client.updateRetryTaskStatus(updateRetryStatusDTO);
-        }
+        Result<Object> result = clientV2.updateRetryTaskStatus(updateRetryStatusDTO);;
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         return (Boolean) result.getData();

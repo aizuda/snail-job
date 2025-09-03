@@ -30,13 +30,7 @@ public class UpdateWorkflowStatusHandler extends AbstractJobRequestHandler<Boole
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result;
-        if (isOpenApiV2()) {
-            result = clientV2.updateWorkFlowStatus(statusDTO);
-        } else {
-            result = client.updateWorkFlowStatus(statusDTO);
-        }
-
+        Result<Object> result = clientV2.updateWorkFlowStatus(statusDTO);
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         return (Boolean) result.getData();

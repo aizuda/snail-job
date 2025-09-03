@@ -26,13 +26,7 @@ public class TriggerWorkflowHandler extends AbstractWorkflowTriggerHandler<Trigg
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result;
-        if (isOpenApiV2()) {
-            result = clientV2.triggerWorkFlow(getReqDTO());
-        } else {
-            result = client.triggerWorkFlow(getReqDTO());
-        }
-
+        Result<Object> result = clientV2.triggerWorkFlow(getReqDTO());
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         return (Boolean) result.getData();

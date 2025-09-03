@@ -21,11 +21,7 @@ public class QueryRetryHandler extends AbstractRetryRequestHandler<RetryApiRespo
     @Override
     protected RetryApiResponse doExecute() {
         Result<Object> result;
-        if (isOpenApiV2()){
-            result = clientV2.queryRetryTask(retryId);
-        } else {
-            result = client.queryRetryTask(retryId);
-        }
+        result = clientV2.queryRetryTask(retryId);
         Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
                 () -> new SnailJobClientException(result.getMessage()));
         Object data = result.getData();

@@ -1,7 +1,7 @@
 package com.aizuda.snailjob.server.web.model.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * 生成idempotentId模型
