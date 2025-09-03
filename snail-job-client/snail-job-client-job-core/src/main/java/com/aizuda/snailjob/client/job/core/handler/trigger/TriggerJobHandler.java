@@ -25,9 +25,7 @@ public abstract class TriggerJobHandler<H> extends AbstractTriggerHandler<H, Boo
 
     @Override
     protected Boolean doExecute() {
-        Result<Boolean> result = clientV2.triggerJob(getReqDTO());;
-        Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
-                () -> new SnailJobClientException(result.getMessage()));
+        Result<Boolean> result = clientV2.triggerJob(getReqDTO());
         return result.getData();
     }
 

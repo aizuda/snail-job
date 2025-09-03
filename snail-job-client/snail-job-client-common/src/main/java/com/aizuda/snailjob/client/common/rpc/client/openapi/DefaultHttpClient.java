@@ -1,10 +1,13 @@
 package com.aizuda.snailjob.client.common.rpc.client.openapi;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
+import com.aizuda.snailjob.client.common.exception.SnailJobClientException;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.SnailJobOpenApiResult;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 
@@ -51,7 +54,9 @@ public class DefaultHttpClient implements SnailHttpClient {
         httpRequest.addHeaders(request.getHeaders());
         return httpRequest.thenFunction(httpResponse -> {
             SnailJobOpenApiResult result = JsonUtil.parseObject(httpResponse.body(), SnailJobOpenApiResult.class);
-            if (result != null && result.getData() != null) {
+            Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
+                    () -> new SnailJobClientException(result.getMessage()));
+            if (result.getData() != null) {
                 result.setData(JsonUtil.parseObject(JsonUtil.toJsonString(result.getData()), request.getReturnType()));
             }
             return result;
