@@ -3,6 +3,7 @@ package com.aizuda.snailjob.client.common.rpc.client.openapi;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
 import lombok.Data;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
@@ -39,7 +40,7 @@ public class Request {
     /**
      * 返回值类型
      */
-    private Class<?> returnType;
+    private Type returnType;
 
     /**
      * 上下文

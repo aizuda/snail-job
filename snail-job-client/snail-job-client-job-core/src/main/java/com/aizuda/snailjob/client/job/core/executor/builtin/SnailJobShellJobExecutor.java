@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.client.job.core.executor.builtin;
 
 
+import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.client.job.core.annotation.JobExecutor;
 import com.aizuda.snailjob.client.job.core.dto.JobArgs;
 import com.aizuda.snailjob.model.dto.ExecuteResult;
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Component;
 @Component
 @JobExecutor(name = "snailJobShellJobExecutor")
 public class SnailJobShellJobExecutor extends AbstractShellExecutor {
+    public SnailJobShellJobExecutor(SnailJobProperties snailJobProperties) {
+        super(snailJobProperties);
+    }
 
     public ExecuteResult jobExecute(JobArgs jobArgs) {
         Object jobParams = jobArgs.getJobParams();

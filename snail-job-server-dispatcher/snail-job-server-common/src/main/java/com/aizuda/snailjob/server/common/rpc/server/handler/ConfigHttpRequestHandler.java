@@ -40,6 +40,6 @@ public class ConfigHttpRequestHandler extends GetHttpRequestHandler {
         String groupName = headers.get(HeadersEnum.GROUP_NAME.getKey());
         String namespace = headers.get(HeadersEnum.NAMESPACE.getKey());
         ConfigRequest configRequest = accessTemplate.getGroupConfigAccess().getConfigInfo(groupName, namespace);
-        return new SnailJobRpcResult(JsonUtil.toJsonString(configRequest), retryRequest.getReqId());
+        return new SnailJobRpcResult(configRequest, retryRequest.getReqId());
     }
 }

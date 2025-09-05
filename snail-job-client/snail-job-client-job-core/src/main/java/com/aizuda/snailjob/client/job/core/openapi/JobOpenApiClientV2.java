@@ -19,10 +19,10 @@ import static com.aizuda.snailjob.common.core.constant.SystemConstants.HTTP_PATH
 public interface JobOpenApiClientV2 {
 
     @Mapping(method = RequestMethod.POST, path = OPENAPI_ADD_JOB)
-    Result<Object> addJob(JobRequest jobRequest);
+    Result<Long> addJob(JobRequest jobRequest);
 
     @Mapping(method = RequestMethod.PUT, path = OPENAPI_UPDATE_JOB)
-    Result<Object> updateJob(JobRequest jobRequest);
+    Result<Boolean> updateJob(JobRequest jobRequest);
 
     @Mapping(method = RequestMethod.GET, path = OPENAPI_GET_JOB_DETAIL_V2)
     Result<JobApiResponse> getJobDetail(@Param("id") Long jobId);
@@ -37,17 +37,17 @@ public interface JobOpenApiClientV2 {
     Result<Boolean> triggerJob(JobTriggerApiRequest request);
 
     @Mapping(method = RequestMethod.POST, path = OPENAPI_TRIGGER_WORKFLOW_V2)
-    Result<Object> triggerWorkFlow(WorkflowTriggerRequest jobTriggerDTO);
+    Result<Boolean> triggerWorkFlow(WorkflowTriggerRequest jobTriggerDTO);
 
     @Mapping(method = RequestMethod.PUT, path = OPENAPI_UPDATE_JOB_STATUS_V2)
-    Result<Object> updateJobStatus(StatusUpdateRequest statusDTO);
+    Result<Boolean> updateJobStatus(StatusUpdateRequest statusDTO);
 
     @Mapping(method = RequestMethod.PUT, path = OPENAPI_UPDATE_WORKFLOW_STATUS_V2)
-    Result<Object> updateWorkFlowStatus(StatusUpdateRequest statusDTO);
+    Result<Boolean> updateWorkFlowStatus(StatusUpdateRequest statusDTO);
 
     @Mapping(method = RequestMethod.DELETE, path = OPENAPI_DELETE_JOB_V2)
     Result<Boolean> deleteJob(Set<Long> toDeleteIds);
 
     @Mapping(method = RequestMethod.DELETE, path = OPENAPI_DELETE_WORKFLOW_V2)
-    Result<Object> deleteWorkflow(Set<Long> toDeleteIds);
+    Result<Boolean> deleteWorkflow(Set<Long> toDeleteIds);
 }

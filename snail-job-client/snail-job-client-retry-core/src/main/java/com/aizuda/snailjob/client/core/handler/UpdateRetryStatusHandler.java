@@ -19,17 +19,14 @@ public class UpdateRetryStatusHandler extends AbstractRetryRequestHandler<Boolea
     }
 
     public UpdateRetryStatusHandler setRetryStatus(RetryStatusEnum retryStatusEnum) {
-        updateRetryStatusDTO.setRetryStatus(retryStatusEnum.getStatus());
         updateRetryStatusDTO.setStatus(retryStatusEnum.getStatus());
         return this;
     }
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result = clientV2.updateRetryTaskStatus(updateRetryStatusDTO);;
-        Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
-                () -> new SnailJobClientException(result.getMessage()));
-        return (Boolean) result.getData();
+        Result<Boolean> result = clientV2.updateRetryTaskStatus(updateRetryStatusDTO);;
+        return result.getData();
     }
 
     @Override

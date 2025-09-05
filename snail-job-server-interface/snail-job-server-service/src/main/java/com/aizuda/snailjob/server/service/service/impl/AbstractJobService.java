@@ -101,7 +101,7 @@ public abstract class AbstractJobService implements JobService {
                         .eq(Job::getNamespaceId, namespaceId)
                         .eq(Job::getJobStatus, StatusEnum.NO.getStatus())
                         .in(Job::getId, ids)
-        ).size(), () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task status is closed"));
+        ).size(), () -> new SnailJobServerException("Failed to delete the scheduled task. Ensure the task is closed, and confirm whether the job exists."));
 
         Assert.isTrue(workflowNodeMapper.selectJobUsedInNonLatestWorkflow(ids).isEmpty(),
                 () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task is used in the workflow"));

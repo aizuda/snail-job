@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.client.common.rpc.client.grpc;
 
 import cn.hutool.core.date.StopWatch;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.annotation.Header;
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
@@ -11,7 +12,7 @@ import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
 import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
-import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.core.util.ClassUtils;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import com.google.common.util.concurrent.FutureCallback;
@@ -22,6 +23,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +44,7 @@ import java.util.function.Consumer;
  * @date : 2023-05-11 21:45
  * @since 1.3.0
  */
-public class GrpcClientInvokeHandler<R extends Result<Object>> implements InvocationHandler {
+public class GrpcClientInvokeHandler<R> implements InvocationHandler {
 
     public static final AtomicLong REQUEST_ID = new AtomicLong(0);
     private final Consumer<R> consumer;
@@ -74,13 +76,17 @@ public class GrpcClientInvokeHandler<R extends Result<Object>> implements Invoca
             return (R) new SnailJobRpcResult(StatusEnum.NO.getStatus(), "future is nulll", null, reqId);
         }
 
+        Type returnType = ClassUtils.getReturnType(method);
         if (async) {
             Futures.addCallback(future, new FutureCallback<>() {
 
                 @Override
                 public void onSuccess(final GrpcResult result) {
+                    Object obj = null;
+                    if (StrUtil.isNotBlank(result.getData())) {
+                        obj = JsonUtil.parseObject(result.getData(), returnType);
+                    }
 
-                    Object obj = JsonUtil.parseObject( result.getData(), Object.class);
                     consumer.accept(
                             (R) new SnailJobRpcResult(result.getStatus(), result.getMessage(), obj, result.getReqId()));
                 }
@@ -97,7 +103,10 @@ public class GrpcClientInvokeHandler<R extends Result<Object>> implements Invoca
 
             try {
                 GrpcResult result = future.get(timeout, unit);
-                Object obj = JsonUtil.parseObject(result.getData(), Object.class);
+                Object obj = null;
+                if (StrUtil.isNotBlank(result.getData())) {
+                    obj = JsonUtil.parseObject(result.getData(), returnType);
+                }
                 return (R) new SnailJobRpcResult(result.getStatus(), result.getMessage(), obj, result.getReqId());
             } catch (ExecutionException e) {
                 throw e.getCause();

@@ -30,10 +30,8 @@ public class UpdateWorkflowStatusHandler extends AbstractJobRequestHandler<Boole
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result = clientV2.updateWorkFlowStatus(statusDTO);
-        Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
-                () -> new SnailJobClientException(result.getMessage()));
-        return (Boolean) result.getData();
+        Result<Boolean> result = clientV2.updateWorkFlowStatus(statusDTO);
+        return result.getData();
     }
 
     @Override
@@ -59,7 +57,6 @@ public class UpdateWorkflowStatusHandler extends AbstractJobRequestHandler<Boole
      * @return
      */
     public UpdateWorkflowStatusHandler setStatus(StatusEnum status) {
-        this.statusDTO.setJobStatus(status.getStatus());
         this.statusDTO.setStatus(status.getStatus());
         return this;
     }

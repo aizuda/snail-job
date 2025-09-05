@@ -1,6 +1,7 @@
 package com.aizuda.snailjob.client.job.core.executor.builtin;
 
 import cn.hutool.core.util.StrUtil;
+import com.aizuda.snailjob.client.common.Lifecycle;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.model.dto.ExecuteResult;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
@@ -9,20 +10,31 @@ import com.aizuda.snailjob.common.core.util.SnailJobFileUtil;
 import com.aizuda.snailjob.common.core.util.SnailJobSystemUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public abstract class AbstractScriptExecutor implements InitializingBean {
+@Slf4j
+public abstract class AbstractScriptExecutor {
 
     protected static final String SH_SHELL = "/bin/sh";
 
     private static String WORKER_DIR;
+
+    public AbstractScriptExecutor(SnailJobProperties snailJobProperties) {
+        if (Objects.isNull(snailJobProperties)) {
+            log.warn("snailJobProperties is null");
+        }
+        WORKER_DIR = SnailFileUtils.workspace(snailJobProperties);
+    }
 
     // 下载脚本模式
     private static final String SCRIPT_DOWNLOAD_METHOD = "DOWNLOAD";
@@ -267,10 +279,9 @@ public abstract class AbstractScriptExecutor implements InitializingBean {
          *
          * @return 允许用户通过启动配置文件自定义存储目录，默认为 user.home
          */
-        public static String workspace() {
-            SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
-            String workspaceByDKey = snailJobProperties.getWorkspace();
-            if (StrUtil.isNotEmpty(workspaceByDKey)) {
+        public static String workspace(SnailJobProperties snailJobProperties) {
+            String workspaceByDKey = Optional.ofNullable(snailJobProperties).map(SnailJobProperties::getWorkspace).orElse("");
+            if (StrUtil.isNotBlank(workspaceByDKey)) {
                 SnailJobLog.LOCAL.info("[FileUtils] [workspace] use custom workspace: {}", workspaceByDKey);
                 return workspaceByDKey;
             }
@@ -292,8 +303,4 @@ public abstract class AbstractScriptExecutor implements InitializingBean {
         private String charset;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        WORKER_DIR = SnailFileUtils.workspace() + "/script_processor/";
-    }
 }

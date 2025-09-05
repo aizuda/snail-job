@@ -3,6 +3,7 @@ package com.aizuda.snailjob.client.common;
 import com.aizuda.snailjob.client.common.annotation.Header;
 import com.aizuda.snailjob.client.common.annotation.Mapping;
 import com.aizuda.snailjob.client.common.rpc.client.RequestMethod;
+import com.aizuda.snailjob.model.request.ConfigRequest;
 import com.aizuda.snailjob.model.request.JobExecutorRequest;
 import com.aizuda.snailjob.model.request.LogTaskRequest;
 import com.aizuda.snailjob.model.request.RetryTaskRequest;
@@ -31,10 +32,10 @@ public interface RpcClient {
     SnailJobRpcResult reportLogTask(List<LogTaskRequest> list);
 
     @Mapping(method = RequestMethod.POST, path = HTTP_PATH.SYNC_CONFIG)
-    Result syncRemoteConfig();
+    Result<ConfigRequest> syncRemoteConfig();
 
     @Mapping(method = RequestMethod.POST, path = HTTP_PATH.BEAT)
-    Result beat(String mark, @Header(name = HeadersEnum.LABEL) Map<String, String> labels);
+    Result<String> beat(String mark, @Header(name = HeadersEnum.LABEL) Map<String, String> labels);
 
     @Mapping(method = RequestMethod.POST, path = HTTP_PATH.REGISTER_JOB_EXECUTORS)
     Result registryExecutors(List<JobExecutorRequest> contextList);

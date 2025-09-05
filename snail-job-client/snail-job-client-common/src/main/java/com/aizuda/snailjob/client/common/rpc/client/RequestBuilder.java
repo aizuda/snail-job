@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * @date : 2023-05-12 16:47
  * @since 1.3.0
  */
-public class RequestBuilder<T, R extends Result<Object>> {
+public class RequestBuilder<T, R> {
 
     private Class<T> clintInterface;
 
@@ -32,7 +32,7 @@ public class RequestBuilder<T, R extends Result<Object>> {
 
     private boolean openapi = false;
 
-    public static <T, R extends Result<Object>> RequestBuilder<T, R> newBuilder() {
+    public static <T, R > RequestBuilder<T, R> newBuilder() {
         return new RequestBuilder<>();
     }
 

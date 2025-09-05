@@ -20,11 +20,11 @@ public class ClassUtils {
      * @param method Method
      * @return
      */
-    public static Class<?> getReturnType(Method method) {
+    public static Type getReturnType(Method method) {
         Type returnType = method.getGenericReturnType();
         if (returnType instanceof ParameterizedType parameterizedType) {
             Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-            return (Class<?>) actualTypeArguments[0];
+            return actualTypeArguments[0];
         }
         return Object.class;
     }

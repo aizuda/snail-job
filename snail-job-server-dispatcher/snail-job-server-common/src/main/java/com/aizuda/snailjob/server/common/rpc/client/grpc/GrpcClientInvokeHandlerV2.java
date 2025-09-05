@@ -2,10 +2,12 @@ package com.aizuda.snailjob.server.common.rpc.client.grpc;
 
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.core.grpc.auto.GrpcResult;
 import com.aizuda.snailjob.common.core.model.Result;
+import com.aizuda.snailjob.common.core.util.ClassUtils;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.NetUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
@@ -31,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -107,6 +110,7 @@ public class GrpcClientInvokeHandlerV2 implements InvocationHandler {
             // 统一设置Token
             requestHeaders.put(SystemConstants.SNAIL_JOB_AUTH_TOKEN, CacheToken.get(groupName, namespaceId));
 
+            Type type = ClassUtils.getReturnType(method);
             long reqId = newId();
             Result result = retryer.call(() -> {
                 RegisterNodeInfo nodeInfo = instanceLiveInfo.getNodeInfo();
@@ -132,7 +136,11 @@ public class GrpcClientInvokeHandlerV2 implements InvocationHandler {
                     try {
                         GrpcResult grpcResult = future.get(Optional.ofNullable(executorTimeout).orElse(20),
                                 TimeUnit.SECONDS);
-                        Object obj = JsonUtil.parseObject(grpcResult.getData(), Object.class);
+
+                        Object obj = null;
+                        if (StrUtil.isNotBlank(grpcResult.getData())) {
+                            obj = JsonUtil.parseObject(grpcResult.getData(), type);
+                        }
                         return new Result(grpcResult.getStatus(), grpcResult.getMessage(), obj);
                     } catch (Exception ex) {
                         log.error("request client I/O error, clientId:[{}] clientAddr:[{}:{}] serverIp:[{}]",

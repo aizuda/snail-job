@@ -47,14 +47,8 @@ public class GetRegNodesPostHttpRequestHandler extends GetHttpRequestHandler {
         SnailJobLog.LOCAL.debug("Client Callback Request. content:[{}]", content);
 
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
-
-
         List<ServerNode> refreshCache = getAndRefreshCache();
-        String json = null;
-        if (CollUtil.isNotEmpty(refreshCache)){
-            json = JsonUtil.toJsonString(refreshCache);
-        }
-        return new SnailJobRpcResult(json, retryRequest.getReqId());
+        return new SnailJobRpcResult(refreshCache, retryRequest.getReqId());
     }
 
     public  List<ServerNode> getAndRefreshCache() {

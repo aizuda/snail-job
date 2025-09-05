@@ -28,7 +28,7 @@ public class SyncRemoteConfig implements Lifecycle {
 
     @Override
     public void start() {
-        CLIENT = RequestBuilder.<RpcClient, SnailJobRpcResult>newBuilder()
+        CLIENT = RequestBuilder.<RpcClient, SnailJobRpcResult<ConfigRequest>>newBuilder()
                 .client(RpcClient.class)
                 .timeout(1000L)
                 .callback(rpcResult -> {
@@ -37,8 +37,7 @@ public class SyncRemoteConfig implements Lifecycle {
                         return;
                     }
 
-                    GroupVersionCache.setConfig(
-                            JsonUtil.parseObject(rpcResult.getData().toString(), ConfigRequest.class));
+                    GroupVersionCache.setConfig(rpcResult.getData());
                 }).build();
 
         SCHEDULE_EXECUTOR.scheduleAtFixedRate(() -> {

@@ -28,10 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -174,15 +171,16 @@ public class ClientRegister extends AbstractRegister {
 
             int size = infos.size();
             // 存储处理结果
-            List<Future<String>> futures = new ArrayList<>(size);
+            List<Future<List<ServerNode>>> futures = new ArrayList<>(size);
             for (InstanceLiveInfo liveInfo : infos) {
-                Future<String> future = refreshNodePool.submit(() -> {
+                Future<List<ServerNode>> future = refreshNodePool.submit(() -> {
                     try {
                         CommonRpcClient serverRpcClient = buildRpcClient(liveInfo);
-                        Result<String> regNodesAndFlush = serverRpcClient.pullRemoteNodeClientRegisterInfo(new PullRemoteNodeClientRegisterInfoDTO());
+                        Result<List<ServerNode>> regNodesAndFlush = serverRpcClient.pullRemoteNodeClientRegisterInfo(new PullRemoteNodeClientRegisterInfoDTO());
                         return regNodesAndFlush.getData();
                     } catch (Exception e) {
-                        return StrUtil.EMPTY;
+                        SnailJobLog.LOCAL.warn("pull remote node client register failed", e);
+                        return List.of();
                     }
                 });
 
@@ -192,15 +190,15 @@ public class ClientRegister extends AbstractRegister {
             return futures.stream().map(future -> {
                 try {
                     // 后面可以考虑配置
-                    String jsonString = future.get(1, TimeUnit.SECONDS);
+                    List<ServerNode> jsonString = future.get(1, TimeUnit.SECONDS);
                     if (Objects.nonNull(jsonString)) {
-                        return JsonUtil.parseList(jsonString, ServerNode.class);
+                        return jsonString;
                     }
                     return new ArrayList<ServerNode>();
                 } catch (Exception e) {
                     return new ArrayList<ServerNode>();
                 }
-            }).filter(Objects::nonNull).flatMap(List::stream).distinct().toList();
+            }).flatMap(List::stream).distinct().toList();
 
         }
 

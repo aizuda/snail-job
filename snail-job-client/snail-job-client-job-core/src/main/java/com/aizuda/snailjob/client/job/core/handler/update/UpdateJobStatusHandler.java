@@ -30,10 +30,8 @@ public class UpdateJobStatusHandler extends AbstractJobRequestHandler<Boolean> {
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result = clientV2.updateJobStatus(statusDTO);
-        Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
-                () -> new SnailJobClientException(result.getMessage()));
-        return (Boolean) result.getData();
+        Result<Boolean> result = clientV2.updateJobStatus(statusDTO);
+        return result.getData();
     }
 
     @Override
@@ -59,7 +57,6 @@ public class UpdateJobStatusHandler extends AbstractJobRequestHandler<Boolean> {
      * @return
      */
     public UpdateJobStatusHandler setStatus(StatusEnum status) {
-        this.statusDTO.setJobStatus(status.getStatus());
         this.statusDTO.setStatus(status.getStatus());
         return this;
     }

@@ -16,12 +16,6 @@ public class StatusUpdateRequest {
     @NotNull(message = "id cannot be null")
     private Long id;
 
-    @Deprecated(since = "1.7.0")
-    private Integer jobStatus;
-
-    @Deprecated(since = "1.7.0")
-    private Integer retryStatus;
-
     @NotNull(message = "status cannot be null")
     private Integer status;
 

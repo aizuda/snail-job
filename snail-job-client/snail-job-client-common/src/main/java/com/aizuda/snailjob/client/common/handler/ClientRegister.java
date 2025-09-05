@@ -35,7 +35,7 @@ public class ClientRegister implements Lifecycle {
 
     @Override
     public void start() {
-        CLIENT = RequestBuilder.<RpcClient, SnailJobRpcResult>newBuilder()
+        CLIENT = RequestBuilder.<RpcClient, SnailJobRpcResult<Boolean>>newBuilder()
                 .client(RpcClient.class)
                 .callback(
                         rpcResult -> {

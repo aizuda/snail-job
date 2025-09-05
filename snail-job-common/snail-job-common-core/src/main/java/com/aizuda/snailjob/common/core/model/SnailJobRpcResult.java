@@ -11,11 +11,11 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Accessors(chain = true)
-public class SnailJobRpcResult extends Result<Object> {
+public class SnailJobRpcResult<T> extends Result<T> {
 
     private long reqId;
 
-    public SnailJobRpcResult(int status, String message, Object data, long reqId) {
+    public SnailJobRpcResult(int status, String message, T data, long reqId) {
         super(status, message, data);
         this.reqId = reqId;
     }
@@ -23,7 +23,7 @@ public class SnailJobRpcResult extends Result<Object> {
     public SnailJobRpcResult() {
     }
 
-    public SnailJobRpcResult(Object data, long reqId) {
+    public SnailJobRpcResult(T data, long reqId) {
         super(data);
         this.reqId = reqId;
     }

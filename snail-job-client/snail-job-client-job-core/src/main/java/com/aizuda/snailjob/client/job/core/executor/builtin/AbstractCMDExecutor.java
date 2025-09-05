@@ -1,9 +1,15 @@
 package com.aizuda.snailjob.client.job.core.executor.builtin;
 
+import com.aizuda.snailjob.client.common.config.SnailJobProperties;
+
 import java.nio.charset.Charset;
 
 
 public abstract class AbstractCMDExecutor extends AbstractScriptExecutor {
+
+    public AbstractCMDExecutor(SnailJobProperties snailJobProperties) {
+        super(snailJobProperties);
+    }
 
     @Override
     protected String getScriptName(Long jobId) {

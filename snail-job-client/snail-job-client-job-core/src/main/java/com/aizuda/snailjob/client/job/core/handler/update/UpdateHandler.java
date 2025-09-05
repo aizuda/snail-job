@@ -38,10 +38,8 @@ public abstract class UpdateHandler<H> extends AbstractParamsHandler<H, Boolean>
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result = clientV2.updateJob(getReqDTO());
-        Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
-                () -> new SnailJobClientException(result.getMessage()));
-        return (Boolean) result.getData();
+        Result<Boolean> result = clientV2.updateJob(getReqDTO());
+        return result.getData();
     }
 
     @Override

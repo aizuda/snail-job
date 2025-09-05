@@ -13,6 +13,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -51,6 +52,12 @@ public class JsonUtil {
      */
     public static <T> T parseObject(String jsonString, Class<T> clazz) {
         return JsonMapper.toJavaObject(jsonString, clazz);
+    }
+
+
+    public static <T> T parseObject(String jsonString, Type type) {
+        JavaType javaType = JsonMapper.getByType(type);
+        return (T) JsonMapper.toJavaObject(jsonString, javaType);
     }
 
 
@@ -243,6 +250,16 @@ public class JsonUtil {
             // 注册JAVA 时间序列化器
             objectMapper.registerModule(javaTimeModule);
             return objectMapper;
+        }
+
+        /**
+         * 获取对象类型
+         *
+         * @param type
+         * @return
+         */
+        private static JavaType getByType(Type type) {
+            return objectMapper.getTypeFactory().constructType(type);
         }
 
         /**

@@ -35,10 +35,8 @@ public class DeleteWorkflowHandler extends AbstractJobRequestHandler<Boolean> {
 
     @Override
     protected Boolean doExecute() {
-        Result<Object> result = clientV2.deleteWorkflow(toDeleteIds);
-        Assert.isTrue(StatusEnum.YES.getStatus() == result.getStatus(),
-                () -> new SnailJobClientException(result.getMessage()));
-        return (Boolean)result.getData();
+        Result<Boolean> result = clientV2.deleteWorkflow(toDeleteIds);
+        return result.getData();
     }
 
     @Override
