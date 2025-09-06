@@ -40,6 +40,7 @@ public abstract class AbstractParamsHandler<H, R> extends AbstractJobRequestHand
         // 设置 groupName
         SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
         reqDTO.setGroupName(snailJobProperties.getGroup());
+        reqDTO.setJobStatus(StatusEnum.YES.getStatus());
     }
 
     protected H setId(Long id) {

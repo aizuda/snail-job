@@ -36,18 +36,18 @@ public class UpdateClientInfoHttpRequestHandler extends PostHttpRequestHandler {
 
     @Override
     public SnailJobRpcResult doHandler(String content, UrlQuery query, HttpHeaders headers) {
-        SnailJobLog.LOCAL.debug("Client Update Request. content:[{}]", content);
+        SnailJobLog.LOCAL.info("Client Update Request. content:[{}]", content);
 
         SnailJobRequest retryRequest = JsonUtil.parseObject(content, SnailJobRequest.class);
         Object[] args = retryRequest.getArgs();
         UpdateClientInfoDTO clientInfoDTO = JsonUtil.parseObject(JsonUtil.toJsonString(args[0]), UpdateClientInfoDTO.class);
 
         try {
-            instanceManager.updateInstanceLabels(clientInfoDTO);
-            return new SnailJobRpcResult(StatusEnum.YES.getStatus(), "success", Boolean.TRUE, retryRequest.getReqId());
+            Boolean updated = instanceManager.updateInstanceLabels(clientInfoDTO);
+            SnailJobLog.LOCAL.info("Client Update Request. content:[{}]", content);
+            return new SnailJobRpcResult(StatusEnum.YES.getStatus(), "success", updated, retryRequest.getReqId());
         } catch (Exception e) {
             return new SnailJobRpcResult(StatusEnum.YES.getStatus(), e.getMessage(), Boolean.FALSE, retryRequest.getReqId());
-
         }
 
     }

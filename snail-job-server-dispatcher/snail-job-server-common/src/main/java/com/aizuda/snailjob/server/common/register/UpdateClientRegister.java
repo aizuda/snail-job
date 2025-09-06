@@ -32,14 +32,13 @@ public class UpdateClientRegister {
     private final InstanceManager instanceManager;
 
     public boolean updateClientInfo(UpdateClientInfoDTO clientInfoDTO) {
+        if (Objects.isNull(clientInfoDTO)){
+            return false;
+        }
         Set<InstanceLiveInfo> instanceALiveInfoSet = instanceManager.getInstanceALiveInfoSet(ServerRegister.NAMESPACE_ID, ServerRegister.GROUP_NAME);
         instanceALiveInfoSet = instanceALiveInfoSet.stream().filter(info -> !info.getNodeInfo().getHostId().equals(ServerRegister.CURRENT_CID)).collect(Collectors.toSet());
 
-        if (null != clientInfoDTO) {
-            // 更新本地标签
-            instanceManager.updateInstanceLabels(clientInfoDTO);
-        }
-
+        boolean result = true;
         if (!instanceALiveInfoSet.isEmpty()) {
             List<Boolean> results = new ArrayList<>();
             instanceALiveInfoSet.stream().map(info -> threadPoolExecutor.submit((Callable<Result>) () -> {
@@ -47,10 +46,10 @@ public class UpdateClientRegister {
                 return serverRpcClient.updateClientInfo(clientInfoDTO);
             })).forEach(future -> {
                 try {
-                    Result<Boolean> result = future.get(1, TimeUnit.SECONDS);
-                    if (StatusEnum.NO.getStatus() == result.getStatus()
-                            || (Objects.nonNull(result.getData()) && !result.getData())) {
-                        SnailJobLog.LOCAL.error("update client info error. msg:[{}]", result.getMessage());
+                    Result<Boolean> futureResult = future.get(1, TimeUnit.SECONDS);
+                    if (StatusEnum.NO.getStatus() == futureResult.getStatus()
+                            || (Objects.nonNull(futureResult.getData()) && !futureResult.getData())) {
+                        SnailJobLog.LOCAL.error("update client info error. msg:[{}]", futureResult.getMessage());
                         results.add(false);
                     } else {
                         results.add(true);
@@ -61,10 +60,10 @@ public class UpdateClientRegister {
                 }
             });
 
-            return results.stream().allMatch(Boolean::booleanValue);
+            result = results.stream().allMatch(Boolean::booleanValue);
         }
 
-        return true;
+        return result && instanceManager.updateInstanceLabels(clientInfoDTO);
     }
 
     private CommonRpcClient buildRpcClient(InstanceLiveInfo info) {

@@ -365,9 +365,9 @@ public class InstanceManager implements Lifecycle {
      *
      * @param clientInfoDTO 服务器节点
      */
-    public void updateInstanceLabels(UpdateClientInfoDTO clientInfoDTO) {
+    public Boolean updateInstanceLabels(UpdateClientInfoDTO clientInfoDTO) {
         if (clientInfoDTO == null) {
-            return;
+            return false;
         }
 
         InstanceKey instanceKey = InstanceKey.builder()
@@ -385,16 +385,20 @@ public class InstanceManager implements Lifecycle {
                             .eq(ServerNode::getHostId, clientInfoDTO.getHostId())
                             .eq(ServerNode::getHostIp, clientInfoDTO.getHostIp()));
             if (Objects.isNull(serverNode)) {
-                return;
+                return false;
             }
 
             registerOrUpdate(RegisterNodeInfoConverter.INSTANCE.toRegisterNodeInfo(serverNode));
-            return;
+            SnailJobLog.LOCAL.info("client update success. instance:[{}]", JsonUtil.toJson(INSTANCE_MAP.get(instanceKey)));
+            return true;
         }
         // 本地有数据则更新标签
         if (StrUtil.isNotBlank(clientInfoDTO.getLabels())){
             instanceLiveInfo.getNodeInfo().setLabels(clientInfoDTO.getLabels());
             instanceLiveInfo.getNodeInfo().setLabelMap(JsonUtil.parseHashMap(clientInfoDTO.getLabels()));
         }
+
+        SnailJobLog.LOCAL.info("client update success. instance:[{}]", JsonUtil.toJson(INSTANCE_MAP.get(instanceKey)));
+        return true;
     }
 }
