@@ -134,7 +134,7 @@ public class GrpcClientInvokeHandlerV2 implements InvocationHandler {
                 } else {
                     Assert.notNull(future, () -> new SnailJobServerException("completableFuture is null"));
                     try {
-                        GrpcResult grpcResult = future.get(Optional.ofNullable(executorTimeout).orElse(20),
+                        GrpcResult grpcResult = future.get(Optional.ofNullable(executorTimeout).orElse(5),
                                 TimeUnit.SECONDS);
 
                         Object obj = null;

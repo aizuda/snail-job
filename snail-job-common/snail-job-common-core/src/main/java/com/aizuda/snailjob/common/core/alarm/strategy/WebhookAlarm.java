@@ -35,7 +35,7 @@ public class WebhookAlarm extends AbstractAlarm<AlarmContext> {
 
         WebhookAttribute webhookAttribute = JsonUtil.parseObject(alarmContext.getNotifyAttribute(), WebhookAttribute.class);
         try {
-            WebhookMessage webhookMessage = WebhookMessage.builder().text(alarmContext.getTitle()).build();
+            WebhookMessage webhookMessage = WebhookMessage.builder().title(alarmContext.getTitle()).text(alarmContext.getText()).build();
 
             HttpRequest post = HttpUtil.createPost(webhookAttribute.getWebhookUrl());
             HttpRequest request = post.body(JsonUtil.toJsonString(webhookMessage), ContentTypeEnum.valueOf(webhookAttribute.getContentType()).getMediaType().toString())
@@ -56,6 +56,7 @@ public class WebhookAlarm extends AbstractAlarm<AlarmContext> {
     @Builder
     private static class WebhookMessage {
 
+        private String title;
         private String text;
     }
 

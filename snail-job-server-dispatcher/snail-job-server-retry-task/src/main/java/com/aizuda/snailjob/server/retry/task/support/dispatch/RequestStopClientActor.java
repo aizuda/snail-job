@@ -83,6 +83,7 @@ public class RequestStopClientActor extends AbstractActor {
                 .failRetry(true)
                 .retryTimes(3)
                 .retryInterval(1)
+                .executorTimeout(1)
                 .client(RetryRpcClient.class)
                 .build();
     }

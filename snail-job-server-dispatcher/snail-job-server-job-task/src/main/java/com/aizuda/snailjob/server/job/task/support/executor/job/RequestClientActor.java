@@ -202,6 +202,7 @@ public class RequestClientActor extends AbstractActor {
                 .routeKey(realJobExecutorDTO.getRouteKey())
                 .failRetry(maxRetryTimes > 0 && !retry)
                 .retryTimes(maxRetryTimes)
+                .executorTimeout(3)
                 .retryInterval(realJobExecutorDTO.getRetryInterval())
                 .retryListener(new JobExecutorRetryListener(realJobExecutorDTO, jobTaskMapper))
                 .client(JobRpcClient.class)
