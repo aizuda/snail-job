@@ -5,13 +5,10 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.client.common.config.SnailJobProperties;
 import com.aizuda.snailjob.common.core.context.SnailSpringContext;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -91,15 +88,10 @@ public final class ClientInfo {
      */
     public static Integer getClientPort() {
         SnailJobProperties snailJobProperties = SnailSpringContext.getBean(SnailJobProperties.class);
-        ServerProperties serverProperties = SnailSpringContext.getBean(ServerProperties.class);
 
         Integer port = snailJobProperties.getPort();
-        // 获取客户端指定的端口
-        if (Objects.isNull(port)) {
-            port = Optional.ofNullable(serverProperties.getPort()).orElse(PORT);
-            snailJobProperties.setPort(port);
-            SnailJobLog.LOCAL.info("snail job client port :{}", port);
-        } else if (port.equals(RANDOM_CLIENT_PORT)) {
+        // 如果端口设置为随机端口，则获取可用端口
+        if (port.equals(RANDOM_CLIENT_PORT)) {
             // 使用随机算法获取端口
             PORT_LOCK.lock();
             try {
