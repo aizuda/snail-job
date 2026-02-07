@@ -148,6 +148,8 @@ public interface SystemConstants {
         String OPENAPI_TRIGGER_JOB_V2 = "/api/job/trigger";
         String OPENAPI_DELETE_JOB_V2 = "/api/job/delete";
         String OPENAPI_UPDATE_JOB_STATUS_V2 = "/api/job/update/status";
+        String OPENAPI_EXISTS_JOB_BY_ID = "/api/job/exists";
+
         @Deprecated
         String OPENAPI_GET_JOB_DETAIL = "/api/job/getJobDetail";
         @Deprecated
@@ -157,6 +159,16 @@ public interface SystemConstants {
         @Deprecated
         String OPENAPI_UPDATE_JOB_STATUS = "/api/job/updateJobStatus";
         // ==================================job ========================//
+
+        // ==================================job bizId 接口 ========================//
+        String OPENAPI_ADD_JOB_BY_BIZ_ID = "/api/job/bizId/add";
+        String OPENAPI_UPDATE_JOB_BY_BIZ_ID = "/api/job/bizId/update";
+        String OPENAPI_GET_JOB_DETAIL_BY_BIZ_ID = "/api/job/bizId/detail";
+        String OPENAPI_TRIGGER_JOB_BY_BIZ_ID = "/api/job/bizId/trigger";
+        String OPENAPI_DELETE_JOB_BY_BIZ_IDS = "/api/job/bizId/delete";
+        String OPENAPI_UPDATE_JOB_STATUS_BY_BIZ_ID = "/api/job/bizId/updateStatus";
+        String OPENAPI_EXISTS_JOB_BY_BIZ_ID = "/api/job/bizId/exists";
+        // ==================================job bizId 接口 ========================//
 
         // ==================================job batch ========================//
         @Deprecated
@@ -174,12 +186,21 @@ public interface SystemConstants {
         @Deprecated
         String OPENAPI_TRIGGER_WORKFLOW = "/api/job/triggerWorkFlow";
         String OPENAPI_TRIGGER_WORKFLOW_V2 = "/api/workflow/trigger";
+        @Deprecated
         String OPENAPI_UPDATE_WORKFLOW_STATUS = "/api/job/updateWorkFlowStatus";
         String OPENAPI_UPDATE_WORKFLOW_STATUS_V2 = "/api/workflow/update/status";
         @Deprecated
         String OPENAPI_DELETE_WORKFLOW = "/api/job/deleteWorkFlow";
         String OPENAPI_DELETE_WORKFLOW_V2 = "/api/workflow/delete";
+        String OPENAPI_EXISTS_WORKFLOW_BY_ID = "/api/workflow/exists";
         // ==================================workflow ========================//
+
+        // ==================================workflow bizId 接口 ========================//
+        String OPENAPI_TRIGGER_WORKFLOW_BY_BIZ_ID = "/api/workflow/bizId/trigger";
+        String OPENAPI_DELETE_WORKFLOW_BY_BIZ_IDS = "/api/workflow/bizId/delete";
+        String OPENAPI_UPDATE_WORKFLOW_STATUS_BY_BIZ_ID = "/api/workflow/bizId/updateStatus";
+        String OPENAPI_EXISTS_WORKFLOW_BY_BIZ_ID = "/api/workflow/bizId/exists";
+        // ==================================workflow bizId 接口 ========================//
 
         // ==================================retry ========================//
         String OPENAPI_QUERY_RETRY = "/api/retry/query";

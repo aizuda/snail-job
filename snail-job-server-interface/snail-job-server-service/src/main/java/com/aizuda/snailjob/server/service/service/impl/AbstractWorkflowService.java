@@ -7,7 +7,11 @@ import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.model.request.WorkflowStatusUpdateBizIdRequest;
+import com.aizuda.snailjob.model.request.WorkflowTriggerBizIdRequest;
+import com.aizuda.snailjob.model.request.base.StatusUpdateRequest;
 import com.aizuda.snailjob.model.request.base.WorkflowTriggerRequest;
+import com.aizuda.snailjob.model.response.WorkflowExistsResponse;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
@@ -15,7 +19,6 @@ import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.job.task.dto.WorkflowTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.prepare.workflow.TerminalWorkflowPrepareHandler;
 import com.aizuda.snailjob.server.service.convert.WorkflowTaskConverter;
-import com.aizuda.snailjob.model.request.base.StatusUpdateRequest;
 import com.aizuda.snailjob.server.service.kit.WorkflowKit;
 import com.aizuda.snailjob.server.service.service.WorkflowService;
 import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
@@ -28,6 +31,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -53,6 +57,10 @@ public abstract class AbstractWorkflowService implements WorkflowService {
         Workflow workflow = workflowMapper.selectById(requestDTO.getId());
         Assert.notNull(workflow, "workflow does not exist");
 
+        return doUpdateWorkFlowStatus(requestDTO, workflow);
+    }
+
+    private boolean doUpdateWorkFlowStatus(StatusUpdateRequest requestDTO, Workflow workflow) {
         // 直接幂等
         if (Objects.equals(requestDTO.getStatus(), workflow.getWorkflowStatus())) {
             return true;
@@ -75,6 +83,10 @@ public abstract class AbstractWorkflowService implements WorkflowService {
         Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
         Assert.isTrue(workflow.getNamespaceId().equals(getNamespaceId()), () -> new SnailJobServerException("namespace id not match."));
 
+        return doTriggerWorkFlow(request, workflow);
+    }
+
+    private boolean doTriggerWorkFlow(WorkflowTriggerRequest request, Workflow workflow) {
         // 将字符串反序列化为 Set
         if (StrUtil.isNotBlank(workflow.getGroupName())) {
             Set<String> namesSet = new HashSet<>(Arrays.asList(workflow.getGroupName().split(", ")));
@@ -120,6 +132,10 @@ public abstract class AbstractWorkflowService implements WorkflowService {
                         .in(Workflow::getId, ids)
         ), () -> new SnailJobServerException("Failed to delete workflow task, please check if the task status is closed"));
 
+        return doDeleteWorkflow(ids);
+    }
+
+    private boolean doDeleteWorkflow(Set<Long> ids) {
         List<JobSummary> jobSummaries = jobSummaryMapper.selectList(new LambdaQueryWrapper<JobSummary>()
                 .select(JobSummary::getId)
                 .in(JobSummary::getBusinessId, ids)
@@ -143,7 +159,99 @@ public abstract class AbstractWorkflowService implements WorkflowService {
         return true;
     }
 
+    @Override
+    public WorkflowExistsResponse existsWorkflowById(Long id) {
+        Workflow workflow = workflowMapper.selectOne(new LambdaQueryWrapper<Workflow>()
+                .eq(Workflow::getNamespaceId, getNamespaceId())
+                .eq(Workflow::getId, id)
+        );
+        return toWorkflowExistsResponse(workflow);
+    }
+
+    // ==================== bizId 接口实现 ====================
+
+    @Override
+    public boolean deleteWorkflowByBizIds(Set<String> bizIds) {
+
+        List<Workflow> workflows = fetchByBizIds(bizIds, getNamespaceId());
+        Assert.isTrue(bizIds.size() == workflows.size(),
+                () -> new SnailJobServerException("Failed to delete workflow task, please check if the task status is closed"));
+        Set<Long> ids = workflows.stream().map(Workflow::getId).collect(Collectors.toSet());
+
+        return doDeleteWorkflow(ids);
+    }
+
+    @Override
+    public boolean triggerWorkflowByBizId(WorkflowTriggerBizIdRequest request) {
+
+        Workflow workflow = fetchByBizId(request.getBizId(), getNamespaceId());
+        Assert.notNull(workflow, () -> new SnailJobServerException("workflow can not be null."));
+        Assert.isTrue(workflow.getNamespaceId().equals(getNamespaceId()), () -> new SnailJobServerException("namespace id not match."));
+
+        WorkflowTriggerRequest dto = new WorkflowTriggerRequest();
+        dto.setWorkflowId(workflow.getId());
+        dto.setTmpWfContext(request.getTmpWfContext());
+        return doTriggerWorkFlow(dto, workflow);
+    }
+
+    @Override
+    public boolean updateWorkflowStatusByBizId(WorkflowStatusUpdateBizIdRequest request) {
+        Assert.notNull(StatusEnum.of(request.getStatus()), () -> new SnailJobServerException("Status cannot be empty"));
+        String namespaceId = getNamespaceId();
+        Workflow workflow = fetchByBizId(request.getBizId(), namespaceId);
+        Assert.notNull(workflow, "workflow does not exist");
+
+        StatusUpdateRequest requestDTO = new StatusUpdateRequest();
+        requestDTO.setId(workflow.getId());
+        requestDTO.setStatus(request.getStatus());
+        return doUpdateWorkFlowStatus(requestDTO, workflow);
+    }
+
+    @Override
+    public WorkflowExistsResponse existsWorkflowByBizId(String bizId) {
+        Workflow workflow = fetchByBizId(bizId, getNamespaceId());
+        return toWorkflowExistsResponse(workflow);
+    }
 
     protected abstract String getNamespaceId();
+
+
+    /**
+     * 根据 bizId 查询 Workflow
+     */
+    private Workflow fetchByBizId(String bizId, String namespaceId) {
+        return workflowMapper.selectOne(new LambdaQueryWrapper<Workflow>()
+                .eq(Workflow::getNamespaceId, namespaceId)
+                .in(Workflow::getBizId, bizId)
+        );
+    }
+
+    /**
+     * 根据 bizIds 批量查询 Workflow
+     *
+     * @param bizIds bizId 集合
+     */
+    private List<Workflow> fetchByBizIds(Set<String> bizIds, String namespaceId) {
+        return workflowMapper.selectList(new LambdaQueryWrapper<Workflow>()
+                .eq(Workflow::getNamespaceId, namespaceId)
+                .in(Workflow::getBizId, bizIds)
+        );
+    }
+
+    /**
+     * 将 Job 转换为 WorkflowExistsResponse
+     */
+    private WorkflowExistsResponse toWorkflowExistsResponse(Workflow job) {
+        if (Objects.isNull(job)) {
+            return null;
+        }
+        WorkflowExistsResponse response = new WorkflowExistsResponse();
+        response.setGroupName(job.getGroupName());
+        response.setId(job.getId());
+        response.setBizId(job.getBizId());
+        response.setWorkflowStatus(job.getWorkflowStatus());
+        response.setVersion(job.getVersion());
+        return response;
+    }
 
 }

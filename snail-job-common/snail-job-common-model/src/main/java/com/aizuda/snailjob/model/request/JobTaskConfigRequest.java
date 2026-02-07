@@ -1,5 +1,8 @@
 package com.aizuda.snailjob.model.request;
 
+import com.aizuda.snailjob.model.validate.group.Add;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 /**
@@ -14,6 +17,11 @@ public class JobTaskConfigRequest {
      * 任务ID
      */
     private Long jobId;
+
+    /**
+     * 任务业务ID
+     */
+    private String jobBizId;
 
     /**
      * 任务名称

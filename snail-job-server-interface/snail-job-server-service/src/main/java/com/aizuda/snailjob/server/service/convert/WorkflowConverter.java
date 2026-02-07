@@ -77,6 +77,7 @@ public interface WorkflowConverter {
         if (WorkflowNodeTypeEnum.JOB_TASK.getType() == workflowNode.getNodeType()) {
             JobTaskConfigRequest jobTaskConfigRequest = new JobTaskConfigRequest();
             jobTaskConfigRequest.setJobId(workflowNode.getJobId());
+            jobTaskConfigRequest.setJobBizId(workflowNode.getJobBizId());
             return jobTaskConfigRequest;
         }
 

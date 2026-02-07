@@ -44,6 +44,11 @@ public class WorkflowNode extends CreateUpdateDt {
     private Long jobId;
 
     /**
+     * 任务业务ID
+     */
+    private String jobBizId;
+
+    /**
      * 工作流ID
      */
     private Long workflowId;

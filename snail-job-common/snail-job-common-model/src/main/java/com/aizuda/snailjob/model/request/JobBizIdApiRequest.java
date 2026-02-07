@@ -1,11 +1,10 @@
-package com.aizuda.snailjob.model.request.base;
+package com.aizuda.snailjob.model.request;
 
 import com.aizuda.snailjob.common.core.enums.ExecutorTypeEnum;
 import com.aizuda.snailjob.common.core.enums.JobBlockStrategyEnum;
 import com.aizuda.snailjob.common.core.enums.JobTaskTypeEnum;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.model.validate.group.Add;
-import com.aizuda.snailjob.model.validate.group.Update;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -22,10 +21,14 @@ import java.util.Set;
  * @date 2025-07-05
  */
 @Data
-public class JobRequest {
+public class JobBizIdApiRequest {
 
-    @NotNull(message = "id cannot be null", groups = Update.class)
-    private Long id;
+    /**
+     * 业务ID
+     */
+    @NotNull(message = "bizId cannot be null")
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens", groups = Add.class)
+    private String bizId;
 
     /**
      * 组名称
@@ -33,12 +36,6 @@ public class JobRequest {
     @NotBlank(message = "groupName cannot be null")
     @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens")
     private String groupName;
-
-    /**
-     * 业务ID
-     */
-    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens", groups = Add.class)
-    private String bizId;
 
     /**
      * 名称

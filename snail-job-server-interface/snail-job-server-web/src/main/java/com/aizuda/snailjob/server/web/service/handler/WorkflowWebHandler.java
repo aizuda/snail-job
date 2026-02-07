@@ -167,6 +167,7 @@ public class WorkflowWebHandler {
                     Assert.notNull(jobTask, () -> new SnailJobServerException("Configuration information for [{}] cannot be empty", nodeInfo.getNodeName()));
                     Assert.notNull(jobTask.getJobId(), () -> new SnailJobServerException("Associated task for [{}] cannot be empty", nodeInfo.getNodeName()));
                     workflowNode.setJobId(jobTask.getJobId());
+                    workflowNode.setJobBizId(jobTask.getJobBizId());
                 }
 
                 Assert.isTrue(1 == workflowNodeMapper.insert(workflowNode),

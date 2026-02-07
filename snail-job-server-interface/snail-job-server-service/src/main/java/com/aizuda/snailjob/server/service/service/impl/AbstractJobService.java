@@ -3,13 +3,18 @@ package com.aizuda.snailjob.server.service.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.HashUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
+import com.aizuda.snailjob.model.request.JobBizIdApiRequest;
+import com.aizuda.snailjob.model.request.JobTriggerBizIdRequest;
+import com.aizuda.snailjob.model.request.StatusUpdateBizIdRequest;
 import com.aizuda.snailjob.model.request.base.JobRequest;
-import com.aizuda.snailjob.model.response.base.JobResponse;
 import com.aizuda.snailjob.model.request.base.JobTriggerRequest;
 import com.aizuda.snailjob.model.request.base.StatusUpdateRequest;
+import com.aizuda.snailjob.model.response.JobExistsResponse;
+import com.aizuda.snailjob.model.response.base.JobResponse;
 import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.enums.JobTaskExecutorSceneEnum;
 import com.aizuda.snailjob.server.common.enums.SyetemTaskTypeEnum;
@@ -20,7 +25,7 @@ import com.aizuda.snailjob.server.job.task.dto.JobTaskPrepareDTO;
 import com.aizuda.snailjob.server.job.task.support.JobTaskConverter;
 import com.aizuda.snailjob.server.job.task.support.prepare.job.TerminalJobPrepareHandler;
 import com.aizuda.snailjob.server.service.convert.JobConverter;
-import com.aizuda.snailjob.server.service.dto.*;
+import com.aizuda.snailjob.server.service.dto.CalculateNextTriggerAtDTO;
 import com.aizuda.snailjob.server.service.kit.JobKit;
 import com.aizuda.snailjob.server.service.kit.TriggerIntervalKit;
 import com.aizuda.snailjob.server.service.service.JobService;
@@ -28,7 +33,9 @@ import com.aizuda.snailjob.template.datasource.access.AccessTemplate;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.JobSummaryMapper;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
-import com.aizuda.snailjob.template.datasource.persistence.po.*;
+import com.aizuda.snailjob.template.datasource.persistence.po.GroupConfig;
+import com.aizuda.snailjob.template.datasource.persistence.po.Job;
+import com.aizuda.snailjob.template.datasource.persistence.po.JobSummary;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +44,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -65,6 +73,10 @@ public abstract class AbstractJobService implements JobService {
         Job job = jobMapper.selectById(jobTrigger.getJobId());
         Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
 
+        return doTrigger(jobTrigger, job);
+    }
+
+    private boolean doTrigger(JobTriggerRequest jobTrigger, Job job) {
         long count = accessTemplate.getGroupConfigAccess().count(new LambdaQueryWrapper<GroupConfig>()
                 .eq(GroupConfig::getGroupName, job.getGroupName())
                 .eq(GroupConfig::getNamespaceId, job.getNamespaceId())
@@ -103,6 +115,11 @@ public abstract class AbstractJobService implements JobService {
                         .in(Job::getId, ids)
         ).size(), () -> new SnailJobServerException("Failed to delete the scheduled task. Ensure the task is closed, and confirm whether the job exists."));
 
+        return doDeleteJobs(ids, namespaceId);
+    }
+
+    private boolean doDeleteJobs(Set<Long> ids, String namespaceId) {
+
         Assert.isTrue(workflowNodeMapper.selectJobUsedInNonLatestWorkflow(ids).isEmpty(),
                 () -> new SnailJobServerException("Failed to delete scheduled task, please check if the task is used in the workflow"));
 
@@ -129,12 +146,16 @@ public abstract class AbstractJobService implements JobService {
     @Override
     public boolean updateJob(JobRequest jobRequest) {
         Assert.notNull(jobRequest.getId(), () -> new SnailJobServerException("ID cannot be empty"));
-        if (Objects.nonNull(jobRequest.getJobStatus())){
+        if (Objects.nonNull(jobRequest.getJobStatus())) {
             Assert.notNull(StatusEnum.of(jobRequest.getJobStatus()), () -> new SnailJobServerException("Invalid status parameter"));
         }
         Job job = jobMapper.selectById(jobRequest.getId());
         Assert.notNull(job, () -> new SnailJobServerException("Job is null, update failed"));
 
+        return doUpdateJob(jobRequest, job);
+    }
+
+    private boolean doUpdateJob(JobRequest jobRequest, Job job) {
         // 前置校验
         updateJobPreValidator(jobRequest);
 
@@ -191,6 +212,11 @@ public abstract class AbstractJobService implements JobService {
         job.setNextTriggerAt(JobKit.calculateNextTriggerAt(job.getTriggerType(), job.getTriggerInterval(), DateUtils.toNowMilli()));
         job.setId(null);
         job.setNamespaceId(getNamespaceId());
+
+        if (StrUtil.isBlank(job.getBizId())){
+            job.setBizId(IdUtil.getSnowflakeNextIdStr());
+        }
+
         // 子类填充属性
         addJobPopulate(job, request);
         Assert.isTrue(1 == jobMapper.insert(job), () -> new SnailJobServerException("Adding new task failed"));
@@ -202,6 +228,10 @@ public abstract class AbstractJobService implements JobService {
         Assert.notNull(StatusEnum.of(requestDTO.getStatus()), () -> new SnailJobServerException("Status cannot be empty"));
         Job job = jobMapper.selectById(requestDTO.getId());
         Assert.notNull(job, () -> new SnailJobServerException("update job status failed"));
+        return doUpdateJobStatus(requestDTO, job);
+    }
+
+    private Boolean doUpdateJobStatus(StatusUpdateRequest requestDTO, Job job) {
         // 直接幂等
         if (Objects.equals(requestDTO.getStatus(), job.getJobStatus())) {
             return true;
@@ -231,6 +261,112 @@ public abstract class AbstractJobService implements JobService {
         }
     }
 
+    @Override
+    public JobExistsResponse existsJobById(Long id) {
+        Job job = jobMapper.selectById(id);
+        if (Objects.isNull(job)) {
+            return null;
+        }
+        return JobConverter.INSTANCE.convert(job);
+    }
+
+    @Override
+    public Long addJobByBizId(JobBizIdApiRequest request) {
+        Job job = fetchByBizId(request.getBizId(), getNamespaceId());
+        Assert.isNull(job, () -> new SnailJobServerException("bizId already exists"));
+
+        JobRequest jobRequest = JobConverter.INSTANCE.convert(request);
+        return addJob(jobRequest);
+    }
+
+
+    @Override
+    public <T extends JobResponse> T getJobByBizId(String bizId, Class<T> clazz) {
+        String namespaceId = getNamespaceId();
+        Job job = fetchByBizId(bizId, namespaceId);
+        if (Objects.isNull(job)) {
+            return null;
+        }
+        try {
+            T instance = clazz.getDeclaredConstructor().newInstance();
+            JobConverter.INSTANCE.fillCommonFields(job, instance);
+            getJobByIdAfter(instance, job);
+            return instance;
+        } catch (Exception e) {
+            throw new SnailJobServerException("Failed to get job by bizId [{}]", bizId, e);
+        }
+    }
+
+    @Override
+    public boolean deleteJobByBizIds(Set<String> bizIds) {
+        String namespaceId = getNamespaceId();
+
+        List<Job> jobs = fetchByBizIds(bizIds, namespaceId);
+
+        Assert.isTrue(bizIds.size() == jobs.size(), () ->
+                new SnailJobServerException("Failed to delete the scheduled task. Ensure the task is closed, and confirm whether the job exists.")
+        );
+
+        Set<Long> ids = jobs.stream().map(Job::getId).collect(Collectors.toSet());
+
+        return doDeleteJobs(ids, getNamespaceId());
+    }
+
+    @Override
+    public boolean updateJobByBizId(JobBizIdApiRequest jobBizIdApiRequest) {
+
+        Assert.notBlank(jobBizIdApiRequest.getBizId(), () -> new SnailJobServerException("bizId cannot be empty"));
+        if (Objects.nonNull(jobBizIdApiRequest.getJobStatus())) {
+            Assert.notNull(StatusEnum.of(jobBizIdApiRequest.getJobStatus()), () -> new SnailJobServerException("Invalid status parameter"));
+        }
+        String namespaceId = getNamespaceId();
+        Job job = fetchByBizId(jobBizIdApiRequest.getBizId(), namespaceId);
+        Assert.notNull(job, () -> new SnailJobServerException("Job is null, update failed"));
+
+        JobRequest jobRequest = JobConverter.INSTANCE.convert(jobBizIdApiRequest);
+        jobRequest.setId(job.getId());
+        return doUpdateJob(jobRequest, job);
+    }
+
+    @Override
+    public Boolean triggerByBizId(JobTriggerBizIdRequest request) {
+        String namespaceId = getNamespaceId();
+
+        Job job = fetchByBizId(request.getBizId(), namespaceId);
+
+        Assert.notNull(job, () -> new SnailJobServerException("job can not be null."));
+
+        JobTriggerRequest jobTrigger = new JobTriggerRequest();
+        jobTrigger.setJobId(job.getId());
+        jobTrigger.setTmpArgsStr(request.getTmpArgsStr());
+        return doTrigger(jobTrigger, job);
+    }
+
+    @Override
+    public Boolean updateJobStatusByBizId(StatusUpdateBizIdRequest request) {
+        Assert.notNull(StatusEnum.of(request.getStatus()), () -> new SnailJobServerException("Status cannot be empty"));
+
+        String namespaceId = getNamespaceId();
+        Job job = fetchByBizId(request.getBizId(), namespaceId);
+
+        Assert.notNull(job, () -> new SnailJobServerException("update job status failed"));
+
+        StatusUpdateRequest requestDTO = new StatusUpdateRequest();
+        requestDTO.setId(job.getId());
+        requestDTO.setStatus(request.getStatus());
+        return doUpdateJobStatus(requestDTO, job);
+    }
+
+    @Override
+    public JobExistsResponse existsJobByBizId(String bizId) {
+        Job job = fetchByBizId(bizId, getNamespaceId());
+        if (Objects.isNull(job)) {
+            return null;
+        }
+        return JobConverter.INSTANCE.convert(job);
+    }
+
+
     protected abstract void getJobByIdAfter(JobResponse responseBaseDTO, Job job);
 
     protected abstract void updateJobPreValidator(JobRequest jobRequest);
@@ -244,4 +380,30 @@ public abstract class AbstractJobService implements JobService {
     }
 
     protected abstract void addJobPreValidator(JobRequest request);
+
+    /**
+     * 根据 bizId 查询 Job
+     */
+    private Job fetchByBizId(String bizId, String namespaceId) {
+        return jobMapper.selectOne(new LambdaQueryWrapper<Job>()
+                .eq(Job::getNamespaceId, namespaceId)
+                .eq(Job::getBizId, bizId)
+        );
+    }
+
+    /**
+     * 根据 bizIds 批量查询 Job
+     *
+     * @param bizIds bizId 集合
+     */
+    private List<Job> fetchByBizIds(Set<String> bizIds, String namespaceId) {
+        return jobMapper.selectList(
+                new LambdaQueryWrapper<Job>().select(Job::getId)
+                        .eq(Job::getNamespaceId, namespaceId)
+                        .eq(Job::getJobStatus, StatusEnum.NO.getStatus())
+                        .in(Job::getBizId, bizIds)
+        );
+    }
+
+
 }
