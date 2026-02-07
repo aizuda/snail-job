@@ -20,7 +20,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <revision>1.9.0</revision>
+        <revision>1.10.0-bizId</revision>
         <skipTests>true</skipTests>
 
         <hutool.version>5.8.40</hutool.version>

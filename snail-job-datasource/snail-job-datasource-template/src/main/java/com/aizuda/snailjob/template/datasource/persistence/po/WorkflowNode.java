@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @TableName("sj_workflow_node")
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(callSuper = true)
 public class WorkflowNode extends CreateUpdateDt {
 
     /**
@@ -52,6 +52,11 @@ public class WorkflowNode extends CreateUpdateDt {
      * 工作流ID
      */
     private Long workflowId;
+
+    /**
+     * 工作流ID
+     */
+    private String workflowBizId;
 
     /**
      * 1、任务节点 2、条件节点 3、回调节点
