@@ -28,7 +28,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link ClusterAddBizIdHandler}
      */
-    public static ClusterAddBizIdHandler addClusterJobByBizId(String bizId) {
+    public static ClusterAddBizIdHandler addClusterJob(String bizId) {
         return new ClusterAddBizIdHandler(bizId);
     }
 
@@ -38,7 +38,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link BroadcastAddBizIdHandler}
      */
-    public static BroadcastAddBizIdHandler addBroadcastJobByBizId(String bizId) {
+    public static BroadcastAddBizIdHandler addBroadcastJob(String bizId) {
         return new BroadcastAddBizIdHandler(bizId);
     }
 
@@ -48,7 +48,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link ShardingAddBizIdHandler}
      */
-    public static ShardingAddBizIdHandler addShardingJobByBizId(String bizId) {
+    public static ShardingAddBizIdHandler addShardingJob(String bizId) {
         return new ShardingAddBizIdHandler(bizId);
     }
 
@@ -58,7 +58,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link MapAddBizIdHandler}
      */
-    public static MapAddBizIdHandler addMapJobByBizId(String bizId) {
+    public static MapAddBizIdHandler addMapJob(String bizId) {
         return new MapAddBizIdHandler(bizId);
     }
 
@@ -68,7 +68,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link MapReduceAddBizIdHandler}
      */
-    public static MapReduceAddBizIdHandler addMapReduceJobByBizId(String bizId) {
+    public static MapReduceAddBizIdHandler addMapReduceJob(String bizId) {
         return new MapReduceAddBizIdHandler(bizId);
     }
 
@@ -78,7 +78,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link ClusterUpdateBizIdHandler}
      */
-    public static ClusterUpdateBizIdHandler updateClusterJobByBizId(String bizId) {
+    public static ClusterUpdateBizIdHandler updateClusterJob(String bizId) {
         return new ClusterUpdateBizIdHandler(bizId);
     }
 
@@ -88,7 +88,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link BroadcastUpdateBizIdHandler}
      */
-    public static BroadcastUpdateBizIdHandler updateBroadcastJobByBizId(String bizId) {
+    public static BroadcastUpdateBizIdHandler updateBroadcastJob(String bizId) {
         return new BroadcastUpdateBizIdHandler(bizId);
     }
 
@@ -98,7 +98,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link ShardingUpdateBizIdHandler}
      */
-    public static ShardingUpdateBizIdHandler updateShardingJobByBizId(String bizId) {
+    public static ShardingUpdateBizIdHandler updateShardingJob(String bizId) {
         return new ShardingUpdateBizIdHandler(bizId);
     }
 
@@ -108,7 +108,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link MapUpdateBizIdHandler}
      */
-    public static MapUpdateBizIdHandler updateMapJobByBizId(String bizId) {
+    public static MapUpdateBizIdHandler updateMapJob(String bizId) {
         return new MapUpdateBizIdHandler(bizId);
     }
 
@@ -118,7 +118,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link MapReduceUpdateBizIdHandler}
      */
-    public static MapReduceUpdateBizIdHandler updateMapReduceJobByBizId(String bizId) {
+    public static MapReduceUpdateBizIdHandler updateMapReduceJob(String bizId) {
         return new MapReduceUpdateBizIdHandler(bizId);
     }
 
@@ -128,7 +128,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link RequestQueryBizIdHandler}
      */
-    public static RequestQueryBizIdHandler getJobDetailByBizId(String bizId) {
+    public static RequestQueryBizIdHandler getJobDetail(String bizId) {
         return new RequestQueryBizIdHandler(bizId);
     }
 
@@ -138,7 +138,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link ClusterTriggerBizIdHandler}
      */
-    public static ClusterTriggerBizIdHandler triggerClusterJobByBizId(String bizId) {
+    public static ClusterTriggerBizIdHandler triggerClusterJob(String bizId) {
         return new ClusterTriggerBizIdHandler(bizId);
     }
 
@@ -148,7 +148,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link BroadcastTriggerBizIdHandler}
      */
-    public static BroadcastTriggerBizIdHandler triggerBroadcastJobByBizId(String bizId) {
+    public static BroadcastTriggerBizIdHandler triggerBroadcastJob(String bizId) {
         return new BroadcastTriggerBizIdHandler(bizId);
     }
 
@@ -158,7 +158,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link ShardingTriggerBizIdHandler}
      */
-    public static ShardingTriggerBizIdHandler triggerShardingJobByBizId(String bizId) {
+    public static ShardingTriggerBizIdHandler triggerShardingJob(String bizId) {
         return new ShardingTriggerBizIdHandler(bizId);
     }
 
@@ -168,7 +168,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link MapTriggerBizIdHandler}
      */
-    public static MapTriggerBizIdHandler triggerMapJobByBizId(String bizId) {
+    public static MapTriggerBizIdHandler triggerMapJob(String bizId) {
         return new MapTriggerBizIdHandler(bizId);
     }
 
@@ -178,7 +178,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link MapReduceTriggerBizIdHandler}
      */
-    public static MapReduceTriggerBizIdHandler triggerMapReduceJobByBizId(String bizId) {
+    public static MapReduceTriggerBizIdHandler triggerMapReduceJob(String bizId) {
         return new MapReduceTriggerBizIdHandler(bizId);
     }
 
@@ -188,7 +188,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link UpdateJobStatusBizIdHandler}
      */
-    public static UpdateJobStatusBizIdHandler updateJobStatusByBizId(String bizId) {
+    public static UpdateJobStatusBizIdHandler updateJobStatus(String bizId) {
         return new UpdateJobStatusBizIdHandler(bizId);
     }
 
@@ -198,7 +198,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizIds 待删除任务BizId集合
      * @return {@link DeleteJobBizIdHandler}
      */
-    public static DeleteJobBizIdHandler deleteJobByBizIds(Set<String> bizIds) {
+    public static DeleteJobBizIdHandler deleteJob(Set<String> bizIds) {
         return new DeleteJobBizIdHandler(bizIds);
     }
 
@@ -208,7 +208,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link TriggerWorkflowBizIdHandler}
      */
-    public static TriggerWorkflowBizIdHandler triggerWorkflowByBizId(String bizId) {
+    public static TriggerWorkflowBizIdHandler triggerWorkflow(String bizId) {
         return new TriggerWorkflowBizIdHandler(bizId);
     }
 
@@ -218,7 +218,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link UpdateWorkflowStatusBizIdHandler}
      */
-    public static UpdateWorkflowStatusBizIdHandler updateWorkflowStatusByBizId(String bizId) {
+    public static UpdateWorkflowStatusBizIdHandler updateWorkflowStatus(String bizId) {
         return new UpdateWorkflowStatusBizIdHandler(bizId);
     }
 
@@ -228,7 +228,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizIds 待删除工作流BizId集合
      * @return {@link DeleteWorkflowBizIdsHandler}
      */
-    public static DeleteWorkflowBizIdsHandler deleteWorkflowByBizIds(Set<String> bizIds) {
+    public static DeleteWorkflowBizIdsHandler deleteWorkflow(Set<String> bizIds) {
         return new DeleteWorkflowBizIdsHandler(bizIds);
     }
 
