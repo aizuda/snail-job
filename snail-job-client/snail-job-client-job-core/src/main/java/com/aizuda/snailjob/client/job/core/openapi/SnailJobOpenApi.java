@@ -7,6 +7,8 @@ import com.aizuda.snailjob.client.job.core.handler.query.RequestQueryHandler;
 import com.aizuda.snailjob.client.job.core.handler.query.RequestQueryJobBatchHandler;
 import com.aizuda.snailjob.client.job.core.handler.query.RequestQueryWorkflowBatchHandler;
 import com.aizuda.snailjob.client.job.core.handler.trigger.*;
+import com.aizuda.snailjob.client.job.core.handler.query.ExistsJobHandler;
+import com.aizuda.snailjob.client.job.core.handler.query.ExistsWorkflowHandler;
 import com.aizuda.snailjob.client.job.core.handler.update.*;
 
 import java.util.Set;
@@ -143,6 +145,26 @@ public final class SnailJobOpenApi {
      */
     public static RequestQueryWorkflowBatchHandler getWorkflowBatchDetail(Long workflowBatchId){
         return new RequestQueryWorkflowBatchHandler(workflowBatchId);
+    }
+
+    /**
+     * 检查任务是否存在
+     *
+     * @param jobId 任务ID
+     * @return {@link ExistsJobHandler}
+     */
+    public static ExistsJobHandler existsJob(Long jobId) {
+        return new ExistsJobHandler(jobId);
+    }
+
+    /**
+     * 检查工作流是否存在
+     *
+     * @param workflowId 工作流ID
+     * @return {@link ExistsWorkflowHandler}
+     */
+    public static ExistsWorkflowHandler existsWorkflow(Long workflowId) {
+        return new ExistsWorkflowHandler(workflowId);
     }
 
     /**

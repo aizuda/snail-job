@@ -15,7 +15,7 @@ import java.util.Map;
  * Similar to AbstractTriggerHandler but uses JobTriggerBizIdRequest.
  *
  * @author opensnail
- * @since sj_1.2.0
+ * @since 1.10.0
  */
 public abstract class AbstractTriggerBizIdHandler<H, R> extends AbstractJobRequestHandler<R> {
     @Getter

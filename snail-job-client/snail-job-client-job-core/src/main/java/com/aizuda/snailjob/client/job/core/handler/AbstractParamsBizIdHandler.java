@@ -24,7 +24,7 @@ import static com.aizuda.snailjob.client.job.core.enums.TriggerTypeEnum.*;
  * Similar to AbstractParamsHandler but uses JobBizIdApiRequest instead of JobApiRequest.
  *
  * @author opensnail
- * @since sj_1.2.0
+ * @since 1.10.0
  */
 public abstract class AbstractParamsBizIdHandler<H, R> extends AbstractJobRequestHandler<R> {
     protected static final String SHARD_NUM = "shardNum";

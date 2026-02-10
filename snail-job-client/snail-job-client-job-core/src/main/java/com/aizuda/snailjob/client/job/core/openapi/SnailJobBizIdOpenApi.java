@@ -3,6 +3,8 @@ package com.aizuda.snailjob.client.job.core.openapi;
 import com.aizuda.snailjob.client.job.core.handler.add.*;
 import com.aizuda.snailjob.client.job.core.handler.delete.DeleteJobBizIdHandler;
 import com.aizuda.snailjob.client.job.core.handler.delete.DeleteWorkflowBizIdsHandler;
+import com.aizuda.snailjob.client.job.core.handler.query.ExistsJobBizIdHandler;
+import com.aizuda.snailjob.client.job.core.handler.query.ExistsWorkflowBizIdHandler;
 import com.aizuda.snailjob.client.job.core.handler.query.RequestQueryBizIdHandler;
 import com.aizuda.snailjob.client.job.core.handler.trigger.*;
 import com.aizuda.snailjob.client.job.core.handler.update.*;
@@ -15,7 +17,7 @@ import java.util.Set;
  * instead of jobId (Long) for task identification.
  *
  * @author opensnail
- * @since sj_1.2.0
+ * @since 1.10.0
  */
 public final class SnailJobBizIdOpenApi {
 
@@ -130,6 +132,26 @@ public final class SnailJobBizIdOpenApi {
      */
     public static RequestQueryBizIdHandler getJobDetail(String bizId) {
         return new RequestQueryBizIdHandler(bizId);
+    }
+
+    /**
+     * 检查任务是否存在
+     *
+     * @param bizId 业务唯一标识
+     * @return {@link ExistsJobBizIdHandler}
+     */
+    public static ExistsJobBizIdHandler existsJob(String bizId) {
+        return new ExistsJobBizIdHandler(bizId);
+    }
+
+    /**
+     * 检查工作流是否存在
+     *
+     * @param bizId 业务唯一标识
+     * @return {@link ExistsWorkflowBizIdHandler}
+     */
+    public static ExistsWorkflowBizIdHandler existsWorkflow(String bizId) {
+        return new ExistsWorkflowBizIdHandler(bizId);
     }
 
     /**

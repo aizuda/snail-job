@@ -13,7 +13,7 @@ import java.util.Map;
  * Abstract handler for workflow operations using bizId.
  *
  * @author opensnail
- * @since sj_1.10.0
+ * @since 1.10.0
  */
 public abstract class AbstractWorkflowBizIdTriggerHandler<H, R> extends AbstractJobRequestHandler<R> {
     @Getter
