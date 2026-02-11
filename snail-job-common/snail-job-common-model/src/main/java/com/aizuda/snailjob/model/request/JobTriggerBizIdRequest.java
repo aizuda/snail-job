@@ -1,9 +1,7 @@
 package com.aizuda.snailjob.model.request;
 
-import com.aizuda.snailjob.model.request.base.JobTriggerRequest;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 基于 bizId 的任务触发请求
@@ -11,9 +9,8 @@ import lombok.EqualsAndHashCode;
  * @author opensnail
  * @since 1.10.0
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class JobTriggerBizIdRequest extends JobTriggerRequest {
+public class JobTriggerBizIdRequest {
 
     /**
      * 业务ID

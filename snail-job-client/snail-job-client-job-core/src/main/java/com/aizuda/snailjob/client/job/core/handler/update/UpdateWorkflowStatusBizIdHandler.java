@@ -2,6 +2,7 @@ package com.aizuda.snailjob.client.job.core.handler.update;
 
 import cn.hutool.core.lang.Pair;
 import com.aizuda.snailjob.client.job.core.handler.AbstractJobRequestHandler;
+import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.model.request.WorkflowStatusUpdateBizIdRequest;
 
@@ -43,13 +44,12 @@ public class UpdateWorkflowStatusBizIdHandler extends AbstractJobRequestHandler<
     }
 
     /**
-     * Set workflow status
-     *
-     * @param status the status to set
-     * @return this handler
+     * 设置状态
+     * @param status
+     * @return
      */
-    public UpdateWorkflowStatusBizIdHandler setStatus(Integer status) {
-        statusDTO.setStatus(status);
+    public UpdateWorkflowStatusBizIdHandler setStatus(StatusEnum status) {
+        this.statusDTO.setStatus(status.getStatus());
         return this;
     }
 }

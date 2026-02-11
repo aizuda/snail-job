@@ -240,7 +240,7 @@ public final class SnailJobBizIdOpenApi {
      * @param bizId 业务唯一标识
      * @return {@link UpdateWorkflowStatusBizIdHandler}
      */
-    public static UpdateWorkflowStatusBizIdHandler updateWorkflowStatus(String bizId) {
+    public static UpdateWorkflowStatusBizIdHandler updateWorkFlowStatus(String bizId) {
         return new UpdateWorkflowStatusBizIdHandler(bizId);
     }
 
