@@ -1,41 +1,52 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.HashUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.StatusEnum;
+import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.common.core.expression.ExpressionEngine;
 import com.aizuda.snailjob.common.core.expression.ExpressionFactory;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
+import com.aizuda.snailjob.model.response.WorkflowExistsResponse;
+import com.aizuda.snailjob.model.response.base.WorkflowDetailResponse;
+import com.aizuda.snailjob.server.common.config.SystemProperties;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.enums.ExpressionTypeEnum;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
-import com.aizuda.snailjob.server.common.util.*;
-import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
+import com.aizuda.snailjob.server.common.util.DateUtils;
+import com.aizuda.snailjob.server.common.util.GraphUtils;
+import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
+import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
+import com.aizuda.snailjob.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.snailjob.server.service.convert.WorkflowConverter;
-import com.aizuda.snailjob.model.response.base.WorkflowDetailResponse;
 import com.aizuda.snailjob.server.service.kit.WorkflowKit;
 import com.aizuda.snailjob.server.service.service.impl.AbstractWorkflowService;
-import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
-import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
-import com.aizuda.snailjob.server.job.task.support.expression.ExpressionInvocationHandler;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
 import com.aizuda.snailjob.server.web.model.request.*;
 import com.aizuda.snailjob.server.web.model.response.WorkflowDetailResponseWebVO;
+import com.aizuda.snailjob.server.web.model.response.WorkflowResponseVO;
 import com.aizuda.snailjob.server.web.service.WorkflowWebService;
 import com.aizuda.snailjob.server.web.service.convert.WorkflowWebConverter;
 import com.aizuda.snailjob.server.web.service.handler.GroupHandler;
 import com.aizuda.snailjob.server.web.service.handler.WorkflowWebHandler;
 import com.aizuda.snailjob.server.web.util.UserSessionUtils;
-import com.aizuda.snailjob.template.datasource.persistence.mapper.*;
-import com.aizuda.snailjob.template.datasource.persistence.po.*;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.JobMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.SystemUserMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowMapper;
+import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
+import com.aizuda.snailjob.template.datasource.persistence.po.Job;
+import com.aizuda.snailjob.template.datasource.persistence.po.SystemUser;
+import com.aizuda.snailjob.template.datasource.persistence.po.Workflow;
+import com.aizuda.snailjob.template.datasource.persistence.po.WorkflowNode;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
@@ -77,6 +88,11 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
     @Override
     @Transactional
     public boolean saveWorkflow(WorkflowRequestVO workflowRequestVO) {
+        // 在验证之前，自动生成 bizId
+        if (StrUtil.isBlank(workflowRequestVO.getBizId())) {
+            workflowRequestVO.setBizId(IdUtil.getSnowflakeNextIdStr());
+        }
+
         log.info("Saved workflow information: {}", JsonUtil.toJsonString(workflowRequestVO));
         MutableGraph<Long> graph = createGraph();
 
@@ -286,8 +302,80 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
             resultList.addAll(StreamUtils.toList(workflowPartitionTasks, WorkflowPartitionTask::getResponseVO));
         }, 0);
 
+        if (CollUtil.isEmpty(resultList)){
+            return JsonUtil.toJsonString(resultList);
+        }
+
+        Set<Long> jobIds = new HashSet<>();
+        for (WorkflowDetailResponseWebVO vo : resultList) {
+            List<WorkflowDetailResponse.NodeInfo> allNodes = new ArrayList<>();
+            collectAllNodes(vo.getNodeConfig(), allNodes);
+
+            for (WorkflowDetailResponse.NodeInfo node : allNodes) {
+                // 判断节点类型 + 非空校验
+                if (WorkflowNodeTypeEnum.JOB_TASK.getType() == node.getNodeType()
+                        && node.getJobTask() != null) {
+                    jobIds.add(node.getJobTask().getJobId());
+                }
+            }
+        }
+
+        List<Job> jobs = jobMapper.selectList(new LambdaQueryWrapper<Job>()
+                .in(Job::getId, jobIds));
+
+        if (CollUtil.isEmpty(jobs)){
+            return JsonUtil.toJsonString(resultList);
+        }
+        Map<Long, Job> jobMap = StreamUtils.toIdentityMap(jobs, Job::getId);
+
+        // 填充job bizId 导入绑定使用
+        for (WorkflowDetailResponseWebVO responseWebVO : resultList) {
+            List<WorkflowDetailResponse.NodeInfo> allNodes = new ArrayList<>();
+            collectAllNodes(responseWebVO.getNodeConfig(), allNodes);
+
+            for (WorkflowDetailResponse.NodeInfo node : allNodes) {
+                // 非 JOB_TASK 节点跳过
+                if (WorkflowNodeTypeEnum.JOB_TASK.getType() != node.getNodeType()) {
+                    continue;
+                }
+                JobTaskConfigRequest jobTask = node.getJobTask();
+                if (jobTask == null || jobTask.getJobId() == null) {
+                    continue;
+                }
+                Job job = jobMap.get(jobTask.getJobId());
+                if (job != null && StrUtil.isNotBlank(job.getBizId())) {
+                    jobTask.setJobBizId(job.getBizId());
+                }
+            }
+        }
+
         return JsonUtil.toJsonString(resultList);
     }
+
+    /**
+     * 递归收集所有节点（包括嵌套的 childNode）
+     * @param config 当前节点配置
+     * @param allNodes 收集结果列表
+     */
+    private void collectAllNodes(WorkflowDetailResponse.NodeConfig config,
+                                 List<WorkflowDetailResponse.NodeInfo> allNodes) {
+        if (config == null || CollUtil.isEmpty(config.getConditionNodes())) {
+            return;
+        }
+
+        for (WorkflowDetailResponse.NodeInfo node : config.getConditionNodes()) {
+            allNodes.add(node);
+
+            if (node.getChildNode() != null) {
+                collectAllNodes(node.getChildNode(), allNodes);
+            }
+        }
+
+        if (config.getChildNode() != null) {
+            collectAllNodes(config.getChildNode(), allNodes);
+        }
+    }
+
 
     private void batchSaveWorkflowTask(final List<WorkflowRequestVO> workflowRequestVOList, final String namespaceId) {
 
@@ -296,8 +384,29 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
 
         for (final WorkflowRequestVO workflowRequestVO : workflowRequestVOList) {
             WorkflowKit.checkExecuteInterval(workflowRequestVO.getTriggerType(), workflowRequestVO.getTriggerInterval());
+            Long id = workflowRequestVO.getId();
+
             workflowRequestVO.setId(null);
-            saveWorkflow(workflowRequestVO);
+
+            String bizId = workflowRequestVO.getBizId();
+            // 兼容老版本 用id作为BizId
+            if (StrUtil.isBlank(bizId)) {
+                if (id == null) {
+                    saveWorkflow(workflowRequestVO);
+                    continue;
+                }
+                bizId = String.valueOf(id);
+            }
+            workflowRequestVO.setBizId(bizId);
+
+            WorkflowExistsResponse existsResponse = existsWorkflowByBizId(bizId);
+            if (existsResponse == null) {
+                saveWorkflow(workflowRequestVO);
+                continue;
+            }
+
+            workflowRequestVO.setId(existsResponse.getId());
+            updateWorkflow(workflowRequestVO);
         }
     }
 

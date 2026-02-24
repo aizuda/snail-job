@@ -26,7 +26,6 @@ public class WorkflowRequestVO {
     @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens")
     private String groupName;
 
-    @NotBlank(message = "bizId cannot be null")
     @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens", groups = Add.class)
     private String bizId;
 

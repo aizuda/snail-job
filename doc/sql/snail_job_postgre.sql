@@ -774,9 +774,7 @@ CREATE TABLE sj_workflow_node
     node_name            varchar(64)  NOT NULL,
     group_name           varchar(64)  NOT NULL,
     job_id               bigint       NOT NULL,
-    job_biz_id           varchar(64)  NOT NULL,
     workflow_id          bigint       NOT NULL,
-    workflow_biz_id      varchar(64)  NOT NULL,
     node_type            smallint     NOT NULL DEFAULT 1,
     expression_type      smallint     NOT NULL DEFAULT 0,
     fail_strategy        smallint     NOT NULL DEFAULT 1,
@@ -798,9 +796,7 @@ COMMENT ON COLUMN sj_workflow_node.namespace_id IS '命名空间id';
 COMMENT ON COLUMN sj_workflow_node.node_name IS '节点名称';
 COMMENT ON COLUMN sj_workflow_node.group_name IS '组名称';
 COMMENT ON COLUMN sj_workflow_node.job_id IS '任务信息id';
-COMMENT ON COLUMN sj_workflow_node.job_biz_id IS '任务业务ID';
 COMMENT ON COLUMN sj_workflow_node.workflow_id IS '工作流ID';
-COMMENT ON COLUMN sj_workflow_node.workflow_biz_id IS '工作流业务ID';
 COMMENT ON COLUMN sj_workflow_node.node_type IS '1、任务节点 2、条件节点';
 COMMENT ON COLUMN sj_workflow_node.expression_type IS '1、SpEl、2、Aviator 3、QL';
 COMMENT ON COLUMN sj_workflow_node.fail_strategy IS '失败策略 1、跳过 2、阻塞';
