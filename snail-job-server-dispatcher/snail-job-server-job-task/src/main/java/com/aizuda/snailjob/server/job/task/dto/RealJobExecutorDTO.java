@@ -16,6 +16,8 @@ public class RealJobExecutorDTO extends BaseDTO {
 
     private Long jobId;
 
+    private String jobBizId;
+
     /**
      * 名称
      */

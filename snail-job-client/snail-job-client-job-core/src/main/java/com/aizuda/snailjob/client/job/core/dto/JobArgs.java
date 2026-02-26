@@ -27,6 +27,8 @@ public class JobArgs {
 
     private Long jobId;
 
+    private String jobBizId;
+
     private Map<String, Object> wfContext;
 
     private Map<String, Object> changeWfContext;

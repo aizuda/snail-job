@@ -118,6 +118,7 @@ public class JobEndPoint {
     private static JobContext buildJobContext(DispatchJobRequest dispatchJob) {
         JobContext jobContext = new JobContext();
         jobContext.setJobId(dispatchJob.getJobId());
+        jobContext.setJobBizId(dispatchJob.getJobBizId());
         jobContext.setShardingTotal(dispatchJob.getShardingTotal());
         jobContext.setShardingIndex(dispatchJob.getShardingIndex());
         jobContext.setNamespaceId(dispatchJob.getNamespaceId());

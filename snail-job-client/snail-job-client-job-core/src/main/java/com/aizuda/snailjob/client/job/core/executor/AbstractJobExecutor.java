@@ -73,6 +73,7 @@ public abstract class AbstractJobExecutor implements IJobExecutor {
             jobArgs.setWfContext(jobContext.getWfContext());
             jobArgs.setChangeWfContext(jobContext.getChangeWfContext());
             jobArgs.setJobId(jobContext.getJobId());
+            jobArgs.setJobBizId(jobContext.getJobBizId());
 
             try {
                 // 初始化调度信息（日志上报LogUtil）

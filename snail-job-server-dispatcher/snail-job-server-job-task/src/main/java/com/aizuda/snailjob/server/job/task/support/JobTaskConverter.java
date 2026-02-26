@@ -91,9 +91,10 @@ public interface JobTaskConverter {
 
     ClientCallbackContext toClientCallbackContext(RealJobExecutorDTO request);
 
-    @Mappings(
-            @Mapping(source = "id", target = "jobId")
-    )
+    @Mappings({
+            @Mapping(source = "id", target = "jobId"),
+            @Mapping(source = "bizId", target = "jobBizId")
+    })
     ClientCallbackContext toClientCallbackContext(Job job);
 
     DispatchJobRequest toDispatchJobRequest(RealJobExecutorDTO realJobExecutorDTO);
@@ -101,6 +102,7 @@ public interface JobTaskConverter {
     @Mappings({
             @Mapping(source = "jobTask.groupName", target = "groupName"),
             @Mapping(source = "jobTask.jobId", target = "jobId"),
+            @Mapping(source = "context.jobBizId", target = "jobBizId"),
             @Mapping(source = "jobTask.taskBatchId", target = "taskBatchId"),
             @Mapping(source = "jobTask.id", target = "taskId"),
             @Mapping(source = "jobTask.argsStr", target = "argsStr"),
@@ -113,9 +115,10 @@ public interface JobTaskConverter {
     })
     RealJobExecutorDTO toRealJobExecutorDTO(JobExecutorContext context, JobTask jobTask);
 
-    @Mappings(
-            @Mapping(source = "id", target = "jobId")
-    )
+    @Mappings({
+            @Mapping(source = "id", target = "jobId"),
+            @Mapping(source = "bizId", target = "jobBizId")
+    })
     JobExecutorContext toJobExecutorContext(Job job);
 
     JobExecutorResultDTO toJobExecutorResultDTO(ClientCallbackContext context);
