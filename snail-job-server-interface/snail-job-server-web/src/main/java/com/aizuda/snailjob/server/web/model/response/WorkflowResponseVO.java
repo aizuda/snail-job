@@ -16,6 +16,11 @@ public class WorkflowResponseVO {
     private Long id;
 
     /**
+     * 业务ID
+     */
+    private String bizId;
+
+    /**
      * 工作流名称
      */
     private String workflowName;

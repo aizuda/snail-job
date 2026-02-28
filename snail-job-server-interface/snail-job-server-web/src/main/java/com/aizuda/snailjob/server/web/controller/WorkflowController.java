@@ -39,6 +39,12 @@ public class WorkflowController {
     @Qualifier("workflowWebCommonService")
     private final WorkflowService workflowService;
 
+    @GetMapping("/check-biz-id")
+    @LoginRequired(role = RoleEnum.USER)
+    public Boolean checkBizIdExists(@RequestParam("bizId") String bizId) {
+        return workflowService.existsWorkflowByBizId(bizId) != null;
+    }
+
     @PostMapping
     @LoginRequired(role = RoleEnum.USER)
     public Boolean saveWorkflow(@RequestBody @Validated WorkflowRequestVO workflowRequestVO) {

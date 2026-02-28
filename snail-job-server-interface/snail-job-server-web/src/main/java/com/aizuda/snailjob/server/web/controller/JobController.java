@@ -37,6 +37,12 @@ public class JobController {
     private final JobService jobService;
     private final JobWebService jobWebService;
 
+    @GetMapping("/check-biz-id")
+    @LoginRequired
+    public Boolean checkBizIdExists(@RequestParam("bizId") String bizId) {
+        return jobService.existsJobByBizId(bizId) != null;
+    }
+
     @GetMapping("/page/list")
     @LoginRequired
     public PageResult<List<JobResponseWebVO>> getJobPage(JobQueryVO jobQueryVO) {
