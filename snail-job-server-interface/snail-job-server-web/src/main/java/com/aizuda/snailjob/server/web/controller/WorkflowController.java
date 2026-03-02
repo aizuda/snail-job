@@ -41,7 +41,13 @@ public class WorkflowController {
 
     @GetMapping("/check-biz-id")
     @LoginRequired(role = RoleEnum.USER)
-    public Boolean checkBizIdExists(@RequestParam("bizId") String bizId) {
+    public Boolean checkBizIdExists(
+            @RequestParam("bizId") String bizId,
+            @RequestParam(value = "id", required = false) Long id) {
+        if (id != null) {
+            var exists = workflowService.existsWorkflowByBizId(bizId);
+            return exists != null && !exists.getId().equals(id);
+        }
         return workflowService.existsWorkflowByBizId(bizId) != null;
     }
 

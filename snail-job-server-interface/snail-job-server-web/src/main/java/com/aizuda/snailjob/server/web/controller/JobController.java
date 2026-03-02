@@ -39,7 +39,13 @@ public class JobController {
 
     @GetMapping("/check-biz-id")
     @LoginRequired
-    public Boolean checkBizIdExists(@RequestParam("bizId") String bizId) {
+    public Boolean checkBizIdExists(
+            @RequestParam("bizId") String bizId,
+            @RequestParam(value = "id", required = false) Long id) {
+        if (id != null) {
+            var exists = jobService.existsJobByBizId(bizId);
+            return exists != null && !exists.getId().equals(id);
+        }
         return jobService.existsJobByBizId(bizId) != null;
     }
 
