@@ -26,7 +26,7 @@ public interface JobWebService {
 
     List<String> getTimeByCron(String cron);
 
-    List<JobResponseWebVO> getJobNameList(String keywords, Long jobId, String groupName);
+    List<JobResponseWebVO> getJobNameList(String keywords, Long jobId, String groupName, String bizId);
 
 //    boolean trigger(JobTriggerVO jobTrigger);
 

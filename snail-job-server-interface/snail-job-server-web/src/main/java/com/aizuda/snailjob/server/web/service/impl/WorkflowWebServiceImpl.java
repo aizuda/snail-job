@@ -1,7 +1,6 @@
 package com.aizuda.snailjob.server.web.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Pair;
 import cn.hutool.core.util.HashUtil;
@@ -175,6 +174,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
                         .eq(Workflow::getNamespaceId, userSessionVO.getNamespaceId())
                         .in(CollUtil.isNotEmpty(groupNames), Workflow::getGroupName, groupNames)
                         .like(StrUtil.isNotBlank(queryVO.getWorkflowName()), Workflow::getWorkflowName, queryVO.getWorkflowName())
+                        .like(StrUtil.isNotBlank(queryVO.getBizId()), Workflow::getBizId, StrUtil.trim(queryVO.getBizId()))
                         .eq(Objects.nonNull(queryVO.getWorkflowStatus()), Workflow::getWorkflowStatus, queryVO.getWorkflowStatus())
                         .eq(Objects.nonNull(queryVO.getOwnerId()), Workflow::getOwnerId, queryVO.getOwnerId())
                         .orderByDesc(Workflow::getId));
@@ -239,12 +239,13 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
     }
 
     @Override
-    public List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName) {
+    public List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName, String bizId) {
         PageDTO<Workflow> selectPage = workflowMapper.selectPage(
                 new PageDTO<>(1, 100),
                 new LambdaQueryWrapper<Workflow>()
-                        .select(Workflow::getId, Workflow::getWorkflowName)
+                        .select(Workflow::getId, Workflow::getWorkflowName, Workflow::getBizId)
                         .like(StrUtil.isNotBlank(keywords), Workflow::getWorkflowName, StrUtil.trim(keywords))
+                        .like(StrUtil.isNotBlank(bizId), Workflow::getBizId, StrUtil.trim(bizId))
                         .eq(Objects.nonNull(workflowId), Workflow::getId, workflowId)
                         .eq(StrUtil.isNotBlank(groupName), Workflow::getGroupName, groupName)
                         .eq(Workflow::getDeleted, StatusEnum.NO.getStatus())

@@ -68,6 +68,7 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
                         .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
                         .in(CollUtil.isNotEmpty(groupNames), Job::getGroupName, groupNames)
                         .like(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName, StrUtil.trim(queryVO.getJobName()))
+                        .like(StrUtil.isNotBlank(queryVO.getBizId()), Job::getBizId, StrUtil.trim(queryVO.getBizId()))
                         .like(StrUtil.isNotBlank(queryVO.getExecutorInfo()), Job::getExecutorInfo, StrUtil.trim(queryVO.getExecutorInfo()))
                         .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
@@ -91,17 +92,18 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
     }
 
     @Override
-    public List<JobResponseWebVO> getJobNameList(String keywords, Long jobId, String groupName) {
+    public List<JobResponseWebVO> getJobNameList(String keywords, Long jobId, String groupName, String bizId) {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         PageDTO<Job> selectPage = jobMapper.selectPage(
                 new PageDTO<>(1, 100),
                 new LambdaQueryWrapper<Job>()
-                        .select(Job::getId, Job::getJobName)
+                        .select(Job::getId, Job::getJobName, Job::getBizId)
                         .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
                         .like(StrUtil.isNotBlank(keywords), Job::getJobName, StrUtil.trim(keywords))
                         .eq(StrUtil.isNotBlank(groupName), Job::getGroupName, groupName)
                         .eq(Objects.nonNull(jobId), Job::getId, jobId)
+                        .like(StrUtil.isNotBlank(bizId), Job::getBizId, StrUtil.trim(bizId))
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                         // SQLServer 分页必须 ORDER BY
                         .orderByDesc(Job::getId));

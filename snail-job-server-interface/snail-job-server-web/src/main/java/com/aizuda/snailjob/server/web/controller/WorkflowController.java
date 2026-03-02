@@ -98,8 +98,10 @@ public class WorkflowController {
     public List<WorkflowResponseVO> getWorkflowNameList(
             @RequestParam(value = "keywords", required = false) String keywords,
             @RequestParam(value = "workflowId", required = false) Long workflowId,
-            @RequestParam(value = "groupName", required = false) String groupName) {
-        return workflowWebService.getWorkflowNameList(keywords, workflowId, groupName);
+            @RequestParam(value = "groupName", required = false) String groupName,
+            @RequestParam(value = "bizId", required = false) String bizId
+    ) {
+        return workflowWebService.getWorkflowNameList(keywords, workflowId, groupName,bizId);
     }
 
     @PostMapping("/check-node-expression")

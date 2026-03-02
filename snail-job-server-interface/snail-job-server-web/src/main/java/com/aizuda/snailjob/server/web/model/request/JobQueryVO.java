@@ -17,4 +17,5 @@ public class JobQueryVO extends BaseQueryDTO {
     private Integer jobStatus;
     private Long ownerId;
     private String executorInfo;
+    private String bizId;
 }

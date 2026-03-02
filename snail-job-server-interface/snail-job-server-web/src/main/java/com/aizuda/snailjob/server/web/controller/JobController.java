@@ -102,9 +102,10 @@ public class JobController {
     public List<JobResponseWebVO> getJobNameList(
             @RequestParam(value = "keywords", required = false) String keywords,
             @RequestParam(value = "jobId", required = false) Long jobId,
-            @RequestParam(value = "groupName", required = false) String groupName
+            @RequestParam(value = "groupName", required = false) String groupName,
+            @RequestParam(value = "bizId", required = false) String bizId
     ) {
-        return jobWebService.getJobNameList(keywords, jobId, groupName);
+        return jobWebService.getJobNameList(keywords, jobId, groupName, bizId);
     }
 
     @PostMapping("/trigger")
