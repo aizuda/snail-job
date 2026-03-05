@@ -241,7 +241,7 @@ public class WorkflowWebServiceImpl extends AbstractWorkflowService implements W
     @Override
     public List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName, String bizId) {
         PageDTO<Workflow> selectPage = workflowMapper.selectPage(
-                new PageDTO<>(1, 100),
+                new PageDTO<>(1, 10),
                 new LambdaQueryWrapper<Workflow>()
                         .select(Workflow::getId, Workflow::getWorkflowName, Workflow::getBizId)
                         .like(StrUtil.isNotBlank(keywords), Workflow::getWorkflowName, StrUtil.trim(keywords))

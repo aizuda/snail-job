@@ -61,6 +61,11 @@ public class WorkflowDetailResponse {
     private Integer workflowStatus;
 
     /**
+     * 描述
+     */
+    private String description;
+
+    /**
      * see: {@link com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum}
      */
     private Integer workflowBatchStatus;
