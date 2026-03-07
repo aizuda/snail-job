@@ -220,6 +220,7 @@ public class JobExecutorActor extends AbstractActor {
         context.setTaskList(taskList);
         context.setTaskBatchId(taskExecute.getTaskBatchId());
         context.setJobId(job.getId());
+        context.setJobBizId(job.getBizId());
         context.setWorkflowTaskBatchId(taskExecute.getWorkflowTaskBatchId());
         context.setWorkflowNodeId(taskExecute.getWorkflowNodeId());
         if (Objects.nonNull(workflowTaskBatch)) {

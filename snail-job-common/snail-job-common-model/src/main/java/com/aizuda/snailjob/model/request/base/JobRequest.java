@@ -35,6 +35,12 @@ public class JobRequest {
     private String groupName;
 
     /**
+     * 业务ID
+     */
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens", groups = Add.class)
+    private String bizId;
+
+    /**
      * 名称
      */
     @NotBlank(message = "jobName cannot be null", groups = Add.class)

@@ -16,6 +16,11 @@ public class JobTaskConfigRequest {
     private Long jobId;
 
     /**
+     * 任务业务ID
+     */
+    private String jobBizId;
+
+    /**
      * 任务名称
      */
     private String jobName;

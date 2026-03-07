@@ -16,6 +16,11 @@ public class JobResponse {
     private Long id;
 
     /**
+     * 业务ID
+     */
+    private String bizId;
+
+    /**
      * 组名称
      */
     private String groupName;

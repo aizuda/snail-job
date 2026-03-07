@@ -2,13 +2,16 @@ package com.aizuda.snailjob.server.web.service.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Assert;
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.constant.SystemConstants;
 import com.aizuda.snailjob.common.core.enums.WorkflowNodeTypeEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
+import com.aizuda.snailjob.model.response.JobExistsResponse;
 import com.aizuda.snailjob.model.response.base.WorkflowDetailResponse;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
+import com.aizuda.snailjob.server.service.service.JobService;
 import com.aizuda.snailjob.server.web.model.request.WorkflowRequestVO;
 import com.aizuda.snailjob.server.web.service.convert.WorkflowWebConverter;
 import com.aizuda.snailjob.template.datasource.persistence.mapper.WorkflowNodeMapper;
@@ -18,6 +21,7 @@ import com.google.common.collect.Sets;
 import com.google.common.graph.MutableGraph;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -35,6 +39,9 @@ import java.util.stream.Collectors;
 public class WorkflowWebHandler {
 
     private final WorkflowNodeMapper workflowNodeMapper;
+
+    @Qualifier("jobWebCommonService")
+    private final JobService jobService;
 
     /**
      * 根据给定的图、父节点ID、节点配置Map和工作流节点Map，构建节点配置
@@ -166,7 +173,18 @@ public class WorkflowWebHandler {
                     JobTaskConfigRequest jobTask = nodeInfo.getJobTask();
                     Assert.notNull(jobTask, () -> new SnailJobServerException("Configuration information for [{}] cannot be empty", nodeInfo.getNodeName()));
                     Assert.notNull(jobTask.getJobId(), () -> new SnailJobServerException("Associated task for [{}] cannot be empty", nodeInfo.getNodeName()));
-                    workflowNode.setJobId(jobTask.getJobId());
+                    Long jobId = jobTask.getJobId();
+                    // 导入会携带bizId， 重新获取jobId
+                    if (StrUtil.isNotBlank(jobTask.getJobBizId())){
+                        JobExistsResponse existsResponse = jobService.existsJobByBizId(jobTask.getJobBizId());
+                        if (existsResponse != null) {
+                            Long originalJobId = jobId;
+                            jobId = existsResponse.getId();
+                            log.info("JobId changed by bizId: nodeName=[{}], jobBizId=[{}], originalJobId=[{}], newJobId=[{}]",
+                                    nodeInfo.getNodeName(), jobTask.getJobBizId(), originalJobId, jobId);
+                        }
+                    }
+                    workflowNode.setJobId(jobId);
                 }
 
                 Assert.isTrue(1 == workflowNodeMapper.insert(workflowNode),

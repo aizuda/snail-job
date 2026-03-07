@@ -26,7 +26,7 @@ public interface WorkflowWebService {
 
     Boolean updateWorkflow(WorkflowRequestVO workflowRequestVO);
 
-    List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName);
+    List<WorkflowResponseVO> getWorkflowNameList(String keywords, Long workflowId, String groupName, String bizId);
 
     Pair<Integer, Object> checkNodeExpression(CheckDecisionVO decisionVO);
 

@@ -37,6 +37,18 @@ public class JobController {
     private final JobService jobService;
     private final JobWebService jobWebService;
 
+    @GetMapping("/check-biz-id")
+    @LoginRequired
+    public Boolean checkBizIdExists(
+            @RequestParam("bizId") String bizId,
+            @RequestParam(value = "id", required = false) Long id) {
+        if (id != null) {
+            var exists = jobService.existsJobByBizId(bizId);
+            return exists != null && !exists.getId().equals(id);
+        }
+        return jobService.existsJobByBizId(bizId) != null;
+    }
+
     @GetMapping("/page/list")
     @LoginRequired
     public PageResult<List<JobResponseWebVO>> getJobPage(JobQueryVO jobQueryVO) {
@@ -90,9 +102,10 @@ public class JobController {
     public List<JobResponseWebVO> getJobNameList(
             @RequestParam(value = "keywords", required = false) String keywords,
             @RequestParam(value = "jobId", required = false) Long jobId,
-            @RequestParam(value = "groupName", required = false) String groupName
+            @RequestParam(value = "groupName", required = false) String groupName,
+            @RequestParam(value = "bizId", required = false) String bizId
     ) {
-        return jobWebService.getJobNameList(keywords, jobId, groupName);
+        return jobWebService.getJobNameList(keywords, jobId, groupName, bizId);
     }
 
     @PostMapping("/trigger")
