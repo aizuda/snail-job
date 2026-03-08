@@ -91,7 +91,7 @@ public final class ClientInfo {
 
         Integer port = snailJobProperties.getPort();
         // 如果端口设置为随机端口，则获取可用端口
-        if (port.equals(RANDOM_CLIENT_PORT)) {
+        if (Objects.isNull(port) || port.equals(RANDOM_CLIENT_PORT)) {
             // 使用随机算法获取端口
             PORT_LOCK.lock();
             try {
