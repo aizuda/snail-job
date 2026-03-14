@@ -64,7 +64,7 @@ public  class MapTaskPostHttpRequestHandler extends PostHttpRequestHandler {
 
     @Override
     public SnailJobRpcResult doHandler(final String content, final UrlQuery query, final HttpHeaders headers) {
-        SnailJobLog.LOCAL.info("map task Request. content:[{}]", content);
+        SnailJobLog.LOCAL.debug("map task Request. content:[{}]", content);
         String groupName = HttpHeaderUtil.getGroupName(headers);
         String namespace = HttpHeaderUtil.getNamespace(headers);
 
