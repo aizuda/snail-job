@@ -69,7 +69,12 @@ public class JsonUtil {
         return JsonMapper.toJavaObject(inputStream, clazz);
     }
 
-
+    /**
+     * 构建 JavaType
+     */
+    public static JavaType constructType(Type t) {
+        return JsonMapper.objectMapper.constructType(t);
+    }
 
     /**
      * 将JSON 数组字符串转Java 对象集合

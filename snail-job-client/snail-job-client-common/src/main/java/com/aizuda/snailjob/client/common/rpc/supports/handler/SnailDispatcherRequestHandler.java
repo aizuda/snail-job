@@ -24,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -130,7 +129,6 @@ public class SnailDispatcherRequestHandler {
         Parameter[] parameters = method.getParameters();
         Object[] params = new Object[paramTypes.length];
 
-        ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = JsonUtil.toJson(infoStr);
         if (Objects.isNull(jsonNode)) {
             SnailJobLog.LOCAL.warn("jsonNode is null. infoStr:[{}]", infoStr);
@@ -140,7 +138,7 @@ public class SnailDispatcherRequestHandler {
         for (int i = 0; i < paramTypes.length; i++) {
             JsonNode node = jsonNode.get(i);
             if (Objects.nonNull(node)) {
-                params[i] = mapper.readValue(node.toString(), mapper.constructType(paramTypes[i]));
+                params[i] = JsonUtil.parseObject(node.toString(), JsonUtil.constructType(paramTypes[i]));
                 continue;
             }
 
