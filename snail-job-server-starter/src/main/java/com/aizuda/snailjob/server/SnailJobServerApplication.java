@@ -14,6 +14,7 @@
  */
 package com.aizuda.snailjob.server;
 
+import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.server.common.rpc.server.grpc.GrpcServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
@@ -33,7 +34,9 @@ import java.util.concurrent.TimeUnit;
 public class SnailJobServerApplication {
 
     public static void main(String[] args) {
-        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
+        // 初始化默认时区
+        initDefaultTimeZone();
+        // 启动SnailJob服务
         SpringApplication.run(SnailJobServerApplication.class, args);
     }
 
@@ -47,7 +50,7 @@ public class SnailJobServerApplication {
                                                  ServletWebServerFactory serverFactory) {
         return args -> {
             // 判定Grpc
-            boolean started =  grpcServer.isStarted();
+            boolean started = grpcServer.isStarted();
             // 最长自旋10秒，保证 grpcHttpServer启动完成
             int waitCount = 0;
             while (!started && waitCount < 100) {
@@ -64,5 +67,28 @@ public class SnailJobServerApplication {
                 SpringApplication.exit(SpringApplication.run(SnailJobServerApplication.class));
             }
         };
+    }
+
+    /**
+     * 从环境变量读取时区配置，如果没有则使用系统默认时区
+     * fixed 避免固定上海时区导致部署国际化服务的机房时，时区如何设置调整都为上海时区时间进行触发的问题
+     */
+    private static void initDefaultTimeZone() {
+        String timezone = System.getenv("TZ");
+
+        if (StrUtil.isNotBlank(timezone)) {
+            try {
+                TimeZone.setDefault(TimeZone.getTimeZone(timezone.trim()));
+                log.info("--------> System timezone set to: {} from environment variable TZ", timezone);
+            } catch (Exception e) {
+                log.warn("--------> Invalid timezone '{}' from environment variable TZ, " +
+                                "using system default timezone. Error: {}",
+                        timezone, e.getMessage());
+            }
+            return;
+        }
+
+        log.info("--------> Environment variable TZ not set, using system default timezone: {}",
+                TimeZone.getDefault().getID());
     }
 }
