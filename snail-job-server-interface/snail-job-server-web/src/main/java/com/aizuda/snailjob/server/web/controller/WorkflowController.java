@@ -39,6 +39,18 @@ public class WorkflowController {
     @Qualifier("workflowWebCommonService")
     private final WorkflowService workflowService;
 
+    @GetMapping("/check-biz-id")
+    @LoginRequired(role = RoleEnum.USER)
+    public Boolean checkBizIdExists(
+            @RequestParam("bizId") String bizId,
+            @RequestParam(value = "id", required = false) Long id) {
+        if (id != null) {
+            var exists = workflowService.existsWorkflowByBizId(bizId);
+            return exists != null && !exists.getId().equals(id);
+        }
+        return workflowService.existsWorkflowByBizId(bizId) != null;
+    }
+
     @PostMapping
     @LoginRequired(role = RoleEnum.USER)
     public Boolean saveWorkflow(@RequestBody @Validated WorkflowRequestVO workflowRequestVO) {
@@ -86,8 +98,10 @@ public class WorkflowController {
     public List<WorkflowResponseVO> getWorkflowNameList(
             @RequestParam(value = "keywords", required = false) String keywords,
             @RequestParam(value = "workflowId", required = false) Long workflowId,
-            @RequestParam(value = "groupName", required = false) String groupName) {
-        return workflowWebService.getWorkflowNameList(keywords, workflowId, groupName);
+            @RequestParam(value = "groupName", required = false) String groupName,
+            @RequestParam(value = "bizId", required = false) String bizId
+    ) {
+        return workflowWebService.getWorkflowNameList(keywords, workflowId, groupName,bizId);
     }
 
     @PostMapping("/check-node-expression")

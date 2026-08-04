@@ -16,11 +16,11 @@ import com.aizuda.snailjob.server.common.pekko.ActorGenerator;
 import com.aizuda.snailjob.server.common.exception.SnailJobServerException;
 import com.aizuda.snailjob.server.common.handler.PostHttpRequestHandler;
 import com.aizuda.snailjob.model.request.JobLogTaskRequest;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
 
 import java.util.List;
 import java.util.Objects;

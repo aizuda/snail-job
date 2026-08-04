@@ -1,7 +1,10 @@
 package com.aizuda.snailjob.server.service.service;
 
+import com.aizuda.snailjob.model.request.WorkflowStatusUpdateBizIdRequest;
+import com.aizuda.snailjob.model.request.WorkflowTriggerBizIdRequest;
 import com.aizuda.snailjob.model.request.base.StatusUpdateRequest;
 import com.aizuda.snailjob.model.request.base.WorkflowTriggerRequest;
+import com.aizuda.snailjob.model.response.WorkflowExistsResponse;
 
 import java.util.Set;
 
@@ -21,4 +24,15 @@ public interface WorkflowService {
 
     boolean updateWorkFlowStatus(StatusUpdateRequest requestDTO);
 
+    WorkflowExistsResponse existsWorkflowById(Long id);
+
+    // ==================== bizId 接口 ====================
+
+    boolean deleteWorkflowByBizIds(Set<String> bizIds);
+
+    boolean triggerWorkflowByBizId(WorkflowTriggerBizIdRequest request);
+
+    boolean updateWorkflowStatusByBizId(WorkflowStatusUpdateBizIdRequest request);
+
+    WorkflowExistsResponse existsWorkflowByBizId(String bizId);
 }

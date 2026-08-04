@@ -13,6 +13,8 @@ import lombok.EqualsAndHashCode;
 @Data
 public class WorkflowQueryVO extends BaseQueryDTO {
 
+    private String bizId;
+
     private String groupName;
 
     private String workflowName;

@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 /**
  * 上报抽象类
@@ -85,9 +86,17 @@ public abstract class AbstractReport implements Report {
         retryTaskRequest.setSceneName(scene);
         retryTaskRequest.setSerializerName(retryArgSerializer.name());
 
-        String expression = retryerInfo.getBizNo();
-        ExpressionEngine expressionEngine = ExpressionEngineCache.expressionEngine();
-        retryTaskRequest.setBizNo((String) expressionEngine.eval(expression, args, executorMethod));
+        try {
+            String expression = retryerInfo.getBizNo();
+            ExpressionEngine expressionEngine = ExpressionEngineCache.expressionEngine();
+            Object bizNo = expressionEngine.eval(expression, args, executorMethod);
+            if (Objects.nonNull(bizNo)){
+                retryTaskRequest.setBizNo(String.valueOf(bizNo));
+            }
+        } catch (Exception e){
+            SnailJobLog.LOCAL.error("BizNo parsing exception: {}, {}", scene, args, e);
+            throw new SnailRetryClientException("bizNo parsing exception: {}, {}", scene, args);
+        }
         return retryTaskRequest;
     }
 

@@ -14,6 +14,8 @@ public class JobContext {
 
     private Long jobId;
 
+    private String jobBizId;
+
     private Long taskBatchId;
 
     private Long workflowTaskBatchId;

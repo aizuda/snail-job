@@ -20,12 +20,10 @@ import com.aizuda.snailjob.common.core.model.SnailJobRpcResult;
 import com.aizuda.snailjob.common.core.model.Result;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.log.SnailJobLog;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
+import tools.jackson.databind.JsonNode;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -125,13 +123,12 @@ public class SnailDispatcherRequestHandler {
     }
 
     public Object deSerialize(String infoStr, Method method,
-                              HttpRequest httpRequest, HttpResponse httpResponse) throws JsonProcessingException {
+                              HttpRequest httpRequest, HttpResponse httpResponse) {
 
         Type[] paramTypes = method.getGenericParameterTypes();
         Parameter[] parameters = method.getParameters();
         Object[] params = new Object[paramTypes.length];
 
-        ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = JsonUtil.toJson(infoStr);
         if (Objects.isNull(jsonNode)) {
             SnailJobLog.LOCAL.warn("jsonNode is null. infoStr:[{}]", infoStr);
@@ -141,7 +138,7 @@ public class SnailDispatcherRequestHandler {
         for (int i = 0; i < paramTypes.length; i++) {
             JsonNode node = jsonNode.get(i);
             if (Objects.nonNull(node)) {
-                params[i] = mapper.readValue(node.toString(), mapper.constructType(paramTypes[i]));
+                params[i] = JsonUtil.parseObject(node.toString(), JsonUtil.constructType(paramTypes[i]));
                 continue;
             }
 

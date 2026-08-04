@@ -6,13 +6,17 @@ import com.aizuda.snailjob.common.core.enums.StatusEnum;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
 import com.aizuda.snailjob.common.core.util.StreamUtils;
 import com.aizuda.snailjob.model.request.base.JobRequest;
+import com.aizuda.snailjob.model.response.JobExistsResponse;
+import com.aizuda.snailjob.model.response.base.JobResponse;
 import com.aizuda.snailjob.server.common.dto.PartitionTask;
 import com.aizuda.snailjob.server.common.util.CronUtils;
 import com.aizuda.snailjob.server.common.util.PartitionTaskUtils;
-import com.aizuda.snailjob.model.response.base.JobResponse;
 import com.aizuda.snailjob.server.service.service.impl.AbstractJobService;
 import com.aizuda.snailjob.server.web.model.base.PageResult;
-import com.aizuda.snailjob.server.web.model.request.*;
+import com.aizuda.snailjob.server.web.model.request.ExportJobVO;
+import com.aizuda.snailjob.server.web.model.request.JobQueryVO;
+import com.aizuda.snailjob.server.web.model.request.JobRequestWebVO;
+import com.aizuda.snailjob.server.web.model.request.UserSessionVO;
 import com.aizuda.snailjob.server.web.model.response.JobResponseWebVO;
 import com.aizuda.snailjob.server.web.service.JobWebService;
 import com.aizuda.snailjob.server.web.service.convert.JobConverter;
@@ -33,7 +37,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author opensnail
@@ -62,6 +68,7 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
                         .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
                         .in(CollUtil.isNotEmpty(groupNames), Job::getGroupName, groupNames)
                         .like(StrUtil.isNotBlank(queryVO.getJobName()), Job::getJobName, StrUtil.trim(queryVO.getJobName()))
+                        .like(StrUtil.isNotBlank(queryVO.getBizId()), Job::getBizId, StrUtil.trim(queryVO.getBizId()))
                         .like(StrUtil.isNotBlank(queryVO.getExecutorInfo()), Job::getExecutorInfo, StrUtil.trim(queryVO.getExecutorInfo()))
                         .eq(Objects.nonNull(queryVO.getJobStatus()), Job::getJobStatus, queryVO.getJobStatus())
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
@@ -85,17 +92,18 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
     }
 
     @Override
-    public List<JobResponseWebVO> getJobNameList(String keywords, Long jobId, String groupName) {
+    public List<JobResponseWebVO> getJobNameList(String keywords, Long jobId, String groupName, String bizId) {
 
         UserSessionVO userSessionVO = UserSessionUtils.currentUserSession();
         PageDTO<Job> selectPage = jobMapper.selectPage(
                 new PageDTO<>(1, 100),
                 new LambdaQueryWrapper<Job>()
-                        .select(Job::getId, Job::getJobName)
+                        .select(Job::getId, Job::getJobName, Job::getBizId)
                         .eq(Job::getNamespaceId, userSessionVO.getNamespaceId())
                         .like(StrUtil.isNotBlank(keywords), Job::getJobName, StrUtil.trim(keywords))
                         .eq(StrUtil.isNotBlank(groupName), Job::getGroupName, groupName)
                         .eq(Objects.nonNull(jobId), Job::getId, jobId)
+                        .like(StrUtil.isNotBlank(bizId), Job::getBizId, StrUtil.trim(bizId))
                         .eq(Job::getDeleted, StatusEnum.NO.getStatus())
                         // SQLServer 分页必须 ORDER BY
                         .orderByDesc(Job::getId));
@@ -123,7 +131,27 @@ public class JobWebServiceImpl extends AbstractJobService implements JobWebServi
         groupHandler.validateGroupExistence(
                 StreamUtils.toSet(requestList, JobRequestWebVO::getGroupName), namespaceId
         );
-        requestList.forEach(this::addJob);
+        for (JobRequestWebVO vo : requestList) {
+
+            String bizId = vo.getBizId();
+            // 兼容老版本 用id作为BizId
+            if (StrUtil.isBlank(bizId)) {
+                if (vo.getId() == null) {
+                    addJob(vo);
+                    continue;
+                }
+                bizId = String.valueOf(vo.getId());
+            }
+            vo.setBizId(bizId);
+
+            JobExistsResponse existsResponse = existsJobByBizId(bizId);
+            if (existsResponse == null) {
+                addJob(vo);
+                continue;
+            }
+            vo.setId(existsResponse.getId());
+            updateJob(vo);
+        }
     }
 
     @Override

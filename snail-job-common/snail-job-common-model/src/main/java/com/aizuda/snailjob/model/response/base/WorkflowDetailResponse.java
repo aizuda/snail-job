@@ -21,6 +21,11 @@ public class WorkflowDetailResponse {
     private Long id;
 
     /**
+     * 业务ID
+     */
+    private String bizId;
+
+    /**
      * 组名称
      */
     private String workflowName;
@@ -54,6 +59,11 @@ public class WorkflowDetailResponse {
      * 0、关闭、1、开启
      */
     private Integer workflowStatus;
+
+    /**
+     * 描述
+     */
+    private String description;
 
     /**
      * see: {@link com.aizuda.snailjob.common.core.enums.JobTaskBatchStatusEnum}

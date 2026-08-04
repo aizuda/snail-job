@@ -2,9 +2,9 @@ package com.aizuda.snailjob.server.common.util;
 
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
+import tools.jackson.core.type.TypeReference;
 
 import java.util.HashMap;
 import java.util.Map;

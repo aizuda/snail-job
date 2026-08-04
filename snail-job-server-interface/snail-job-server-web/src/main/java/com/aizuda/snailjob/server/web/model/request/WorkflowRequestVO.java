@@ -2,6 +2,7 @@ package com.aizuda.snailjob.server.web.model.request;
 
 import com.aizuda.snailjob.model.request.DecisionConfigRequest;
 import com.aizuda.snailjob.model.request.JobTaskConfigRequest;
+import com.aizuda.snailjob.model.validate.group.Add;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -24,6 +25,9 @@ public class WorkflowRequestVO {
     @NotBlank(message = "Group name cannot be null")
     @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens")
     private String groupName;
+
+    @Pattern(regexp = "^[A-Za-z0-9_-]{1,64}$", message = "Only supports 1~64 characters, including numbers, letters, underscores, and hyphens", groups = Add.class)
+    private String bizId;
 
     @NotBlank(message = "Workflow name cannot be empty")
     private String workflowName;

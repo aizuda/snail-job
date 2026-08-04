@@ -21,8 +21,8 @@ import com.aizuda.snailjob.server.common.dto.JobLogMetaDTO;
 import com.aizuda.snailjob.server.common.dto.LogMetaDTO;
 import com.aizuda.snailjob.server.common.dto.RetryLogMetaDTO;
 import com.aizuda.snailjob.server.common.log.LogStorageFactory;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.MDC;
+import tools.jackson.databind.JsonNode;
 
 import java.util.Objects;
 import java.util.Optional;

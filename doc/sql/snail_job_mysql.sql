@@ -292,6 +292,7 @@ CREATE TABLE `sj_job`
 (
     `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `namespace_id`     varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `biz_id`           varchar(64)         NOT NULL COMMENT '业务ID',
     `group_name`       varchar(64)         NOT NULL COMMENT '组名称',
     `job_name`         varchar(64)         NOT NULL COMMENT '名称',
     `args_str`         text                         DEFAULT NULL COMMENT '执行方法参数',
@@ -322,7 +323,8 @@ CREATE TABLE `sj_job`
     PRIMARY KEY (`id`),
     KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`),
     KEY `idx_job_status_bucket_index` (`job_status`, `bucket_index`),
-    KEY `idx_create_dt` (`create_dt`)
+    KEY `idx_create_dt` (`create_dt`),
+    UNIQUE KEY `uk_sj_job_01` (`namespace_id`, `biz_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='任务信息';
@@ -453,6 +455,7 @@ CREATE TABLE `sj_workflow`
     `id`               bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
     `workflow_name`    varchar(64)         NOT NULL COMMENT '工作流名称',
     `namespace_id`     varchar(64)         NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a' COMMENT '命名空间id',
+    `biz_id`           varchar(64)         NOT NULL COMMENT '业务ID',
     `group_name`       varchar(64)         NOT NULL COMMENT '组名称',
     `workflow_status`  tinyint(4)          NOT NULL DEFAULT 1 COMMENT '工作流状态 0、关闭、1、开启',
     `trigger_type`     tinyint(4)          NOT NULL COMMENT '触发类型 1.CRON 表达式 2. 固定时间',
@@ -473,7 +476,8 @@ CREATE TABLE `sj_workflow`
     `update_dt`        datetime            NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),
     KEY `idx_create_dt` (`create_dt`),
-    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`)
+    KEY `idx_namespace_id_group_name` (`namespace_id`, `group_name`),
+    UNIQUE KEY `uk_sj_workflow_01` (`namespace_id`, `biz_id`)
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 0
   DEFAULT CHARSET = utf8mb4 COMMENT ='工作流';

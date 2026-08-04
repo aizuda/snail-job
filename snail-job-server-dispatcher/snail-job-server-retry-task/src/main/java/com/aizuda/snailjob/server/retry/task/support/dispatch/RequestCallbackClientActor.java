@@ -183,6 +183,7 @@ public class RequestCallbackClientActor extends AbstractActor {
                 .failover(true)
                 .retryTimes(3)
                 .retryInterval(1)
+                .executorTimeout(3)
                 .routeKey(executorDTO.getRouteKey())
                 .allocKey(String.valueOf(executorDTO.getRetryTaskId()))
                 .retryListener(new RetryExecutorRetryListener(executorDTO))

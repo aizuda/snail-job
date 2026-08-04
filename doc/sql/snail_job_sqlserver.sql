@@ -1422,6 +1422,7 @@ CREATE TABLE sj_job
 (
     id               bigint        NOT NULL PRIMARY KEY IDENTITY,
     namespace_id     nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    biz_id           nvarchar(64)  NOT NULL,
     group_name       nvarchar(64)  NOT NULL,
     job_name         nvarchar(64)  NOT NULL,
     args_str         nvarchar(max) NULL     DEFAULT NULL,
@@ -1458,6 +1459,8 @@ CREATE INDEX idx_sj_job_02 ON sj_job (job_status, bucket_index)
 GO
 CREATE INDEX idx_sj_job_03 ON sj_job (create_dt)
 GO
+CREATE UNIQUE INDEX uk_sj_job_01 ON sj_job (namespace_id, biz_id)
+GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -1471,6 +1474,13 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'sj_job',
      'COLUMN', N'namespace_id'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'业务ID',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_job',
+     'COLUMN', N'biz_id'
 GO
 
 EXEC sp_addextendedproperty
@@ -2345,6 +2355,7 @@ CREATE TABLE sj_workflow
     id               bigint        NOT NULL PRIMARY KEY IDENTITY,
     workflow_name    nvarchar(64)  NOT NULL,
     namespace_id     nvarchar(64)  NOT NULL DEFAULT '764d604ec6fc45f68cd92514c40e9e1a',
+    biz_id           nvarchar(64)  NOT NULL,
     group_name       nvarchar(64)  NOT NULL,
     workflow_status  tinyint       NOT NULL DEFAULT 1,
     trigger_type     tinyint       NOT NULL,
@@ -2370,6 +2381,8 @@ CREATE INDEX idx_sj_workflow_01 ON sj_workflow (create_dt)
 GO
 CREATE INDEX idx_sj_workflow_02 ON sj_workflow (namespace_id, group_name)
 GO
+CREATE UNIQUE INDEX uk_sj_workflow_01 ON sj_workflow (namespace_id, biz_id)
+GO
 
 EXEC sp_addextendedproperty
      'MS_Description', N'主键',
@@ -2390,6 +2403,13 @@ EXEC sp_addextendedproperty
      'SCHEMA', N'dbo',
      'TABLE', N'sj_workflow',
      'COLUMN', N'namespace_id'
+GO
+
+EXEC sp_addextendedproperty
+     'MS_Description', N'业务ID',
+     'SCHEMA', N'dbo',
+     'TABLE', N'sj_workflow',
+     'COLUMN', N'biz_id'
 GO
 
 EXEC sp_addextendedproperty

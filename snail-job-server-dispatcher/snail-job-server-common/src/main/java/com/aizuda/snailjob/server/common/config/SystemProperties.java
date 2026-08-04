@@ -2,7 +2,6 @@ package com.aizuda.snailjob.server.common.config;
 
 import com.aizuda.snailjob.common.core.alarm.email.SnailJobMailProperties;
 import com.aizuda.snailjob.common.core.enums.RpcTypeEnum;
-import com.aizuda.snailjob.common.core.util.NetUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**

@@ -29,6 +29,11 @@ public class JobExecutorContext {
     private Long jobId;
 
     /**
+     * 业务id
+     */
+    private String jobBizId;
+
+    /**
      * 任务id
      */
     private Long taskBatchId;

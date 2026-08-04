@@ -1,17 +1,21 @@
 package com.aizuda.snailjob.common.core.util;
 
-import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.ext.javatime.deser.LocalDateDeserializer;
+import tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer;
+import tools.jackson.databind.ext.javatime.ser.LocalDateSerializer;
+import tools.jackson.databind.ext.javatime.ser.LocalDateTimeSerializer;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.node.ObjectNode;
 
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
@@ -65,7 +69,12 @@ public class JsonUtil {
         return JsonMapper.toJavaObject(inputStream, clazz);
     }
 
-
+    /**
+     * 构建 JavaType
+     */
+    public static JavaType constructType(Type t) {
+        return JsonMapper.objectMapper.constructType(t);
+    }
 
     /**
      * 将JSON 数组字符串转Java 对象集合
@@ -187,12 +196,8 @@ public class JsonUtil {
      * 判断 Json 是否为空
      */
     public static boolean isEmptyJson(String json){
-        try {
-            JsonNode jsonNode = JsonMapper.objectMapper.readTree(json);
-            return jsonNode.isEmpty();
-        } catch (JsonProcessingException e) {
-            throw new SnailJobCommonException("Json validation exception!", e);
-        }
+        JsonNode jsonNode = JsonMapper.objectMapper.readTree(json);
+        return jsonNode.isEmpty();
     }
 
     /**
@@ -203,53 +208,25 @@ public class JsonUtil {
         private static final ObjectMapper objectMapper = jacksonObjectMapper();
 
         public static ObjectMapper jacksonObjectMapper() {
-
-            // 初始化全局Jackson 序列化工具
-            ObjectMapper objectMapper = new ObjectMapper();
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
+            DateTimeFormatter localDateTimeFormatter = DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS);
             DateTimeFormatter localDateFormatter = DateTimeFormatter.ofPattern(YYYY_MM_DD);
-
-            // 忽略未知属性
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-            // 忽略无法序列化的属性
-            objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-
-            // 序列化是忽略空值字段
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
-            // 初始化Java8 时间序列化器
-            JavaTimeModule javaTimeModule = new JavaTimeModule();
-            javaTimeModule.addSerializer(LocalDate.class, new JsonSerializer<LocalDate>() {
-                @Override
-                public void serialize(LocalDate localDate, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-                    jsonGenerator.writeString(localDate.format(localDateFormatter));
-                }
-            });
-            javaTimeModule.addSerializer(LocalDateTime.class, new JsonSerializer<LocalDateTime>() {
-                @Override
-                public void serialize(LocalDateTime localDateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-                    jsonGenerator.writeString(localDateTime.format(dateTimeFormatter));
-                }
-            });
-            javaTimeModule.addDeserializer(LocalDate.class, new JsonDeserializer<LocalDate>() {
-                @Override
-                public LocalDate deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-                    String value = jsonParser.getValueAsString();
-                    return StrUtil.isBlank(value) ? null : LocalDateTime.parse(value, DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS)).toLocalDate();
-                }
-            });
-            javaTimeModule.addDeserializer(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
-                @Override
-                public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-                    String value = jsonParser.getValueAsString();
-                    return StrUtil.isBlank(value) ? null : LocalDateTime.parse(value, DateTimeFormatter.ofPattern(YYYY_MM_DD_HH_MM_SS));
-                }
-            });
-
-            // 注册JAVA 时间序列化器
-            objectMapper.registerModule(javaTimeModule);
-            return objectMapper;
+            // 初始化时间序列化模块
+            SimpleModule simpleModule = new SimpleModule();
+            simpleModule.addSerializer(LocalDate.class, new LocalDateSerializer(localDateFormatter));
+            simpleModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(localDateTimeFormatter));
+            simpleModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(localDateFormatter));
+            simpleModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(localDateTimeFormatter));
+            // 初始化全局Jackson 序列化工具
+            return tools.jackson.databind.json.JsonMapper.builder()
+                    // 忽略未知属性
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    // 忽略无法序列化的属性
+                    .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                    // 序列化是忽略空值字段
+                    .changeDefaultPropertyInclusion(incl -> incl.withValueInclusion(JsonInclude.Include.NON_NULL))
+                    // 注册时间序列化模块
+                    .addModule(simpleModule)
+                    .build();
         }
 
         /**
@@ -304,11 +281,7 @@ public class JsonUtil {
         }
 
         public static <T> T toJavaObject(InputStream inputStream, Class<T> clazz) {
-            try {
-                return objectMapper.readValue(inputStream, clazz);
-            } catch (IOException e) {
-                throw new SnailJobCommonException("Json to object conversion failed", e);
-            }
+            return objectMapper.readValue(inputStream, clazz);
         }
 
         /**

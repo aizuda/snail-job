@@ -64,6 +64,7 @@ public class RealStopTaskActor extends AbstractActor {
                 .failRetry(Boolean.TRUE)
                 .retryTimes(3)
                 .retryInterval(1)
+                .executorTimeout(1)
                 .client(JobRpcClient.class)
                 .build();
 

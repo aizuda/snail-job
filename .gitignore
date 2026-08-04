@@ -33,3 +33,5 @@ target/
 
 data/
 rebel.xml
+
+.sisyphus

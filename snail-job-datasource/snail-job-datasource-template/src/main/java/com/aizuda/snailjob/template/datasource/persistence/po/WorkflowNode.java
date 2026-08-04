@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @TableName("sj_workflow_node")
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(callSuper = true)
 public class WorkflowNode extends CreateUpdateDt {
 
     /**

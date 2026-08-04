@@ -17,6 +17,9 @@ public class DispatchJobRequest {
     @NotNull(message = "jobId cannot be null")
     private Long jobId;
 
+    @NotNull(message = "jobId cannot be null")
+    private String jobBizId;
+
     @NotNull(message = "taskBatchId cannot be null")
     private Long taskBatchId;
 

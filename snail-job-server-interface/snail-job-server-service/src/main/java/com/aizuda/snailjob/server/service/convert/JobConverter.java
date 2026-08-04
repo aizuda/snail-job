@@ -3,6 +3,8 @@ package com.aizuda.snailjob.server.service.convert;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
+import com.aizuda.snailjob.model.request.JobBizIdApiRequest;
+import com.aizuda.snailjob.model.response.JobExistsResponse;
 import com.aizuda.snailjob.server.common.util.DateUtils;
 import com.aizuda.snailjob.server.common.util.TriggerIntervalUtils;
 import com.aizuda.snailjob.model.request.base.JobRequest;
@@ -37,6 +39,10 @@ public interface JobConverter {
     })
     Job convert(JobRequest jobRequest);
 
+    @Mapping(target = "id", ignore = true)
+    JobRequest convert(JobBizIdApiRequest jobBizIdApiRequest);
+
+    JobExistsResponse convert(Job job);
 
     @Mappings({
             @Mapping(target = "nextTriggerAt", expression = "java(com.aizuda.snailjob.server.common.util.DateUtils.toLocalDateTime(job.getNextTriggerAt()))"),

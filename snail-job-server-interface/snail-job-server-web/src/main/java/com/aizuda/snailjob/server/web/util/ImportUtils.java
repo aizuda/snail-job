@@ -3,10 +3,10 @@ package com.aizuda.snailjob.server.web.util;
 import cn.hutool.core.io.FileUtil;
 import com.aizuda.snailjob.common.core.exception.SnailJobCommonException;
 import com.aizuda.snailjob.common.core.util.JsonUtil;
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
+import tools.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.util.List;

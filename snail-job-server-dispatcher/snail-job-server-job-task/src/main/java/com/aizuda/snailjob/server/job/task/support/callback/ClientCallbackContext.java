@@ -16,6 +16,11 @@ public class ClientCallbackContext {
     private Long jobId;
 
     /**
+     * 业务id
+     */
+    private String jobBizId;
+
+    /**
      * 命名空间
      */
     private String namespaceId;

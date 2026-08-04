@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>4.0.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -16,16 +16,16 @@
     <description>snail-job</description>
 
     <properties>
-        <java.version>17</java.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <revision>1.9.0</revision>
+        <revision>2.0.2</revision>
         <skipTests>true</skipTests>
 
-        <hutool.version>5.8.40</hutool.version>
-        <mybatis-spring.version>3.0.3</mybatis-spring.version>
-        <mybatis-plus.version>3.5.14</mybatis-plus.version>
+        <hutool.version>5.8.44</hutool.version>
+        <mybatis-spring.version>4.0.0</mybatis-spring.version>
+        <mybatis-plus.version>3.5.17</mybatis-plus.version>
         <guava.version>33.3.0-jre</guava.version>
         <guava-retrying.version>2.0.0</guava-retrying.version>
         <mapstruct.version>1.6.3</mapstruct.version>
@@ -174,7 +174,7 @@
             </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+                <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
             <!-- >= 3.5.9 PaginationInnerInterceptor 需要单独引入 -->

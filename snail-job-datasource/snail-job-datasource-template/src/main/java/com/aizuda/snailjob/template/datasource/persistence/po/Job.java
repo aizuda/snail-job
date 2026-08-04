@@ -31,6 +31,11 @@ public class Job extends CreateUpdateDt {
     private String namespaceId;
 
     /**
+     * 业务ID
+     */
+    private String bizId;
+
+    /**
      * 组名称
      */
     private String groupName;
